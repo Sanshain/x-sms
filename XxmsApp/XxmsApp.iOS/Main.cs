@@ -5,7 +5,7 @@ using System.Linq;
 using Foundation;
 using UIKit;
 
-namespace App4.iOS
+namespace XxmsApp.iOS
 {
     public class Application
     {

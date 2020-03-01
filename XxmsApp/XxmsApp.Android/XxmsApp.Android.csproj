@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C77CC97D-512E-4BB0-834B-CB8A3CBC58E6}</ProjectGuid>
+    <ProjectGuid>{D7F8A0EE-C1DB-4C40-B143-B40088325189}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
-    <RootNamespace>App4.Droid</RootNamespace>
-    <AssemblyName>App4.Android</AssemblyName>
+    <RootNamespace>XxmsApp.Droid</RootNamespace>
+    <AssemblyName>XxmsApp.Android</AssemblyName>
     <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
     <AndroidApplication>True</AndroidApplication>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
@@ -80,8 +80,13 @@
     </AndroidResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\XxmsApp\XxmsApp.csproj">
+      <Project>{C2A8BB17-8144-4B23-BCCA-5697A7A7C0E2}</Project>
+      <Name>XxmsApp</Name>
+    </ProjectReference>
+  </ItemGroup>
 
-  <Import Project="..\App4\App4.projitems" Label="Shared" />
 
  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>
