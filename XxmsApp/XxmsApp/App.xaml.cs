@@ -15,16 +15,10 @@ namespace XxmsApp
 
             MainPage = new MasterDetailPage()
             {
-                Master = new MenuPage
-                {                    
-                    Title = "Title"
-                },
-                Detail = new NavigationPage(new XxmsApp.MainPage()
-                {
-                    Title = "Detail",
-                })                
+                Master = new MenuPage { Title = "Title" },
+                Detail = new NavigationPage(new XxmsApp.MainPage())
             };
-            //*/
+            
         }
 
 		protected override void OnStart ()

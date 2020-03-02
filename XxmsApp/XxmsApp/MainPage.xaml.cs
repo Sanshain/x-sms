@@ -14,21 +14,18 @@ namespace XxmsApp
 			InitializeComponent();
 
             var views = new StackLayout();
-            var scroller = new ScrollView { Content = views };
-
-            var btn = new Button { Text = "Click" };
-            btn.Clicked += Btn_Clicked;
-            var rootLayout = new AbsoluteLayout();
-
-            rootLayout.Children.Add(scroller, new Rectangle(0, 0, 1, 0.9));
-
-            AbsoluteLayout.SetLayoutFlags(scroller, AbsoluteLayoutFlags.SizeProportional);            
-            rootLayout.Children.Add(btn, new Rectangle(0, 1, 1, 0.1));
-            AbsoluteLayout.SetLayoutFlags(btn, AbsoluteLayoutFlags.All);//*/
-
-            Title = "Absolute Layout Exploration - Code";
-
+            var subScroller = new ScrollView { Content = views };
+            var subBtn = new Button { Text = "Click" };
+            var rootLayout = new AbsoluteLayout();            
+                        
+            rootLayout.Children.Add(subScroller, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);            
+            rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
             Content = rootLayout;
+
+            subBtn.Clicked += Btn_Clicked;
+
+            Title = "Detail";
+            
 
             for (int i = 0; i < 35; i++)
             {
@@ -38,6 +35,7 @@ namespace XxmsApp
                     FontSize = 16
                 });
             }
+            
         }
 
         private void Btn_Clicked(object sender, EventArgs e)
