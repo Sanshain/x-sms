@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,8 +9,9 @@ using Xamarin.Forms;
 namespace XxmsApp
 {
 	public partial class MainPage : ContentPage
-	{
-		public MainPage()
+	{             
+
+        public MainPage()
 		{
 			InitializeComponent();
 
@@ -23,35 +25,26 @@ namespace XxmsApp
             Content = rootLayout;
 
             subBtn.Clicked += Btn_Clicked;
+            
 
             Title = "Detail";
+            
+            views.Children.Add(new Piece.CustomList());
 
-            List<string> sms = new List<string>();
-            for (int i = 0; i < 35; i++)
-            {
-                /*
-                views.Children.Add(new Label
-                {
-                    Text = "Hello " + i,
-                    FontSize = 16
-                });//*/
-
-                sms.Add("item " + i);
-            }
-
-            var MsgsList = new ListView();
-            MsgsList.ItemsSource = sms;
-
-            views.Children.Add(MsgsList);
-
-
+            
         }
+
+
+
+
 
         private void Btn_Clicked(object sender, EventArgs e)
         {
             var target = sender as Button;
             var parent = (target.Parent as Layout).Parent as Page;
             ((parent.Parent as NavigationPage).Parent as MasterDetailPage).IsPresented = true;
+
+
         }
     }
 }
