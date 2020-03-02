@@ -15,15 +15,14 @@ namespace XxmsApp
 
             var views = new StackLayout();
             var scroller = new ScrollView { Content = views };
+
             var btn = new Button { Text = "Click" };
             btn.Clicked += Btn_Clicked;
             var rootLayout = new AbsoluteLayout();
 
             rootLayout.Children.Add(scroller, new Rectangle(0, 0, 1, 0.9));
 
-
-            AbsoluteLayout.SetLayoutFlags(scroller, AbsoluteLayoutFlags.SizeProportional);
-            //*/
+            AbsoluteLayout.SetLayoutFlags(scroller, AbsoluteLayoutFlags.SizeProportional);            
             rootLayout.Children.Add(btn, new Rectangle(0, 1, 1, 0.1));
             AbsoluteLayout.SetLayoutFlags(btn, AbsoluteLayoutFlags.All);//*/
 

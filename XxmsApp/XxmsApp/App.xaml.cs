@@ -15,18 +15,14 @@ namespace XxmsApp
 
             MainPage = new MasterDetailPage()
             {
-                Master = new ContentPage
-                {
-                    Content = new Label { Text = "None", HorizontalTextAlignment = TextAlignment.Center },
+                Master = new MenuPage
+                {                    
                     Title = "Title"
                 },
                 Detail = new NavigationPage(new XxmsApp.MainPage()
                 {
                     Title = "Detail",
-                })
-                {
-                    Title = "Nav"
-                }
+                })                
             };
             //*/
         }
