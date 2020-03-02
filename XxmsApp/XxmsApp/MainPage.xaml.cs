@@ -25,17 +25,26 @@ namespace XxmsApp
             subBtn.Clicked += Btn_Clicked;
 
             Title = "Detail";
-            
 
+            List<string> sms = new List<string>();
             for (int i = 0; i < 35; i++)
             {
+                /*
                 views.Children.Add(new Label
                 {
                     Text = "Hello " + i,
                     FontSize = 16
-                });
+                });//*/
+
+                sms.Add("item " + i);
             }
-            
+
+            var MsgsList = new ListView();
+            MsgsList.ItemsSource = sms;
+
+            views.Children.Add(MsgsList);
+
+
         }
 
         private void Btn_Clicked(object sender, EventArgs e)
