@@ -63,23 +63,34 @@ namespace XxmsApp.Piece
             return new DataTemplate(() =>
             {
 
-                Label TimeLabel = new Label { FontSize = 18 };
-                Label ValueLabel = new Label { FontSize = 16 };
-                Label PhoneLabel = new Label { FontSize = 14 };
+                Label PhoneLabel = new Label { FontSize = 16 };
+                Label TimeLabel = new Label { FontSize = 14};
+                Label ValueLabel = new Label { FontSize = 14 , Margin = new Thickness(0, 10) };                
 
+                PhoneLabel.SetBinding(Label.TextProperty, "Phone");
                 TimeLabel.SetBinding(Label.TextProperty, "Time");
                 ValueLabel.SetBinding(Label.TextProperty, "Value");
-                PhoneLabel.SetBinding(Label.TextProperty, "Phone");
+                
+
+                var view = new RelativeLayout();
+                view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
+                view.Children.Add(TimeLabel, 
+                    Constraint.RelativeToParent((parent) =>
+                    {
+                        return parent.Width - TimeLabel.Width - 10;                 // установка координаты X
+                    }),
+                    Constraint.Constant(0)                    
+                );
+                view.Children.Add(ValueLabel,
+                    Constraint.Constant(10),
+                    Constraint.Constant(15),
+                    Constraint.RelativeToParent((parent) => parent.Width)
+                );                
 
 
                 return new ViewCell                                     // создаем объект ViewCell.
                 {
-                    View = new StackLayout
-                    {
-                        Padding = new Thickness(0, 5),
-                        Orientation = StackOrientation.Vertical,
-                        Children = { TimeLabel, ValueLabel, PhoneLabel }
-                    }
+                    View = view
                 };
             });
 
