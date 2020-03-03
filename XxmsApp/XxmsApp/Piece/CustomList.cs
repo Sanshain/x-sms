@@ -18,30 +18,9 @@ namespace XxmsApp.Piece
         public CustomList ()
 		{
 
-            ItemsSource = DataLoad();
+            ItemsSource = this.DataLoad();
 
-            ItemTemplate = new DataTemplate(() =>
-            {                
-
-                Label TimeLabel = new Label { FontSize = 18 };
-                Label ValueLabel = new Label { FontSize = 16 };
-                Label PhoneLabel = new Label { FontSize = 14 };
-
-                TimeLabel.SetBinding(Label.TextProperty, "Time");
-                ValueLabel.SetBinding(Label.TextProperty, "Value");
-                PhoneLabel.SetBinding(Label.TextProperty, "Phone");
-
-                
-                return new ViewCell   // создаем объект ViewCell.
-                {
-                    View = new StackLayout
-                    {
-                        Padding = new Thickness(0, 5),
-                        Orientation = StackOrientation.Vertical,
-                        Children = { TimeLabel, ValueLabel, PhoneLabel }
-                    }
-                };
-            });            
+            ItemTemplate = this.DataView();
 
             source.CollectionChanged += Source_CollectionChanged;
 
@@ -61,10 +40,7 @@ namespace XxmsApp.Piece
         }
 
         protected ObservableCollection<Message> DataLoad()
-        {
-            
-            // Включает multiline для ItemTemplate:
-            HasUnevenRows = true;               
+        {   
 
             for (int i = 0; i < 20; i++)
             {
@@ -77,6 +53,36 @@ namespace XxmsApp.Piece
             }
 
             return source;
+        }
+
+        protected DataTemplate DataView()
+        {
+            
+            HasUnevenRows = true;                                       // Включает multiline для ItemTemplate
+
+            return new DataTemplate(() =>
+            {
+
+                Label TimeLabel = new Label { FontSize = 18 };
+                Label ValueLabel = new Label { FontSize = 16 };
+                Label PhoneLabel = new Label { FontSize = 14 };
+
+                TimeLabel.SetBinding(Label.TextProperty, "Time");
+                ValueLabel.SetBinding(Label.TextProperty, "Value");
+                PhoneLabel.SetBinding(Label.TextProperty, "Phone");
+
+
+                return new ViewCell                                     // создаем объект ViewCell.
+                {
+                    View = new StackLayout
+                    {
+                        Padding = new Thickness(0, 5),
+                        Orientation = StackOrientation.Vertical,
+                        Children = { TimeLabel, ValueLabel, PhoneLabel }
+                    }
+                };
+            });
+
         }
     }
 }
