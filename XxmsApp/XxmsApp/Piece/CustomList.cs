@@ -62,6 +62,7 @@ namespace XxmsApp.Piece
 
             return new DataTemplate(() =>
             {
+                var view = new RelativeLayout();
 
                 Label PhoneLabel = new Label { FontSize = 16 };
                 Label TimeLabel = new Label { FontSize = 14};
@@ -70,28 +71,15 @@ namespace XxmsApp.Piece
                 PhoneLabel.SetBinding(Label.TextProperty, "Phone");
                 TimeLabel.SetBinding(Label.TextProperty, "Time");
                 ValueLabel.SetBinding(Label.TextProperty, "Value");
-                
-
-                var view = new RelativeLayout();
+                                
                 view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
                 view.Children.Add(TimeLabel, 
-                    Constraint.RelativeToParent((parent) =>
-                    {
-                        return parent.Width - TimeLabel.Width - 10;                 // установка координаты X
-                    }),
-                    Constraint.Constant(0)                    
-                );
-                view.Children.Add(ValueLabel,
-                    Constraint.Constant(10),
-                    Constraint.Constant(15),
-                    Constraint.RelativeToParent((parent) => parent.Width)
+                    Constraint.RelativeToParent((par) => par.Width - TimeLabel.Width - 10));
+                view.Children.Add(ValueLabel, Constraint.Constant(10), Constraint.Constant(15),
+                    Constraint.RelativeToParent((par) => par.Width)
                 );                
 
-
-                return new ViewCell                                     // создаем объект ViewCell.
-                {
-                    View = view
-                };
+                return new ViewCell{ View = view };
             });
 
         }
