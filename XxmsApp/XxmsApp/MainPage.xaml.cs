@@ -15,12 +15,11 @@ namespace XxmsApp
 		{
 			InitializeComponent();
 
-            var views = new StackLayout();
-            var subScroller = new ScrollView { Content = views };
             var subBtn = new Button { Text = "Click" };
-            var rootLayout = new AbsoluteLayout();            
-                        
-            rootLayout.Children.Add(subScroller, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);            
+
+            var rootLayout = new AbsoluteLayout();      
+            
+            rootLayout.Children.Add(new Piece.CustomList(), new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);            
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
             Content = rootLayout;
 
@@ -29,8 +28,6 @@ namespace XxmsApp
 
             Title = "Detail";
             
-            views.Children.Add(new Piece.CustomList());
-
             
         }
 
