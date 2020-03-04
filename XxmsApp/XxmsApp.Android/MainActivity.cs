@@ -6,7 +6,24 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Xamarin.Forms;
+using Android.Content.Res;
 
+[assembly: Dependency(typeof(XxmsApp.Piece.MeasureString))]
+namespace XxmsApp.Piece
+{
+    public class MeasureString : IMeasureString
+    {
+        public double StringSize(string text)
+        {
+            var bounds = new Android.Graphics.Rect();
+            TextView view = new TextView(Forms.Context);
+            view.Paint.GetTextBounds(text, 0, text.Length, bounds);
+            var length = bounds.Width();
+            return length / Resources.System.DisplayMetrics.ScaledDensity;
+        }
+    }
+}
 
 namespace XxmsApp.Droid
 {
@@ -26,3 +43,4 @@ namespace XxmsApp.Droid
         }
     }
 }
+

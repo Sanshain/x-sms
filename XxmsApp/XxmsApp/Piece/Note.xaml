@@ -3,8 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="XxmsApp.Piece.Note">
   <ViewCell.View>
-      <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
-      </StackLayout>
+      <RelativeLayout>
+            <Label x:Name="PhoneLabel" Text="{Binding Path=Phone}" RelativeLayout.XConstraint="10" />
+            <Label x:Name="TimeLabel" Text="{Binding Path=Time}" />
+            <Label x:Name="ValueLabel" Text="{Binding Path=Value}" />
+      </RelativeLayout>
   </ViewCell.View>
 </ViewCell>

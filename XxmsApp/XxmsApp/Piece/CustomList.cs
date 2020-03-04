@@ -7,13 +7,17 @@ using System.Text;
 using Xamarin.Forms;
 using XxmsApp.Models;
 
+
+
 namespace XxmsApp.Piece
 {
-    
+
+    public interface IMeasureString { double StringSize(string text); }
 
     public class CustomList : ListView
 	{
         public ObservableCollection<Message> source { get; set; } = new ObservableCollection<Message>();
+        public int timeSize { get; set; } = 14;
 
         public CustomList ()
 		{
@@ -24,7 +28,8 @@ namespace XxmsApp.Piece
 
             source.CollectionChanged += Source_CollectionChanged;
 
-        }
+
+        }        
 
         private void Source_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -60,12 +65,14 @@ namespace XxmsApp.Piece
             
             HasUnevenRows = true;                                       // Включает multiline для ItemTemplate
 
+            double timeWidth = calculateWidth();
+
             return new DataTemplate(() =>
             {
                 var view = new RelativeLayout();
 
                 Label PhoneLabel = new Label { FontSize = 16 };
-                Label TimeLabel = new Label { FontSize = 14};
+                Label TimeLabel = new Label { FontSize = timeSize };
                 Label ValueLabel = new Label { FontSize = 14 , Margin = new Thickness(0, 10) };                
 
                 PhoneLabel.SetBinding(Label.TextProperty, "Phone");
@@ -74,7 +81,7 @@ namespace XxmsApp.Piece
                                 
                 view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
                 view.Children.Add(TimeLabel, 
-                    Constraint.RelativeToParent((par) => par.Width - TimeLabel.Width - 10));
+                    Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
                 view.Children.Add(ValueLabel, Constraint.Constant(10), Constraint.Constant(15),
                     Constraint.RelativeToParent((par) => par.Width)
                 );                
@@ -83,5 +90,15 @@ namespace XxmsApp.Piece
             });
 
         }
+
+        protected double calculateWidth()
+        {
+
+            var service = DependencyService.Get<IMeasureString>();
+            var timeWidth = service.StringSize(DateTime.Now.ToString());
+
+            return timeWidth;
+        }
+
     }
 }
