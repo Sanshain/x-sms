@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XxmsApp.Piece;
 
 namespace XxmsApp
 {
@@ -14,9 +15,21 @@ namespace XxmsApp
 	{
 		public MenuPage ()
 		{
-			InitializeComponent ();
+            
+            StackLayout menu = new StackLayout { };
+            menu.Children.Add(new ListView
+            {
+                HorizontalOptions = LayoutOptions.Center,
+                ItemsSource = new string[]
+                {
+                    "Настройки",
+                    "О нас"
+                },
+                ItemTemplate = new DataTemplate(typeof(MenuPoint))
+            });
 
-            Content = new Label { Text = "Label", HorizontalTextAlignment = TextAlignment.Center };
-		}
+            Content = menu;
+
+        }
 	}
 }
