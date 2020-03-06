@@ -16,11 +16,11 @@ namespace XxmsApp
         {
             InitializeComponent();
 
-            MainPage = new MasterDetailPage()
+            MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },
                 Detail = new NavigationPage(new XxmsApp.MainPage())
-            };
+            });
 
 
 

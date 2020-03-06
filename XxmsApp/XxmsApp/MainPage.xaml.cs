@@ -16,9 +16,7 @@ namespace XxmsApp
 			InitializeComponent();
 
             var subBtn = new Button { Text = "Click" };
-
-            var rootLayout = new AbsoluteLayout();      
-            
+            var rootLayout = new AbsoluteLayout();                                    
             rootLayout.Children.Add(new Piece.CustomList(), new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);            
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
             Content = rootLayout;
