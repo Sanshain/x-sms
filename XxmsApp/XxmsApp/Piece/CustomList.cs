@@ -19,6 +19,8 @@ namespace XxmsApp.Piece
         public ObservableCollection<Message> source { get; set; } = new ObservableCollection<Message>();
         public int timeSize { get; set; } = 14;
 
+        private ViewCell lastCell;
+
         public CustomList ()
 		{
 
@@ -72,7 +74,7 @@ namespace XxmsApp.Piece
                 var view = new RelativeLayout();
 
                 Label PhoneLabel = new Label { FontSize = 16 };
-                Label TimeLabel = new Label { FontSize = timeSize };
+                Label TimeLabel = new Label { FontSize = timeSize };  //, TextColor = Color.Gray
                 Label ValueLabel = new Label { FontSize = 14 , Margin = new Thickness(0, 10) };                
 
                 PhoneLabel.SetBinding(Label.TextProperty, "Phone");
@@ -84,12 +86,28 @@ namespace XxmsApp.Piece
                     Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
                 view.Children.Add(ValueLabel, Constraint.Constant(10), Constraint.Constant(15),
                     Constraint.RelativeToParent((par) => par.Width)
-                );                
+                );
 
-                return new ViewCell{ View = view };
+                var viewCell = new ViewCell { View = view };
+                // viewCell.Tapped += ViewCell_Tapped;                
+
+                return viewCell;
             });
 
         }
+
+        /*
+        private void ViewCell_Tapped(object sender, EventArgs e)
+        {
+            if (lastCell != null) lastCell.View.BackgroundColor = Color.Transparent;
+
+            var viewCell = (ViewCell)sender;
+            if (viewCell.View != null)
+            {
+                viewCell.View.BackgroundColor = Color.LightSteelBlue;
+                lastCell = viewCell;
+            }
+        }//*/
 
         protected double calculateWidth()
         {

@@ -21,10 +21,12 @@ namespace XxmsApp.Piece
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center
             };
+            Label content = new Label {
+                HorizontalOptions = LayoutOptions.CenterAndExpand,
+                FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label))            
+            };
 
-            Label content = new Label();
             content.SetBinding(Label.TextProperty, ".");
-            content.HorizontalOptions = LayoutOptions.CenterAndExpand;
 
             mnuItem.Children.Add(content);
             View = mnuItem;
