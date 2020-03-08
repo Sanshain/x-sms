@@ -4,7 +4,7 @@
              x:Class="XxmsApp.Piece.MessageView">
   <ContentView.Content>
       <StackLayout>
-          <Label Text="Hello Xamarin.Forms!" />
+          <Label Text="Hello Xamarin.Forms!" HorizontalOptions="StartAndExpand" VerticalOptions="Center" Margin="20"/>
       </StackLayout>
   </ContentView.Content>
 </ContentView>

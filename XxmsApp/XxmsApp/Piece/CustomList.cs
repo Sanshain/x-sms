@@ -19,8 +19,6 @@ namespace XxmsApp.Piece
         public ObservableCollection<Message> source { get; set; } = new ObservableCollection<Message>();
         public int timeSize { get; set; } = 14;
 
-        private ViewCell lastCell;
-
         public CustomList ()
 		{
 

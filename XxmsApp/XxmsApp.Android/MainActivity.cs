@@ -8,10 +8,12 @@ using Android.Widget;
 using Android.OS;
 using Xamarin.Forms;
 using Android.Content.Res;
+using Xamarin.Forms.Platform.Android;
 
 [assembly: Dependency(typeof(XxmsApp.Piece.MeasureString))]
 namespace XxmsApp.Piece
-{
+{ 
+
     public class MeasureString : IMeasureString
     {
         public double StringSize(string text)
@@ -42,5 +44,9 @@ namespace XxmsApp.Droid
             LoadApplication(new App());
         }
     }
+
 }
+
+
+
 

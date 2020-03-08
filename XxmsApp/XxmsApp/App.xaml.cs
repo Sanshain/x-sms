@@ -15,7 +15,7 @@ namespace XxmsApp
         public App()
         {
             InitializeComponent();
-
+            
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },

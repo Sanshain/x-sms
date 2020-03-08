@@ -10,6 +10,8 @@ using XxmsApp.Piece;
 
 namespace XxmsApp
 {
+
+
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class MenuPage : ContentPage
 	{
@@ -25,6 +27,7 @@ namespace XxmsApp
                 ItemsSource = new string[]
                 {
                     "Настройки",
+                    "О нас",
                     "О нас"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
