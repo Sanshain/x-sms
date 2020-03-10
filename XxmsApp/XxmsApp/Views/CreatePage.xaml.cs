@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
+using Plugin.ContactService.Shared;
 
 namespace XxmsApp.Views
 {
@@ -110,17 +111,17 @@ namespace XxmsApp.Views
             ((sender as View).Parent as Frame).OutlineColor = Color.DarkRed;//*/
             if (sender == adresseeEntry && focused)
             {
+
+
+                var contactsGetter = Plugin.ContactService.CrossContactService.Current.GetContactListAsync();
+                var contacts = contactsGetter.GetAwaiter().GetResult();
+                var main_contacts = contacts.ToList().GetRange(0, 5);
+
                 // msgFields.Children[1].IsVisible = false;
                 msgFields.Children[1] = (new ListView()
                 {
                     VerticalOptions = LayoutOptions.FillAndExpand,
-                    ItemsSource = new string[]
-                    {
-                        "string1",
-                        "string1",
-                        "string1",
-                        "string1"
-                    }
+                    ItemsSource = main_contacts
                 });
                 focused = false;
                 adresseeEntry.Focus();
