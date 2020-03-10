@@ -102,12 +102,13 @@ namespace XxmsApp.Views
 
         private void MessageEditor_Focused(object sender, FocusEventArgs e)
         {
-            if (!e.IsFocused) bottom.HeightRequest = -1;
-            else
-            {
+            /*
+            if (e.IsFocused) {
                 var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
                 bottom.HeightRequest = pageHeight * 0.55;
-            }
+            }            
+            else
+                bottom.HeightRequest = -1;//*/
 
         }
 
