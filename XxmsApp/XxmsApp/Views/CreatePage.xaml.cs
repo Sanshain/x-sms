@@ -18,13 +18,14 @@ namespace XxmsApp.Views
 
 
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class CreateNote : ContentPage
+	public partial class CreatePage : ContentPage
 	{
         StackLayout msgFields;
         StackLayout bottom;
         Entry adresseeEntry;
+        Frame messageFrame;
 
-        public CreateNote ()
+        public CreatePage ()
 		{
             
 			InitializeComponent ();
@@ -32,14 +33,14 @@ namespace XxmsApp.Views
             var container = new StackLayout();            
             msgFields = new StackLayout()
             {                                                                           // Initialize message Forms
-                // BackgroundColor = Color.LightGray,
-                VerticalOptions = LayoutOptions.FillAndExpand
-                
+                BackgroundColor = Color.LightGray,
+                VerticalOptions = LayoutOptions.FillAndExpand                
             };
 
             adresseeEntry = new Entry {
                 //BackgroundColor = Color.LightCoral,
-                VerticalOptions = LayoutOptions.Start
+                VerticalOptions = LayoutOptions.Start,
+                Placeholder = "Введите номер телефона"
             };
             Frame adresseeFrame = new Frame {
                 Margin = new Thickness(5),
@@ -52,7 +53,7 @@ namespace XxmsApp.Views
 
 
             var messageEditor = new Editor { };
-            Frame messageFrame = new Frame
+            messageFrame = new Frame
             {
                 Margin = new Thickness(5),
                 CornerRadius = 5,
@@ -75,14 +76,12 @@ namespace XxmsApp.Views
             
             Content = container;                                                        // set container
 
-
             
             messageEditor.Focused += MessageEditor_Focused;
             messageEditor.Unfocused += MessageEditor_Unfocused;
             adresseeEntry.Focused += MessageEditor_Focused;
             adresseeEntry.Unfocused += MessageEditor_Unfocused;
             
-
         }
 
 
@@ -90,15 +89,43 @@ namespace XxmsApp.Views
         {
             /// ((sender as View).Parent as Frame).HasShadow = false;
 
+            
+
+            if (sender == adresseeEntry)
+            {
+                msgFields.Children[1] = messageFrame;
+                (messageFrame.Content as Editor).Focus();
+
+                focused = true;
+            }
+
             if (Device.RuntimePlatform == Device.iOS)  bottom.HeightRequest = -1;
         }
 
+        bool focused = true;
         private void MessageEditor_Focused(object sender, FocusEventArgs e)
         {
             /*
             ((sender as View).Parent as Frame).HasShadow = true;            
             ((sender as View).Parent as Frame).OutlineColor = Color.DarkRed;//*/
+            if (sender == adresseeEntry && focused)
+            {
+                // msgFields.Children[1].IsVisible = false;
+                msgFields.Children[1] = (new ListView()
+                {
+                    VerticalOptions = LayoutOptions.FillAndExpand,
+                    ItemsSource = new string[]
+                    {
+                        "string1",
+                        "string1",
+                        "string1",
+                        "string1"
+                    }
+                });
+                focused = false;
+                adresseeEntry.Focus();
 
+            }
 
             if (Device.RuntimePlatform == Device.iOS)                               /// if its not Android, set `Focused`
             {

@@ -22,8 +22,6 @@ namespace XxmsApp
                 Detail = new NavigationPage(new XxmsApp.MainPage())
             });
 
-
-
         }
 
         protected override void OnStart()
