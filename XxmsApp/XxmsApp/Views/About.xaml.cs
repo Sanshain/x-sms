@@ -15,6 +15,7 @@ namespace XxmsApp.Views
 		public About ()
 		{
 			InitializeComponent ();
-		}
+
+        }
 	}
 }

@@ -22,34 +22,52 @@ namespace XxmsApp.Views
 	{
         StackLayout msgFields;
         StackLayout bottom;
-        
+        Entry adresseeEntry;
 
         public CreateNote ()
-		{            
-
+		{
+            
 			InitializeComponent ();
 
             var container = new StackLayout();            
-            msgFields = new StackLayout(){                                              // Initialize message Forms
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                BackgroundColor = Color.LightGray};
+            msgFields = new StackLayout()
+            {                                                                           // Initialize message Forms
+                // BackgroundColor = Color.LightGray,
+                VerticalOptions = LayoutOptions.FillAndExpand
+                
+            };
 
-            var adresseeEntry = new Entry {
-                BackgroundColor = Color.LightCoral,
-                VerticalOptions = LayoutOptions.Start };
-            msgFields.Children.Add(adresseeEntry);
-
-            var messageEditor = new Editor {
-                BackgroundColor = Color.Blue,
+            adresseeEntry = new Entry {
+                //BackgroundColor = Color.LightCoral,
+                VerticalOptions = LayoutOptions.Start
+            };
+            Frame adresseeFrame = new Frame {
                 Margin = new Thickness(5),
-                VerticalOptions = LayoutOptions.FillAndExpand };
-            msgFields.Children.Add(messageEditor);
+                CornerRadius =5,
+                IsClippedToBounds = true,
+                Padding = new Thickness(0,0,0,0)
+            };
+            adresseeFrame.Content = adresseeEntry;
+            msgFields.Children.Add(adresseeFrame);
+
+
+            var messageEditor = new Editor { };
+            Frame messageFrame = new Frame
+            {
+                Margin = new Thickness(5),
+                CornerRadius = 5,
+                IsClippedToBounds = true,
+                Padding = new Thickness(0, 0, 0, -10),
+                VerticalOptions = LayoutOptions.FillAndExpand
+            };
+            messageFrame.Content = messageEditor;
+            msgFields.Children.Add(messageFrame);
 
             container.Children.Add(msgFields);
 
             
-            bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };        // Initialize Button for send
-            var send = new Button { Text = "Send" };
+            bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };// Initialize Button for send
+            var send = new Button { Text = "Send" };  
             bottom.Children.Add(send);
             send.Clicked += Send_Clicked;
             container.Children.Add(bottom);
@@ -58,40 +76,51 @@ namespace XxmsApp.Views
             Content = container;                                                        // set container
 
 
-            /// if its not Android, set `Focused`
-            if (Device.RuntimePlatform == Device.iOS)  
-            {
-                messageEditor.Focused += MessageEditor_Focused;
-                messageEditor.Unfocused += MessageEditor_Unfocused;
-                adresseeEntry.Focused += MessageEditor_Focused;
-                adresseeEntry.Unfocused += MessageEditor_Unfocused;
-            }
+            
+            messageEditor.Focused += MessageEditor_Focused;
+            messageEditor.Unfocused += MessageEditor_Unfocused;
+            adresseeEntry.Focused += MessageEditor_Focused;
+            adresseeEntry.Unfocused += MessageEditor_Unfocused;
+            
 
         }
 
 
         private void MessageEditor_Unfocused(object sender, FocusEventArgs e)
         {
-            bottom.HeightRequest = -1;
+            /// ((sender as View).Parent as Frame).HasShadow = false;
+
+            if (Device.RuntimePlatform == Device.iOS)  bottom.HeightRequest = -1;
         }
 
         private void MessageEditor_Focused(object sender, FocusEventArgs e)
         {
+            /*
+            ((sender as View).Parent as Frame).HasShadow = true;            
+            ((sender as View).Parent as Frame).OutlineColor = Color.DarkRed;//*/
 
-            Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+
+            if (Device.RuntimePlatform == Device.iOS)                               /// if its not Android, set `Focused`
             {
+                Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+                {
 
-                var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
-                bottom.HeightRequest = pageHeight * 0.55; // nearly
+                    var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage)
+                        .RootPage.Height;
+                    bottom.HeightRequest = pageHeight * 0.55; // nearly
 
-                return false;
-            });                
+                    return false;
+                });    
+            }
+            
 
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
+
+            adresseeEntry.Focus();
         }
 
 

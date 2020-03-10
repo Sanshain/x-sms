@@ -4,9 +4,11 @@
              x:Class="XxmsApp.Views.About">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="About X-sms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+            <Frame x:Name="frame" HasShadow="True" OutlineColor="Red" 
+                   VerticalOptions="CenterAndExpand" 
+                   HorizontalOptions="CenterAndExpand">
+                <Label Text="About X-sms!" />
+            </Frame>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

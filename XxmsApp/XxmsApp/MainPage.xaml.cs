@@ -63,7 +63,7 @@ namespace XxmsApp
             var parent = (target.Parent as Layout).Parent as Page;
             ((parent.Parent as NavigationPage).Parent as MasterDetailPage).IsPresented = true;//*/
 
-            Navigation.PushAsync(new Views.CreateNote(), true);            
+            Navigation.PushAsync(new Views.CreateNote { Title= "Новое сообщение" }, true);            
 
         }
 
