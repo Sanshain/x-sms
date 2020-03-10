@@ -68,11 +68,13 @@ namespace XxmsApp.Views
 
             container.Children.Add(msgFields);
 
-            messageEditor.Focused += MessageEditor_Focused;
-            messageEditor.Unfocused += MessageEditor_Focused;
-            adresseeEntry.Focused += MessageEditor_Focused; 
-            adresseeEntry.Unfocused += MessageEditor_Focused;
-
+            if (Device.RuntimePlatform == Device.iOS)
+            {
+                messageEditor.Focused += MessageEditor_Focused;
+                messageEditor.Unfocused += MessageEditor_Focused;
+                adresseeEntry.Focused += MessageEditor_Focused;
+                adresseeEntry.Unfocused += MessageEditor_Focused;
+            }
 
             // container.Children.Add(new StackLayout { VerticalOptions = LayoutOptions.CenterAndExpand });
             var send = new Button { Text = "Send" };
@@ -102,13 +104,13 @@ namespace XxmsApp.Views
 
         private void MessageEditor_Focused(object sender, FocusEventArgs e)
         {
-            /*
+            
             if (e.IsFocused) {
                 var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
                 bottom.HeightRequest = pageHeight * 0.55;
             }            
             else
-                bottom.HeightRequest = -1;//*/
+                bottom.HeightRequest = -1;
 
         }
 
