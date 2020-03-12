@@ -12,13 +12,14 @@ namespace XxmsApp
 	{
 
         Dictionary<Type, Action> onPop;
+        Button subBtn = new Button { Text = "Создать", IsEnabled = false };
 
         public MainPage()
 		{
 			InitializeComponent();
             
 
-            var subBtn = new Button { Text = "Click" };
+            
             var rootLayout = new AbsoluteLayout();
             var dialogs = new Piece.CustomList();
             rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);            
@@ -35,7 +36,17 @@ namespace XxmsApp
             };            
 
             Title = "Диалоги";
-            
+
+
+            var contactsGetter = (Application.Current as App).contactsAwaiter;
+
+            contactsGetter.ContinueWith((cnts) =>
+            {
+                subBtn.IsEnabled = true;
+
+                (Application.Current as App).contacts = cnts.Result.ToList();
+            }, TaskScheduler.FromCurrentSynchronizationContext());                               // 
+            //.GetAwaiter().GetResult().ToList();
 
 
         }
@@ -47,7 +58,7 @@ namespace XxmsApp
         }
 
         private async void Dialogs_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {
+        {            
 
             if (e.SelectedItem == null) return;
 

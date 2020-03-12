@@ -69,7 +69,7 @@ namespace XxmsApp.Views
 
             
             bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };// Initialize Button for send
-            var send = new Button { Text = "Send" };  
+            var send = new Button { Text = "Send" };
             bottom.Children.Add(send);
             send.Clicked += Send_Clicked;
             container.Children.Add(bottom);
@@ -82,7 +82,11 @@ namespace XxmsApp.Views
             messageEditor.Unfocused += MessageEditor_Unfocused;
             adresseeEntry.Focused += MessageEditor_Focused;
             adresseeEntry.Unfocused += MessageEditor_Unfocused;
-            
+
+            // var contactsGetter = (Application.Current as App).contactsAwaiter;
+
+            // contacts = contactsGetter.GetAwaiter().GetResult().ToList();
+
         }
 
 
@@ -111,11 +115,10 @@ namespace XxmsApp.Views
             ((sender as View).Parent as Frame).OutlineColor = Color.DarkRed;//*/
             if (sender == adresseeEntry && focused)
             {
+                var stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
 
-
-                var contactsGetter = Plugin.ContactService.CrossContactService.Current.GetContactListAsync();
-                var contacts = contactsGetter.GetAwaiter().GetResult();
-                var main_contacts = contacts.ToList().GetRange(0, 5);
+                var main_contacts = (Application.Current as App).contacts.GetRange(0, 5);
 
                 // msgFields.Children[1].IsVisible = false;
                 msgFields.Children[1] = (new ListView()
@@ -125,6 +128,10 @@ namespace XxmsApp.Views
                 });
                 focused = false;
                 adresseeEntry.Focus();
+
+                stopwatch.Stop();
+
+                (bottom.Children[0] as Button).Text = stopwatch.Elapsed.ToString();
 
             }
 
