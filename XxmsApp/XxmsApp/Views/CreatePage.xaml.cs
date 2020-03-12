@@ -25,6 +25,7 @@ namespace XxmsApp.Views
         StackLayout bottom;
         Entry adresseeEntry;
         Frame messageFrame;
+        Frame frameSend;
 
         public CreatePage ()
 		{
@@ -69,8 +70,17 @@ namespace XxmsApp.Views
 
             
             bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };// Initialize Button for send
+                        
             var send = new Button { Text = "Send" };
-            bottom.Children.Add(send);
+            frameSend = new Frame {
+                Content = send,
+                CornerRadius = 10,
+                Margin = new Thickness(5,5,5,15),
+                Padding = new Thickness(-10),                
+                IsClippedToBounds = true,
+                BackgroundColor = Color.Red
+            };
+            bottom.Children.Add(frameSend);
             send.Clicked += Send_Clicked;
             container.Children.Add(bottom);
 
@@ -131,7 +141,7 @@ namespace XxmsApp.Views
 
                 stopwatch.Stop();
 
-                (bottom.Children[0] as Button).Text = stopwatch.Elapsed.ToString();
+                ((bottom.Children[0] as Frame).Content as Button).Text = stopwatch.Elapsed.ToString();
 
             }
 
@@ -156,6 +166,8 @@ namespace XxmsApp.Views
             base.OnAppearing();
 
             adresseeEntry.Focus();
+
+            (frameSend.Content as Button).HeightRequest = (frameSend.Content as View).Height + 15;
         }
 
 
