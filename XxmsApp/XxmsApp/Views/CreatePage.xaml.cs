@@ -128,7 +128,8 @@ namespace XxmsApp.Views
                 var stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
 
-                var main_contacts = (Application.Current as App).contacts.GetRange(0, 5);
+                var main_contacts = (Application.Current as App)._contacts.GetRange(0, 5);
+                // var main_contacts = (Application.Current as App).contacts.GetRange(0, 5);
 
                 // msgFields.Children[1].IsVisible = false;
                 msgFields.Children[1] = (new ListView()

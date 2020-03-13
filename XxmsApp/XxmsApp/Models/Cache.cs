@@ -11,35 +11,63 @@ using Xamarin.Forms;
 
 namespace XxmsApp.Model
 {
-
-    [Table("Contacts")]
-    public class Contacts
+    
+    public class Contacts : IModel
     {
         
        
-        [PrimaryKey, AutoIncrement, Column("_Number")]
+        [PrimaryKey, Column("_Number")]        
         public string Phone { get; set; }
         public string Name { get; set; }
         public string Photo { get; set; }
         public string OptionalPhones { get; set; }
 
+        /// <summary>
+        /// For coping properties after creation 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public IModel Create(object obj)
+        {
+            var contact = obj as Contact;
+
+            this.Name = contact.Name;
+            this.Phone = contact.Number;
+            this.OptionalPhones = contact.Numbers != null ? string.Join(";", contact.Numbers) : string.Empty;
+            this.Photo = contact.PhotoUriThumbnail ?? string.Empty;
+
+            return this;
+        }
+
+        /*
         [OneToMany]
-        public List<Message> Messages { get; set; }
+        public List<Message> Messages { get; set; }//*/
 
         // [OneToMany]
         // public List<Model.Message> Duties { get; set; }
 
 
-        public static implicit operator Contacts (Plugin.ContactService.Shared.Contact contact)
+        public static explicit operator Contacts (Plugin.ContactService.Shared.Contact contact)
         {
+            var cn = new Contacts();
+
+            cn.Name = contact.Name;
+            cn.Phone = contact.Number;
+            cn.OptionalPhones = contact.Numbers != null ? string.Join(";", contact.Numbers) : string.Empty;
+            cn.Photo = contact.PhotoUriThumbnail;
+
+            return cn;
+
+            /*
             return new Contacts
             {
                 Name = contact.Name,
                 Phone = contact.Number,
                 OptionalPhones = string.Join(";", contact.Numbers),
                 Photo = contact.PhotoUriThumbnail
-            };
+            };//*/
         }
+
 
     }
 }
@@ -48,6 +76,17 @@ namespace XxmsApp.Model
 
 namespace XxmsApp
 {
+
+    public interface IModel
+    {
+        /// <summary>
+        /// For coping properties after creation 
+        /// </summary>
+        /// <param name="obj">base object from API</param>
+        /// <returns>model instance</returns>
+        IModel Create(object obj);
+    }
+
     public static class Cache
     {
         static SQLiteConnection database = new SQLiteConnection(
@@ -58,8 +97,15 @@ namespace XxmsApp
         static Cache()
         {
 
+            
+
             database.CreateTable<Model.Message>();
-            database.Table<Model.Message>();      
+
+            database.DropTable<Model.Contacts>();
+            database.CreateTable<Model.Contacts>();
+                
+            
+            //             database.Table<Model.Message>();      
             
         }
 
@@ -80,9 +126,9 @@ namespace XxmsApp
         /// <summary>
         /// Читает из БД таблицу
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">model type</typeparam>
         /// <returns></returns>
-        public static List<T> Read<T>() where T : new()
+        public static List<T> Read<T>() where T : IModel, new()
         {
             if (cache.ContainsKey(typeof(T))) return cache[typeof(T)].Select(o => (T)o).ToList();
             else
@@ -93,11 +139,25 @@ namespace XxmsApp
             }
         }
 
-        public static async Task<List<T>> UpdateAsync<T>(List<T> model)
+        static List<T> iConvert<T>(List<object> raw) where T: IModel, new()
+        {
+            
+            var res = new List<T>();
+            for (int i=0;i< raw.Count; i++)
+            {
+                var r = new T().Create(raw[i]);
+                res.Add((T)r);
+            }
+            return res;
+        }
+
+        public static async Task<List<T>> UpdateAsync<T>(List<T> model) 
+            where T : IModel, new()
         {
             var rawList = await actions[typeof(T)]();
 
-            var objectList = rawList.Select(o => (T)o).ToList();
+            // var objectList = rawList.Select(o => (T)o).ToList();
+            var objectList = iConvert<T>(rawList);
 
             database.UpdateAll(objectList);                     // database.InsertAll(new List<Model.Contacts>());
 

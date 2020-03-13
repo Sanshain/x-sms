@@ -12,21 +12,30 @@ namespace XxmsApp
     public partial class App : Application
     {
         public const string DATABASE_FILENAME = "messages.db";
-        internal Task<IList<Contact>> contactsAwaiter;
+        internal Task<IList<Contact>> contactsAwaiter;        
         internal List<Contact> contacts;
-        
+
+        internal Task<List<Model.Contacts>> contactsWaiter;
+        internal List<Model.Contacts> _contacts;
+
 
         public App()
         {
             InitializeComponent();
 
-            contactsAwaiter = Plugin.ContactService.CrossContactService.Current.GetContactListAsync();
+            // contactsAwaiter = Plugin.ContactService.CrossContactService.Current.GetContactListAsync();
+
+            _contacts = Cache.Read<Model.Contacts>();
+            if (_contacts.Count == 0)
+            {
+                contactsWaiter = Cache.UpdateAsync(_contacts);
+            }
 
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },
                 Detail = new NavigationPage(new XxmsApp.MainPage())
-            });            
+            });
 
         }
 

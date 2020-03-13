@@ -38,6 +38,15 @@ namespace XxmsApp
             Title = "Диалоги";
 
 
+            (Application.Current as App).contactsWaiter.ContinueWith((cn) =>
+            {
+                (Application.Current as App)._contacts = cn.GetAwaiter().GetResult();
+
+                subBtn.IsEnabled = true;
+
+            }, TaskScheduler.FromCurrentSynchronizationContext()).GetAwaiter();
+
+            /*
             var contactsGetter = (Application.Current as App).contactsAwaiter;
 
             contactsGetter.ContinueWith((cnts) =>
@@ -47,7 +56,7 @@ namespace XxmsApp
                 (Application.Current as App).contacts = cnts.Result.ToList();
             }, TaskScheduler.FromCurrentSynchronizationContext());                               // 
             //.GetAwaiter().GetResult().ToList();
-
+            //*/
 
         }
 
