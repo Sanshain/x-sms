@@ -11,9 +11,10 @@ namespace XxmsApp
 
     public partial class App : Application
     {
-        public const string DATA_FILE = "messages.db";
+        public const string DATABASE_FILENAME = "messages.db";
         internal Task<IList<Contact>> contactsAwaiter;
         internal List<Contact> contacts;
+        
 
         public App()
         {
@@ -25,7 +26,7 @@ namespace XxmsApp
             {
                 Master = new MenuPage { Title = "Title" },
                 Detail = new NavigationPage(new XxmsApp.MainPage())
-            });
+            });            
 
         }
 

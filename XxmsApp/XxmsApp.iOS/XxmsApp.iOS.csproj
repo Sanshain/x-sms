@@ -131,4 +131,7 @@
       <Name>XxmsApp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml" />
+  </ItemGroup>
 </Project>

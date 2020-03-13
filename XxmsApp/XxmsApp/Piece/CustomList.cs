@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 using Xamarin.Forms;
-using XxmsApp.Models;
+using XxmsApp.Model;
 
 
 

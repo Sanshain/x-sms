@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using XxmsApp.Models;
+using XxmsApp.Model;
 
 
-namespace XxmsApp.Models
+namespace XxmsApp.Model
 {
 
     public class Message
