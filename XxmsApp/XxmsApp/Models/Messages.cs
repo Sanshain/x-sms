@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using XxmsApp.Model;
 
+using SQLiteNetExtensions.Attributes;
 
 namespace XxmsApp.Model
 {
@@ -18,6 +19,10 @@ namespace XxmsApp.Model
         public DateTime Time { get; set; }
         public long Phone { get; set; }
         public string Value { get; set; }
+
+        // [ManyToOne]
+        [ForeignKey(typeof(Contacts))]
+        public Contacts Contact { get; set; }
 
         // public Boolean Outbound { get; set; } = false;
 

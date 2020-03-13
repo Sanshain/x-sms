@@ -1,6 +1,7 @@
 ﻿using Plugin.ContactService.Shared;
 using SQLite;
 using SQLiteNetExtensions.Attributes;
+using SQLiteNetExtensions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+
 
 namespace XxmsApp.Model
 {
@@ -39,7 +41,7 @@ namespace XxmsApp.Model
             return this;
         }
 
-        /*
+        
         [OneToMany]
         public List<Message> Messages { get; set; }//*/
 
@@ -95,9 +97,7 @@ namespace XxmsApp
                 App.DATABASE_FILENAME));
 
         static Cache()
-        {
-
-            
+        {            
 
             database.CreateTable<Model.Message>();
 
@@ -158,6 +158,7 @@ namespace XxmsApp
 
             // var objectList = rawList.Select(o => (T)o).ToList();
             var objectList = iConvert<T>(rawList);
+            
 
             database.UpdateAll(objectList);                     // database.InsertAll(new List<Model.Contacts>());
 
