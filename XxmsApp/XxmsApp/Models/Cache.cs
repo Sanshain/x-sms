@@ -1,7 +1,9 @@
 ﻿using Plugin.ContactService.Shared;
 using SQLite;
+using SQLiteNetExtensions.Attributes;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,9 +21,11 @@ namespace XxmsApp.Model
         public string Phone { get; set; }
         public string Name { get; set; }
         public string Photo { get; set; }
-        public string OptionalPhones { get; set; }        
-        
-        
+        public string OptionalPhones { get; set; }
+
+        [OneToMany]
+        public List<Message> Messages { get; set; }
+
         // [OneToMany]
         // public List<Model.Message> Duties { get; set; }
 
@@ -46,7 +50,11 @@ namespace XxmsApp
 {
     public static class Cache
     {
-        static SQLiteConnection database = new SQLiteConnection(App.DATABASE_FILENAME);
+        static SQLiteConnection database = new SQLiteConnection(
+            Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+                App.DATABASE_FILENAME));
+
         static Cache()
         {
 
