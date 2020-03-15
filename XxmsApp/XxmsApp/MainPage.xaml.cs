@@ -15,28 +15,10 @@ namespace XxmsApp
         Button subBtn = new Button { Text = "Создать", IsEnabled = false };
 
         public MainPage()
-		{
-			InitializeComponent();
-            
+        {
+            // InitializeComponent();
 
-            
-            var rootLayout = new AbsoluteLayout();
-            var dialogs = new Piece.CustomList();
-            rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);            
-            rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
-            Content = rootLayout;
-
-            
-            subBtn.Clicked += Btn_Clicked;
-            dialogs.ItemSelected += Dialogs_ItemSelected;
-            this.Appearing += MainPage_Appearing;
-            onPop = new Dictionary<Type, Action>
-            {
-                { typeof(Views.Messages) , () => dialogs.SelectedItem = null }
-            };            
-
-            Title = "Диалоги";
-
+            Initialize();
 
             if ((Application.Current as App)._contacts.Count == 0)
             {
@@ -50,19 +32,26 @@ namespace XxmsApp
             }
             else subBtn.IsEnabled = true;
 
+        }
 
-            /*
-            var contactsGetter = (Application.Current as App).contactsAwaiter;
+        private void Initialize()
+        {
+            var rootLayout = new AbsoluteLayout();
+            var dialogs = new Piece.CustomList();
+            rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
+            rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
+            Content = rootLayout;
 
-            contactsGetter.ContinueWith((cnts) =>
+
+            subBtn.Clicked += Btn_Clicked;
+            dialogs.ItemSelected += Dialogs_ItemSelected;
+            this.Appearing += MainPage_Appearing;
+            onPop = new Dictionary<Type, Action>
             {
-                subBtn.IsEnabled = true;
+                { typeof(Views.Messages) , () => dialogs.SelectedItem = null }
+            };
 
-                (Application.Current as App).contacts = cnts.Result.ToList();
-            }, TaskScheduler.FromCurrentSynchronizationContext());                               // 
-            //.GetAwaiter().GetResult().ToList();
-            //*/
-
+            Title = "Диалоги";
         }
 
         private void MainPage_Appearing(object sender, EventArgs e)

@@ -75,12 +75,14 @@ namespace XxmsApp
     public interface IModel
     {
         /// <summary>
-        /// For coping properties after creation 
+        /// For coping model properties after creation 
         /// </summary>
         /// <param name="obj">base object from API</param>
         /// <returns>model instance</returns>
         IModel Create(object obj);
-
+        /// <summary>
+        /// object validate inside Model-class
+        /// </summary>
         Boolean IsActual { get; }
     }
 
@@ -96,19 +98,14 @@ namespace XxmsApp
 
         static Cache()
         {
-            // database = new SQLiteConnection(App.DATABASE_FILENAME);
 
             database.CreateTable<Model.Message>();
 
-            database.DropTable<Model.Contacts>();
+            // database.DropTable<Model.Contacts>();
             database.CreateTable<Model.Contacts>();
 
-
-            /*database.Close();
-            database.Dispose();
-            database = new SQLiteConnection(db_filename);//*/
-
         }
+
 
         static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
 
@@ -122,13 +119,14 @@ namespace XxmsApp
             }
         };
 
-        // public static List<T> Read<T>() where T: new() => database.Table<T>().ToList();
+
 
         /// <summary>
-        /// Читает из БД таблицу
+        /// Читает из БД таблицу моделей, если ее нет в кэше
         /// </summary>
         /// <typeparam name="T">model type</typeparam>
         /// <returns></returns>
+        // public static List<T> Read<T>() where T: new() => database.Table<T>().ToList();
         public static List<T> Read<T>() where T : IModel, new()
         {
             if (cache.ContainsKey(typeof(T))) return cache[typeof(T)].Select(o => (T)o).ToList();
@@ -155,14 +153,12 @@ namespace XxmsApp
         /// <summary>
         /// Асинхронно считывает данные из АПИ и сохраняет их в БД. Возвращает обновленные данные
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
+        /// <typeparam name="T">тип, реализующий интерфейс, который будет сохранен в БД</typeparam>
+        /// <param name="model">список объектов, реализующих тип T</param>
         /// <returns>возвращает обновленные данные</returns>
         public static async Task<List<T>> UpdateAsync<T>(List<T> model) 
             where T : IModel, new()
-        {
-
-            // var primaryKey = model.GetType().GetProperties().SingleOrDefault(); // error w/o description -> Need check on main Thread
+        {            
 
             var rawList = await actions[typeof(T)]();
 
@@ -178,14 +174,6 @@ namespace XxmsApp
                     if (obj.IsActual) cnt += database.InsertOrReplace(obj);
                 }
             });
-
-            // database.Insert(objectList[11]);
-
-            // database.InsertAllWithChildren(objectList.GetRange(0, 5).ToList());
-
-            // database.InsertAll(objectList.GetRange(5, 10).ToList());
-
-            // database.InsertAllWithChildren(objectList);                     // database.InsertAll(new List<Model.Contacts>());
 
             var objects = database.Table<T>().ToList();
 

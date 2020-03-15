@@ -28,27 +28,34 @@ namespace XxmsApp.Views
         Frame frameSend;
 
         public CreatePage ()
-		{
-            
-			InitializeComponent ();
+        {
+            // InitializeComponent ();
 
-            var container = new StackLayout();            
+            InitializeComponents();
+
+        }
+
+        private void InitializeComponents()
+        {
+            
             msgFields = new StackLayout()
             {                                                                           // Initialize message Forms
                 BackgroundColor = Color.LightGray,
-                VerticalOptions = LayoutOptions.FillAndExpand                
+                VerticalOptions = LayoutOptions.FillAndExpand
             };
 
-            adresseeEntry = new Entry {
+            adresseeEntry = new Entry
+            {
                 //BackgroundColor = Color.LightCoral,
                 VerticalOptions = LayoutOptions.Start,
                 Placeholder = "Введите номер телефона"
             };
-            Frame adresseeFrame = new Frame {
+            Frame adresseeFrame = new Frame
+            {
                 Margin = new Thickness(5),
-                CornerRadius =5,
+                CornerRadius = 5,
                 IsClippedToBounds = true,
-                Padding = new Thickness(0,0,0,0)
+                Padding = new Thickness(0, 0, 0, 0)
             };
             adresseeFrame.Content = adresseeEntry;
             msgFields.Children.Add(adresseeFrame);
@@ -66,28 +73,26 @@ namespace XxmsApp.Views
             messageFrame.Content = messageEditor;
             msgFields.Children.Add(messageFrame);
 
-            container.Children.Add(msgFields);
-
             
+
+
             bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };// Initialize Button for send
-                        
+
             var send = new Button { Text = "Send" };
-            frameSend = new Frame {
+            frameSend = new Frame
+            {
                 Content = send,
                 CornerRadius = 10,
-                Margin = new Thickness(5,5,5,15),
-                Padding = new Thickness(-10),                
+                Margin = new Thickness(5, 5, 5, 15),
+                Padding = new Thickness(-10),
                 IsClippedToBounds = true,
                 BackgroundColor = Color.Red
             };
             bottom.Children.Add(frameSend);
             send.Clicked += Send_Clicked;
-            container.Children.Add(bottom);
 
-            
-            Content = container;                                                        // set container
 
-            
+
             messageEditor.Focused += MessageEditor_Focused;
             messageEditor.Unfocused += MessageEditor_Unfocused;
             adresseeEntry.Focused += MessageEditor_Focused;
@@ -97,15 +102,18 @@ namespace XxmsApp.Views
 
             // contacts = contactsGetter.GetAwaiter().GetResult().ToList();
 
-        }
+            var container = new StackLayout();
+            container.Children.Add(msgFields);
+            container.Children.Add(bottom);
 
+            Content = container;                                                        // set container
+        }
 
         private void MessageEditor_Unfocused(object sender, FocusEventArgs e)
         {
             /// ((sender as View).Parent as Frame).HasShadow = false;
 
-            
-
+           
             if (sender == adresseeEntry)
             {
                 msgFields.Children[1] = messageFrame;
@@ -123,6 +131,7 @@ namespace XxmsApp.Views
             /*
             ((sender as View).Parent as Frame).HasShadow = true;            
             ((sender as View).Parent as Frame).OutlineColor = Color.DarkRed;//*/
+
             if (sender == adresseeEntry && focused)
             {
                 var stopwatch = new System.Diagnostics.Stopwatch();
@@ -162,6 +171,7 @@ namespace XxmsApp.Views
 
         }
 
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
@@ -173,7 +183,11 @@ namespace XxmsApp.Views
 
 
 
-
+        /// <summary>
+        /// Send sms
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         [Obsolete("This yet just gag. Need to realize")]
         private void Send_Clicked(object sender, EventArgs e)
         {

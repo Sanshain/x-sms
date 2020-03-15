@@ -23,27 +23,7 @@ namespace XxmsApp
         {
             InitializeComponent();
 
-            // contactsAwaiter = Plugin.ContactService.CrossContactService.Current.GetContactListAsync();
-
-            _contacts = Cache.Read<Model.Contacts>();
-            if (_contacts.Count == 0)
-            {
-                contactsWaiter = Cache.UpdateAsync(_contacts);
-            }
-            else
-            {
-
-                // сделать удаленное обвновление с задержкой
-                Device.StartTimer(TimeSpan.FromSeconds(20), () =>
-                {
-                    Cache.UpdateAsync(_contacts).ContinueWith((tsk) =>
-                    {
-                        _contacts = tsk.Result;
-                    });
-                   
-                    return false;
-                });
-            }
+            DBUpdates();
 
             MainPage = (new MasterDetailPage()
             {
@@ -51,6 +31,21 @@ namespace XxmsApp
                 Detail = new NavigationPage(new XxmsApp.MainPage())
             });
 
+        }
+
+
+        private void DBUpdates()
+        {
+            if ((_contacts = Cache.Read<Model.Contacts>()).Count == 0) contactsWaiter = Cache.UpdateAsync(_contacts);
+            else    // сделать удаленное обвновление с задержкой
+            {
+                Device.StartTimer(TimeSpan.FromSeconds(20), () =>
+                {
+                    Cache.UpdateAsync(_contacts).ContinueWith(tsk => _contacts = tsk.Result);
+
+                    return false;
+                });
+            }
         }
 
         protected override void OnStart()
