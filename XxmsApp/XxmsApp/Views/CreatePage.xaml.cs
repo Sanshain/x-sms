@@ -26,6 +26,7 @@ namespace XxmsApp.Views
         Entry adresseeEntry;
         Frame messageFrame;
         Frame frameSend;
+        ListView drdnList;
 
         public CreatePage ()
         {
@@ -48,8 +49,11 @@ namespace XxmsApp.Views
             {
                 //BackgroundColor = Color.LightCoral,
                 VerticalOptions = LayoutOptions.Start,
-                Placeholder = "Введите номер телефона"
+                Placeholder = "Введите номер телефона",
+                FontSize = Device.GetNamedSize(NamedSize.Default, typeof(Entry)),
+                TextColor = Color.Green
             };
+            adresseeEntry.TextChanged += AdresseeEntry_TextChanged;
             Frame adresseeFrame = new Frame
             {
                 Margin = new Thickness(5),
@@ -59,6 +63,15 @@ namespace XxmsApp.Views
             };
             adresseeFrame.Content = adresseeEntry;
             msgFields.Children.Add(adresseeFrame);
+
+            var main_contacts = (Application.Current as App)._contacts;
+            // .GetRange(0, Math.Min((Application.Current as App)._contacts.Count, 15));
+            drdnList = new ListView()
+            {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                ItemsSource = main_contacts
+            };
+            drdnList.ItemTapped += DrdnList_ItemTapped;
 
 
             var messageEditor = new Editor { };
@@ -109,6 +122,28 @@ namespace XxmsApp.Views
             Content = container;                                                        // set container
         }
 
+        [Obsolete("need remade to filter")]
+        private void AdresseeEntry_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if ((frameSend.Content as Button).Text.IndexOf('*') < 0)
+                (frameSend.Content as Button).Text = "*";
+            else
+                (frameSend.Content as Button).Text += "*";
+        }
+
+        private void DrdnList_ItemTapped(object sender, ItemTappedEventArgs e)
+        {
+            if (e?.Item != null)
+            {
+                var contact = ((sender as ListView).SelectedItem as Model.Contacts);
+
+                adresseeEntry.Text = contact.Phone + " (" + contact.Name + ")";
+
+                msgFields.Children[1] = messageFrame;
+                (messageFrame.Content as Editor).Focus();
+            }
+        }
+
         private void MessageEditor_Unfocused(object sender, FocusEventArgs e)
         {
             /// ((sender as View).Parent as Frame).HasShadow = false;
@@ -116,8 +151,12 @@ namespace XxmsApp.Views
            
             if (sender == adresseeEntry)
             {
-                msgFields.Children[1] = messageFrame;
-                (messageFrame.Content as Editor).Focus();
+
+                // DrdnList_ItemSelected(drdnList, null);
+                // DisplayAlert(drdnList.IsFocused.ToString(), ".", ".").GetAwaiter();
+
+                // msgFields.Children[1] = messageFrame;
+                // (messageFrame.Content as Editor).Focus();
 
                 focused = true;
             }
@@ -137,17 +176,11 @@ namespace XxmsApp.Views
                 var stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
 
-                var main_contacts = (Application.Current as App)._contacts.GetRange(0, 5);
-                // var main_contacts = (Application.Current as App).contacts.GetRange(0, 5);
-
                 // msgFields.Children[1].IsVisible = false;
-                msgFields.Children[1] = (new ListView()
-                {
-                    VerticalOptions = LayoutOptions.FillAndExpand,
-                    ItemsSource = main_contacts
-                });
+
+                msgFields.Children[1] = drdnList;
                 focused = false;
-                adresseeEntry.Focus();
+                // adresseeEntry.Focus();
 
                 stopwatch.Stop();
 
@@ -170,6 +203,7 @@ namespace XxmsApp.Views
             
 
         }
+
 
 
         protected override void OnAppearing()
