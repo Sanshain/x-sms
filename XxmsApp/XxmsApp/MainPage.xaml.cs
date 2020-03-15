@@ -38,13 +38,18 @@ namespace XxmsApp
             Title = "Диалоги";
 
 
-            (Application.Current as App).contactsWaiter.ContinueWith((cn) =>
+            if ((Application.Current as App)._contacts.Count == 0)
             {
-                (Application.Current as App)._contacts = cn.GetAwaiter().GetResult();
+                (Application.Current as App).contactsWaiter.ContinueWith((cn) =>
+                {
+                    (Application.Current as App)._contacts = cn.GetAwaiter().GetResult();
 
-                subBtn.IsEnabled = true;
+                    subBtn.IsEnabled = true;
 
-            }, TaskScheduler.FromCurrentSynchronizationContext()).GetAwaiter();
+                }, TaskScheduler.FromCurrentSynchronizationContext()).GetAwaiter();
+            }
+            else subBtn.IsEnabled = true;
+
 
             /*
             var contactsGetter = (Application.Current as App).contactsAwaiter;

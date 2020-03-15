@@ -13,12 +13,13 @@ using Xamarin.Forms;
 
 namespace XxmsApp.Model
 {
-    
+
     public class Contacts : IModel
     {
-        
-       
-        [PrimaryKey, Column("_Number")]        
+
+        public bool IsActual => !string.IsNullOrWhiteSpace(this.Phone);
+
+        [PrimaryKey, Column("_Number")]
         public string Phone { get; set; }
         public string Name { get; set; }
         public string Photo { get; set; }
@@ -41,13 +42,9 @@ namespace XxmsApp.Model
             return this;
         }
 
-        
+
         [OneToMany]
-        public List<Message> Messages { get; set; }//*/
-
-        // [OneToMany]
-        // public List<Model.Message> Duties { get; set; }
-
+        public List<Message> Messages { get; set; }//*/        
 
         public static explicit operator Contacts (Plugin.ContactService.Shared.Contact contact)
         {
@@ -60,16 +57,12 @@ namespace XxmsApp.Model
 
             return cn;
 
-            /*
-            return new Contacts
-            {
-                Name = contact.Name,
-                Phone = contact.Number,
-                OptionalPhones = string.Join(";", contact.Numbers),
-                Photo = contact.PhotoUriThumbnail
-            };//*/
         }
 
+        public override string ToString()
+        {
+            return this.Name;
+        }
 
     }
 }
@@ -87,26 +80,34 @@ namespace XxmsApp
         /// <param name="obj">base object from API</param>
         /// <returns>model instance</returns>
         IModel Create(object obj);
+
+        Boolean IsActual { get; }
     }
+
 
     public static class Cache
     {
-        static SQLiteConnection database = new SQLiteConnection(
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
-                App.DATABASE_FILENAME));
+
+        readonly static string db_filename = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Personal),                          // .Resources  for iOS and Android the better
+                App.DATABASE_FILENAME);
+
+        static SQLiteConnection database = new SQLiteConnection(db_filename);
 
         static Cache()
-        {            
+        {
+            // database = new SQLiteConnection(App.DATABASE_FILENAME);
 
             database.CreateTable<Model.Message>();
 
             database.DropTable<Model.Contacts>();
             database.CreateTable<Model.Contacts>();
-                
-            
-            //             database.Table<Model.Message>();      
-            
+
+
+            /*database.Close();
+            database.Dispose();
+            database = new SQLiteConnection(db_filename);//*/
+
         }
 
         static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
@@ -151,16 +152,42 @@ namespace XxmsApp
             return res;
         }
 
+        /// <summary>
+        /// Асинхронно считывает данные из АПИ и сохраняет их в БД. Возвращает обновленные данные
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model"></param>
+        /// <returns>возвращает обновленные данные</returns>
         public static async Task<List<T>> UpdateAsync<T>(List<T> model) 
             where T : IModel, new()
         {
+
+            // var primaryKey = model.GetType().GetProperties().SingleOrDefault(); // error w/o description -> Need check on main Thread
+
             var rawList = await actions[typeof(T)]();
 
             // var objectList = rawList.Select(o => (T)o).ToList();
             var objectList = iConvert<T>(rawList);
-            
 
-            database.UpdateAll(objectList);                     // database.InsertAll(new List<Model.Contacts>());
+            int cnt = 0;
+            database.RunInTransaction(() =>
+            {
+                
+                foreach (var obj in objectList)
+                {
+                    if (obj.IsActual) cnt += database.InsertOrReplace(obj);
+                }
+            });
+
+            // database.Insert(objectList[11]);
+
+            // database.InsertAllWithChildren(objectList.GetRange(0, 5).ToList());
+
+            // database.InsertAll(objectList.GetRange(5, 10).ToList());
+
+            // database.InsertAllWithChildren(objectList);                     // database.InsertAll(new List<Model.Contacts>());
+
+            var objects = database.Table<T>().ToList();
 
             return objectList;
         }

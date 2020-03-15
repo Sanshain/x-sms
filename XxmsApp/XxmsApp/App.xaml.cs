@@ -30,6 +30,20 @@ namespace XxmsApp
             {
                 contactsWaiter = Cache.UpdateAsync(_contacts);
             }
+            else
+            {
+
+                // сделать удаленное обвновление с задержкой
+                Device.StartTimer(TimeSpan.FromSeconds(20), () =>
+                {
+                    Cache.UpdateAsync(_contacts).ContinueWith((tsk) =>
+                    {
+                        _contacts = tsk.Result;
+                    });
+                   
+                    return false;
+                });
+            }
 
             MainPage = (new MasterDetailPage()
             {

@@ -10,8 +10,10 @@ namespace XxmsApp.Model
 {
 
     [Table("Messages")]
-    public class Message
+    public class Message : IModel
     {
+        public bool IsActual => true;
+
         [PrimaryKey, AutoIncrement, Column("_Number")]
         public int Id { get; set; }
 
@@ -20,9 +22,14 @@ namespace XxmsApp.Model
         public long Phone { get; set; }
         public string Value { get; set; }
 
-        // [ManyToOne]
-        [ForeignKey(typeof(Contacts))]
+        // [ForeignKey(typeof(Contacts))] // therror on deploy
+        [ManyToOne]
         public Contacts Contact { get; set; }
+
+        public IModel Create(object obj)
+        {
+            throw new NotImplementedException();
+        }
 
         // public Boolean Outbound { get; set; } = false;
 
