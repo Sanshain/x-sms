@@ -184,19 +184,8 @@ namespace XxmsApp.Views
                 msgFields.Children[1] = drdnList;
                 focused = false;
 
-                Action ReFocus = async () =>
+                Action ReFocus = () =>
                 {
-                    /*// not worl well as next somehow
-                    adresseeEntry.Unfocus();
-
-                    await Task.Run(() => {});
-
-                    adresseeEntry.Focus();
-                    //*/
-
-
-
-
 
                     adresseeEntry.Unfocus();
 
