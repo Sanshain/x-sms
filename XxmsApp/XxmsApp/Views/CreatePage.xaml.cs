@@ -199,42 +199,6 @@ namespace XxmsApp.Views
                 };
                 ReFocus();
 
-                /*
-                if (drdnList.SelectedItem != null) DisplayAlert("Заменить?", "", "No", "Yes").ContinueWith(r =>
-                  {
-                      if (r.Result)
-                      {
-                          adresseeEntry.Unfocus();
-
-                          // messageFrame.Content.Focus();
-
-                          adresseeEntry.Text = "";
-
-                          adresseeEntry.Focus();
-                      }
-
-                  }, TaskScheduler.FromCurrentSynchronizationContext());//*/
-
-                /*
-                if (drdnList.SelectedItem != null && Device.RuntimePlatform == Device.Android)
-                {
-                    adresseeEntry.Unfocus();
-
-                    adresseeEntry.Text = "";
-
-                    Device.StartTimer(TimeSpan.FromMilliseconds(0), () =>
-                    {
-
-                        // adresseeEntry.Unfocus();
-                        adresseeEntry.Focus();
-
-                        return false;
-                    });
-                }//*/
-
-
-
-
 
                 // stopwatch.Stop();
 
