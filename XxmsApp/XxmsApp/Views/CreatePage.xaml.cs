@@ -141,6 +141,9 @@ namespace XxmsApp.Views
 
                 msgFields.Children[1] = messageFrame;
                 (messageFrame.Content as Editor).Focus();
+
+                focused = true;
+
             }
         }
 
@@ -158,7 +161,7 @@ namespace XxmsApp.Views
                 // msgFields.Children[1] = messageFrame;
                 // (messageFrame.Content as Editor).Focus();
 
-                focused = true;
+                // focused = true;
             }
 
             if (Device.RuntimePlatform == Device.iOS)  bottom.HeightRequest = -1;
@@ -173,18 +176,80 @@ namespace XxmsApp.Views
 
             if (sender == adresseeEntry && focused)
             {
-                var stopwatch = new System.Diagnostics.Stopwatch();
-                stopwatch.Start();
+                // var stopwatch = new System.Diagnostics.Stopwatch();
+                // stopwatch.Start();
 
                 // msgFields.Children[1].IsVisible = false;
 
                 msgFields.Children[1] = drdnList;
                 focused = false;
-                // adresseeEntry.Focus();
 
-                stopwatch.Stop();
+                Action ReFocus = async () =>
+                {
+                    /*// not worl well as next somehow
+                    adresseeEntry.Unfocus();
 
-                ((bottom.Children[0] as Frame).Content as Button).Text = stopwatch.Elapsed.ToString();
+                    await Task.Run(() => {});
+
+                    adresseeEntry.Focus();
+                    //*/
+
+
+
+
+
+                    adresseeEntry.Unfocus();
+
+                    Task.Factory.StartNew<bool>(() => true).ContinueWith(r =>
+                    {
+                        adresseeEntry.Focus();
+
+                    }, TaskScheduler.FromCurrentSynchronizationContext());//*/
+
+
+                };
+                ReFocus();
+
+                /*
+                if (drdnList.SelectedItem != null) DisplayAlert("Заменить?", "", "No", "Yes").ContinueWith(r =>
+                  {
+                      if (r.Result)
+                      {
+                          adresseeEntry.Unfocus();
+
+                          // messageFrame.Content.Focus();
+
+                          adresseeEntry.Text = "";
+
+                          adresseeEntry.Focus();
+                      }
+
+                  }, TaskScheduler.FromCurrentSynchronizationContext());//*/
+
+                /*
+                if (drdnList.SelectedItem != null && Device.RuntimePlatform == Device.Android)
+                {
+                    adresseeEntry.Unfocus();
+
+                    adresseeEntry.Text = "";
+
+                    Device.StartTimer(TimeSpan.FromMilliseconds(0), () =>
+                    {
+
+                        // adresseeEntry.Unfocus();
+                        adresseeEntry.Focus();
+
+                        return false;
+                    });
+                }//*/
+
+
+
+
+
+                // stopwatch.Stop();
+
+                // ((bottom.Children[0] as Frame).Content as Button).Text = stopwatch.Elapsed.ToString();
 
             }
 
