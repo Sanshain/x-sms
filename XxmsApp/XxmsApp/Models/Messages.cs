@@ -26,7 +26,7 @@ namespace XxmsApp.Model
         [ManyToOne]
         public Contacts Contact { get; set; }
 
-        public IModel Create(object obj)
+        public IModel CreateAs(object obj)
         {
             throw new NotImplementedException();
         }

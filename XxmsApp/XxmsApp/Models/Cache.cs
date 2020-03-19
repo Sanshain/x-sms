@@ -26,12 +26,20 @@ namespace XxmsApp.Model
         public string OptionalPhones { get; set; }
 
         /// <summary>
+        /// view for present on binding Views
+        /// </summary>
+        public string View
+        {
+            get => this.Phone + " (" + this.Name + ")";
+        }
+
+        /// <summary>
         /// For coping properties after creation 
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public IModel Create(object obj)
-        {
+        public IModel CreateAs(object obj)
+        {            
             var contact = obj as Contact;
 
             this.Name = contact.Name;
@@ -79,7 +87,7 @@ namespace XxmsApp
         /// </summary>
         /// <param name="obj">base object from API</param>
         /// <returns>model instance</returns>
-        IModel Create(object obj);
+        IModel CreateAs(object obj);
         /// <summary>
         /// object validate inside Model-class
         /// </summary>
@@ -144,7 +152,7 @@ namespace XxmsApp
             var res = new List<T>();
             for (int i=0;i< raw.Count; i++)
             {
-                var r = new T().Create(raw[i]);
+                var r = new T().CreateAs(raw[i]);
                 res.Add((T)r);
             }
             return res;

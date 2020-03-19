@@ -53,7 +53,9 @@ namespace XxmsApp.Views
                 FontSize = Device.GetNamedSize(NamedSize.Default, typeof(Entry)),
                 TextColor = Color.Green
             };
+            // adresseeEntry.SetBinding(Entry.TextProperty, "View");
             adresseeEntry.TextChanged += AdresseeEntry_TextChanged;
+            adresseeEntry.Completed += AdresseeEntry_Completed;
             Frame adresseeFrame = new Frame
             {
                 Margin = new Thickness(5),
@@ -122,13 +124,34 @@ namespace XxmsApp.Views
             Content = container;                                                        // set container
         }
 
+        private void AdresseeEntry_Completed(object sender, EventArgs e)
+        {
+            var list = drdnList.ItemsSource as List<Model.Contacts>;
+            if (list.Count > 0)
+            {
+                // (sender as Entry).BindingContext = (drdnList.ItemsSource as List<Model.Contacts>).First();
+                // (sender as Entry).SetBinding(Entry.TextProperty, "View");
+
+                DrdnList_ItemTapped(drdnList, new ItemTappedEventArgs(list, drdnList.SelectedItem = list[0]));
+            }
+        }
+
         [Obsolete("need remade to filter")]
         private void AdresseeEntry_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if ((frameSend.Content as Button).Text.IndexOf('*') < 0)
-                (frameSend.Content as Button).Text = "*";
-            else
-                (frameSend.Content as Button).Text += "*";
+            drdnList.ItemsSource = (Application.Current as App)._contacts.Where(c =>
+            {
+                return 
+                    (c.Phone?.ToLower().Contains(e.NewTextValue.ToLower()) ?? false) || 
+                    (c.Name?.ToLower().Contains(e.NewTextValue.ToLower()) ?? false);
+
+            }).ToList();
+
+            if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
+            {
+                drdnList.SelectedItem = (drdnList.ItemsSource as List<Model.Contacts>).First();
+            }
+
         }
 
         private void DrdnList_ItemTapped(object sender, ItemTappedEventArgs e)
@@ -138,6 +161,7 @@ namespace XxmsApp.Views
                 var contact = ((sender as ListView).SelectedItem as Model.Contacts);
 
                 adresseeEntry.Text = contact.Phone + " (" + contact.Name + ")";
+                // adresseeEntry.BindingContext = contact;
 
                 msgFields.Children[1] = messageFrame;
                 (messageFrame.Content as Editor).Focus();
@@ -191,6 +215,9 @@ namespace XxmsApp.Views
 
                     Task.Factory.StartNew<bool>(() => true).ContinueWith(r =>
                     {
+
+                        adresseeEntry.Text = "";
+
                         adresseeEntry.Focus();
 
                     }, TaskScheduler.FromCurrentSynchronizationContext());//*/
