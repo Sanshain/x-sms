@@ -16,20 +16,16 @@ using Xamarin.Forms;
 using XxmsApp.Model;
 using XxmsApp.Api;
 
-namespace XxmsApp.Droid
+[assembly: Dependency(typeof(XxmsApp.Api.IncomingSms))]
+namespace XxmsApp.Api
 {
 
-    
-
-    public interface IReceived
-    {
-        event OnReceived Received;
-    }
-
+   
     // [BroadcastReceiver(Enabled = true, Exported = true)]
+    
     [BroadcastReceiver(Enabled = true, Label = "SMS Receiver")]
     [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]           // "android.provider.Telephony.SMS_RECEIVED"
-    public class IncomingSms : BroadcastReceiver
+    public class IncomingSms : BroadcastReceiver, IReceived
     {
         
         public event OnReceived Received;
@@ -46,6 +42,15 @@ namespace XxmsApp.Droid
 
             OnMessagesReiceved(messages);
 
+
+            /*
+            var _messages = new List<string>();
+
+            for (var i = 0; i < messages.Length; i++)
+            {
+                _messages.Add(messages[i].OriginatingAddress + ":" +  messages[i].MessageBody);
+            }
+            //*/
         }
 
         private void OnMessagesReiceved(SmsMessage[] messages)
@@ -64,6 +69,8 @@ namespace XxmsApp.Droid
                     Phone = messages[i].OriginatingAddress,
                     Value = messages[i].MessageBody
                 });
+
+
                 //*/
 
                 /*
