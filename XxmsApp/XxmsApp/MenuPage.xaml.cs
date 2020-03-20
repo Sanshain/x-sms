@@ -27,7 +27,6 @@ namespace XxmsApp
                 ItemsSource = new string[]
                 {
                     "Настройки",
-                    "О нас",
                     "О нас"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))

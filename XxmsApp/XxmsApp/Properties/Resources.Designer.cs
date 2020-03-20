@@ -59,5 +59,14 @@ namespace XxmsApp.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на True.
+        /// </summary>
+        internal static string AutoFocus {
+            get {
+                return ResourceManager.GetString("AutoFocus", resourceCulture);
+            }
+        }
     }
 }

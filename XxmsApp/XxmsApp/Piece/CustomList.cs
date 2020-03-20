@@ -53,7 +53,7 @@ namespace XxmsApp.Piece
                 {
                     Value = "message " + i + 1,
                     Time = DateTime.Now,
-                    Phone = 8918 + i^3
+                    Phone = (8918 + i^3).ToString()
                 });
             }
 

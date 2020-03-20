@@ -93,7 +93,7 @@ namespace XxmsApp.Views
 
             bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };// Initialize Button for send
 
-            var send = new Button { Text = "Send" };
+            var send = new Button { Text = "Send", IsEnabled = false };
             frameSend = new Frame
             {
                 Content = send,
@@ -152,6 +152,8 @@ namespace XxmsApp.Views
                 drdnList.SelectedItem = (drdnList.ItemsSource as List<Model.Contacts>).First();
             }
 
+            if (!string.IsNullOrWhiteSpace((sender as Entry).Text)) (frameSend.Content as Button).IsEnabled = true;
+
         }
 
         private void DrdnList_ItemTapped(object sender, ItemTappedEventArgs e)
@@ -164,7 +166,7 @@ namespace XxmsApp.Views
                 // adresseeEntry.BindingContext = contact;
 
                 msgFields.Children[1] = messageFrame;
-                (messageFrame.Content as Editor).Focus();
+                if (Convert.ToBoolean(Properties.Resources.AutoFocus)) (messageFrame.Content as Editor).Focus();
 
                 focused = true;
 

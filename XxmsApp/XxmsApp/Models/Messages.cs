@@ -6,8 +6,21 @@ using XxmsApp.Model;
 
 using SQLiteNetExtensions.Attributes;
 
+
+
 namespace XxmsApp.Model
 {
+    namespace Abstraction
+    {
+        [Obsolete("пока не уверен, что стоит его использовать")]
+        public class LowLevelMessage
+        {
+            public string Address { get; set; }
+            public string Value { get; set; }
+        }
+    }
+
+
 
     [Table("Messages")]
     public class Message : IModel
@@ -19,7 +32,7 @@ namespace XxmsApp.Model
 
 
         public DateTime Time { get; set; }
-        public long Phone { get; set; }
+        public string Phone { get; set; }                                                                 // long
         public string Value { get; set; }
 
         // [ForeignKey(typeof(Contacts))] // therror on deploy

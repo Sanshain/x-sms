@@ -12,8 +12,6 @@ namespace XxmsApp
     public partial class App : Application
     {
         public const string DATABASE_FILENAME = "messages.db";
-        internal Task<IList<Contact>> contactsAwaiter;        
-        internal List<Contact> contacts;
 
         internal Task<List<Model.Contacts>> contactsWaiter;
         internal List<Model.Contacts> _contacts;
@@ -50,7 +48,9 @@ namespace XxmsApp
 
         protected override void OnStart()
         {
-            // Handle when your app starts
+            // IncomingSms
+
+            // how can I here get sms
         }
 
         protected override void OnSleep()
