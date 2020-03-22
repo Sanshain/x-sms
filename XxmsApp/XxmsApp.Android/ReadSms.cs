@@ -28,9 +28,9 @@ namespace XxmsApp.Api.Droid
 
             // List<string> xms = new List<string>();
 
-            string s = "";
-
-            ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms/inbox"), null, null, null, null);
+            ICursor qs = contentResolver.Query(
+                Android.Net.Uri.Parse("content://sms/inbox"), null, null, null, null);  
+            //on "ORDER BY _id DESC" - timeout exception error
 
             List<XxmsApp.Model.Message> messages = new List<Model.Message>();
 
@@ -38,10 +38,14 @@ namespace XxmsApp.Api.Droid
             {
                 XxmsApp.Model.Message msg = new Model.Message
                 {
-                    Time = DateTime.FromBinary(qs.GetLong(qs.GetColumnIndex("date"))),
+                    Id = qs.GetInt(qs.GetColumnIndex("_id")),
+                    // Time = DateTime.FromBinary(qs.GetLong(qs.GetColumnIndex("date"))),
                     Address = qs.GetString(qs.GetColumnIndex("address")),
                     Value = qs.GetString(qs.GetColumnIndex("body"))
                 };
+
+                var time = qs.GetLong(qs.GetColumnIndex("date"));
+                msg.Time = new DateTime(1970, 1, 1).AddMilliseconds(time);
 
                 messages.Add(msg);
             }

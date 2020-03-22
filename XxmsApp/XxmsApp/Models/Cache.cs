@@ -40,6 +40,7 @@ namespace XxmsApp.Model
         /// <returns></returns>
         public IModel CreateAs(object obj)
         {            
+            
             var contact = obj as Contact;
 
             this.Name = contact.Name;
@@ -91,7 +92,7 @@ namespace XxmsApp
         /// <summary>
         /// object validate inside Model-class
         /// </summary>
-        Boolean IsActual { get; }
+        Boolean IsActual { get; }        
     }
 
 
@@ -106,7 +107,7 @@ namespace XxmsApp
 
         static Cache()
         {
-
+            // database.DropTable<Model.Message>();
             database.CreateTable<Model.Message>();
 
             // database.DropTable<Model.Contacts>();
@@ -119,12 +120,29 @@ namespace XxmsApp
 
         static Dictionary<Type, Func<Task<List<object>>>> actions = new Dictionary<Type, Func<Task<List<object>>>>()
         {
-            { typeof(Model.Contacts),  async () => {
 
+            { typeof(Model.Contacts),  async () => 
+                {
                     return (await Plugin.ContactService.CrossContactService.Current.GetContactListAsync())
                         .Select(r => r as object).ToList();
                 }
+            },
+            { typeof(Model.Message), async () =>
+
+                {
+                    var msgs = await Task.Factory.StartNew<List<object>>(() =>
+                    {
+                        var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
+                        var messages = x_messages.Read();
+                        var objects = messages.Select(m => m as object).ToList();
+
+                        return objects;
+                    });
+
+                    return msgs;
+                }
             }
+
         };
 
 
@@ -136,15 +154,31 @@ namespace XxmsApp
         /// <returns></returns>
         // public static List<T> Read<T>() where T: new() => database.Table<T>().ToList();
         public static List<T> Read<T>() where T : IModel, new()
-        {
+        {            
+
             if (cache.ContainsKey(typeof(T))) return cache[typeof(T)].Select(o => (T)o).ToList();
             else
             {
                 var objects = database.Table<T>().ToList();
-                cache[typeof(T)] = objects.Select(o => (object)o).ToList();
+
+                if (objects.Count > 0) cache[typeof(T)] = objects.Select(o => (object)o).ToList();
+
+                else
+                {
+                    // подписываемся на событие On UpdateAsync()
+                    void ListenUpdates(IList<IModel> obj)
+                    {
+                        cache[typeof(T)] = objects.Select(o => (object)o).ToList();
+                        Cache.OnUpdate -= ListenUpdates;
+                    }
+
+                    Cache.OnUpdate += ListenUpdates;
+                }
+
                 return objects;
             }
         }
+
 
         static List<T> iConvert<T>(List<object> raw) where T: IModel, new()
         {
@@ -157,6 +191,8 @@ namespace XxmsApp
             }
             return res;
         }
+
+        public static event Action<IList<IModel>> OnUpdate;
 
         /// <summary>
         /// Асинхронно считывает данные из АПИ и сохраняет их в БД. Возвращает обновленные данные
@@ -184,6 +220,8 @@ namespace XxmsApp
             });
 
             var objects = database.Table<T>().ToList();
+
+            OnUpdate?.Invoke(objects.Select(o => o as IModel).ToList());
 
             return objectList;
         }

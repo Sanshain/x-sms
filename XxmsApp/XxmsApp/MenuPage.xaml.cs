@@ -78,12 +78,21 @@ namespace XxmsApp
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
 
+                    /*
                     var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
                     var messages = x_messages.Read();
+                    //*/
                     // var c = messages.Count;
 
+                    var messages = await Cache.UpdateAsync(new List<Model.Message>());
+
+                    /*
+                    var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
+                    var messages = x_messages.Read();
+                    var objects = messages.Select(m => m as object).ToList();//*/
+
                     sw.Stop();
-                    DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.ToString(), "Ok");
+                    DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
 
                     // sw.Elapsed.ToString()
 

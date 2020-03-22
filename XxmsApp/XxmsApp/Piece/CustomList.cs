@@ -57,6 +57,10 @@ namespace XxmsApp.Piece
                 });
             }
 
+            var msgs = Cache.Read<Message>().OrderByDescending(m => m.Id).ToList();
+
+            source = new ObservableCollection<Message>(msgs.GetRange(0, Math.Min(30, msgs.Count)));
+
             return source;
         }
 
@@ -71,18 +75,18 @@ namespace XxmsApp.Piece
             {
                 var view = new RelativeLayout();
 
-                Label PhoneLabel = new Label { FontSize = 16 };
+                Label PhoneLabel = new Label { FontSize = 20, FontAttributes = FontAttributes.Bold };
                 Label TimeLabel = new Label { FontSize = timeSize };  //, TextColor = Color.Gray
-                Label ValueLabel = new Label { FontSize = 14 , Margin = new Thickness(0, 10) };                
+                Label ValueLabel = new Label { FontSize = 14, Margin = new Thickness(0, 10) };                
 
                 PhoneLabel.SetBinding(Label.TextProperty, "Address");
                 TimeLabel.SetBinding(Label.TextProperty, "Time");
-                ValueLabel.SetBinding(Label.TextProperty, "Value");
+                ValueLabel.SetBinding(Label.TextProperty, "Label");
                                 
                 view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
                 view.Children.Add(TimeLabel, 
                     Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
-                view.Children.Add(ValueLabel, Constraint.Constant(10), Constraint.Constant(15),
+                view.Children.Add(ValueLabel, Constraint.Constant(10), Constraint.Constant(25),
                     Constraint.RelativeToParent((par) => par.Width)
                 );
 

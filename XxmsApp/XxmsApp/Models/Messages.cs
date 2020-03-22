@@ -35,13 +35,17 @@ namespace XxmsApp.Model
         public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
 
+        // [SQLite.Ignore]
+        public string Label
+        {
+            get => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
+        }
         // [ForeignKey(typeof(Contacts))] // therror on deploy
-        [ManyToOne]
-        public Contacts Contact { get; set; }
+        [ManyToOne] public Contacts Contact { get; set; }
 
         public IModel CreateAs(object obj)
         {
-            throw new NotImplementedException();
+            return obj as Message;
         }
 
         // public Boolean Outbound { get; set; } = false;
