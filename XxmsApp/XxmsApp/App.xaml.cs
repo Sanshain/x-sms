@@ -28,6 +28,7 @@ namespace XxmsApp
             xMessages.Received += XMessages_Received;//*/
 
 
+
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },

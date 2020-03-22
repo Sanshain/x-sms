@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace XxmsApp
                 ItemsSource = new string[]
                 {
                     "Настройки",
+                    "Read sms",
                     "О нас"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
@@ -71,16 +73,34 @@ namespace XxmsApp
                     (this.Parent as MasterDetailPage).IsPresented = false;                    
 
                     break;
+                case "Read sms":
+
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+
+                    var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
+                    var messages = x_messages.Read();
+                    // var c = messages.Count;
+
+                    sw.Stop();
+                    DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.ToString(), "Ok");
+
+                    // sw.Elapsed.ToString()
+
+                    ((ListView)sender).SelectedItem = null;
+
+                    break;
                 default:
 
-                    await DisplayAlert("title", e.SelectedItem.ToString(), "Ok", "No");
-                    
-                    ((ListView)sender).SelectedItem = null;
-                                       
+                    bool r = await DisplayAlert("Start read?", e.SelectedItem.ToString(), "Ok", "No");
+
+                    ((ListView)sender).SelectedItem = null; 
 
                     break;
                 
             }
+
+
 
             /*
             Device.StartTimer(TimeSpan.FromSeconds(1), () =>

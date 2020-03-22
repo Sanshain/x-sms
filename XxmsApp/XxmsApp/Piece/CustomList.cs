@@ -53,7 +53,7 @@ namespace XxmsApp.Piece
                 {
                     Value = "message " + i + 1,
                     Time = DateTime.Now,
-                    Phone = (8918 + i^3).ToString()
+                    Address = (8918 + i^3).ToString()
                 });
             }
 
@@ -75,7 +75,7 @@ namespace XxmsApp.Piece
                 Label TimeLabel = new Label { FontSize = timeSize };  //, TextColor = Color.Gray
                 Label ValueLabel = new Label { FontSize = 14 , Margin = new Thickness(0, 10) };                
 
-                PhoneLabel.SetBinding(Label.TextProperty, "Phone");
+                PhoneLabel.SetBinding(Label.TextProperty, "Address");
                 TimeLabel.SetBinding(Label.TextProperty, "Time");
                 ValueLabel.SetBinding(Label.TextProperty, "Value");
                                 

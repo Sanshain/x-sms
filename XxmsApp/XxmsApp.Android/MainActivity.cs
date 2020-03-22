@@ -32,6 +32,8 @@ namespace XxmsApp.Droid
     [Activity(Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        public static Android.Content.ContentResolver InstanceResolver;
+
         protected override void OnCreate(Bundle bundle)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -44,6 +46,8 @@ namespace XxmsApp.Droid
             var application = new App();
 
             LoadApplication(application);
+
+            InstanceResolver = this.ContentResolver;
         }
     }
 

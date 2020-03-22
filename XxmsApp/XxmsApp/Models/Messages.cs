@@ -32,7 +32,7 @@ namespace XxmsApp.Model
 
 
         public DateTime Time { get; set; }
-        public string Phone { get; set; }                                                                 // long
+        public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
 
         // [ForeignKey(typeof(Contacts))] // therror on deploy

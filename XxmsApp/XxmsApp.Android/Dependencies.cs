@@ -29,8 +29,7 @@ namespace XxmsApp.Api
     {
         
         public event OnReceived Received;
-
-        private const string TAG = "AA:SmsReceiver";
+        
         public override void OnReceive(Context context, Intent intent)
         {
 
@@ -41,7 +40,6 @@ namespace XxmsApp.Api
             SmsMessage[] messages = Telephony.Sms.Intents.GetMessagesFromIntent(intent);
 
             OnMessagesReiceved(messages);
-
 
             /*
             var _messages = new List<string>();
@@ -66,7 +64,7 @@ namespace XxmsApp.Api
 
                 XMessages.Add(new XxmsApp.Model.Message
                 {
-                    Phone = messages[i].OriginatingAddress,
+                    Address = messages[i].OriginatingAddress,
                     Value = messages[i].MessageBody
                 });
 
