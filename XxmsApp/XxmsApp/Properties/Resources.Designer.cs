@@ -68,5 +68,14 @@ namespace XxmsApp.Properties {
                 return ResourceManager.GetString("AutoFocus", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на True.
+        /// </summary>
+        internal static string DialogsView {
+            get {
+                return ResourceManager.GetString("DialogsView", resourceCulture);
+            }
+        }
     }
 }

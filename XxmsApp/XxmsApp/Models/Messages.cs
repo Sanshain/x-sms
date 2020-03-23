@@ -4,21 +4,25 @@ using System.Collections.Generic;
 using System.Text;
 using XxmsApp.Model;
 
+
 using SQLiteNetExtensions.Attributes;
-
-
+using System.Linq;
 
 namespace XxmsApp.Model
 {
-    namespace Abstraction
+
+    // [Obsolete("пока не уверен, что стоит его использовать")]    
+
+    public class Dialog
     {
-        [Obsolete("пока не уверен, что стоит его использовать")]
-        public class LowLevelMessage
-        {
-            public string Address { get; set; }
-            public string Value { get; set; }
-        }
+        public string Address { get; set; }
+
+        public DateTime Time => Messages?.FirstOrDefault()?.Time ?? DateTime.Now;
+        public string Label => Messages?.FirstOrDefault()?.Label ?? "Nothing";
+            
+        public IEnumerable<Message> Messages { get; set; }
     }
+    
 
 
 

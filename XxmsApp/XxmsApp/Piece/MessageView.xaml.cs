@@ -6,15 +6,19 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XxmsApp.Model;
 
 namespace XxmsApp.Piece
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class MessageView : ContentView
 	{
-		public MessageView ()
+		public MessageView (Message msg)
 		{
 			InitializeComponent ();
-		}
+
+            Content = new Label { Text = msg.Label };
+
+        }
 	}
 }

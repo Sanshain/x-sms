@@ -4,6 +4,7 @@ using SQLiteNetExtensions.Attributes;
 using SQLiteNetExtensions.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -153,13 +154,13 @@ namespace XxmsApp
         /// <typeparam name="T">model type</typeparam>
         /// <returns></returns>
         // public static List<T> Read<T>() where T: new() => database.Table<T>().ToList();
-        public static List<T> Read<T>() where T : IModel, new()
+        public static List<T> Read<T>(ObservableCollection<T> observable = null) where T : IModel, new()
         {            
 
             if (cache.ContainsKey(typeof(T))) return cache[typeof(T)].Select(o => (T)o).ToList();
             else
             {
-                var objects = database.Table<T>().ToList();
+                var objects = database.Table<T>().ToList();                
 
                 if (objects.Count > 0) cache[typeof(T)] = objects.Select(o => (object)o).ToList();
 

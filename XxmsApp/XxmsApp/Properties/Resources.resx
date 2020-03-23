@@ -121,4 +121,8 @@
     <value>True</value>
     <comment>for Editor on CreatePage</comment>
   </data>
+  <data name="DialogsView" xml:space="preserve">
+    <value>True</value>
+    <comment>list dialogs or messages</comment>
+  </data>
 </root>

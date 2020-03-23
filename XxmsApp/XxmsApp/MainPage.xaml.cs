@@ -40,11 +40,10 @@ namespace XxmsApp
             var dialogs = new Piece.CustomList();
             rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
-            Content = rootLayout;
-
+            Content = rootLayout;            
 
             subBtn.Clicked += Btn_Clicked;
-            dialogs.ItemSelected += Dialogs_ItemSelected;
+            // dialogs.ItemSelected += Dialogs_ItemSelected; // move realization inside CustomList
             this.Appearing += MainPage_Appearing;
             onPop = new Dictionary<Type, Action>
             {
@@ -65,7 +64,7 @@ namespace XxmsApp
 
             if (e.SelectedItem == null) return;
 
-            await Navigation.PushAsync(new Views.Messages(), true);
+            await Navigation.PushAsync(new Views.Messages(null), true);
 
             (sender as ListView).SelectedItem = null;
         }

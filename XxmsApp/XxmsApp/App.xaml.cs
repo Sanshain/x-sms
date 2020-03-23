@@ -19,6 +19,7 @@ namespace XxmsApp
 
         public App()
         {
+            
             InitializeComponent();
 
             DBUpdates();
@@ -32,7 +33,7 @@ namespace XxmsApp
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },
-                Detail = new NavigationPage(new XxmsApp.MainPage())
+                Detail = new NavigationPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black }
             });
 
         }
@@ -45,6 +46,7 @@ namespace XxmsApp
                 message.Count().ToString(),
                 message.FirstOrDefault()?.Value ?? "void",
                 "ok");
+            
         }
         
 

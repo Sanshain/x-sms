@@ -6,42 +6,55 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XxmsApp.Model;
 
 namespace XxmsApp.Views
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class Messages : ContentPage
 	{
-		public Messages ()
+		public Messages (object obj)
 		{
-			InitializeComponent ();
+			// InitializeComponent ();            
+
 
             var count = 10;
 
             var messageViews = new StackLayout();
             
-            for (int i = 0; i < count; i++)
+            if (obj.GetType() == typeof(Dialog))
             {
-                Piece.MessageView msgView = new Piece.MessageView();
+                var dialog = obj as Dialog;
+                //for (int i = 0; i < dialog.Messages.Count(); i++)
+                foreach(var msg in dialog.Messages)
+                {
+                    Piece.MessageView msgView = new Piece.MessageView(msg);
 
-                messageViews.Children.Add(msgView);
+                    messageViews.Children.Add(msgView);
+                }
             }
+
+
 
 
             RelativeLayout root = new RelativeLayout();
             root.Children.Add(new ScrollView
             {
                 Content = messageViews
-            }, Constraint.Constant(0), Constraint.Constant(0), Constraint.RelativeToParent((par) => 
-            {
-                return par.Width;
-            }),
-            Constraint.RelativeToParent((par) => 
-            {
-                return par.Height * 0.9;      
-            }));
+            }, 
+                Constraint.Constant(0), 
+                Constraint.Constant(0), 
+                Constraint.RelativeToParent((par) => 
+                    {
+                        return par.Width;
+                    }),
+                Constraint.RelativeToParent((par) => 
+                    {
+                        return par.Height * 0.9;      
+                    })
+             );
 
-            Content = root;
+             Content = root;
 
         }
 	}

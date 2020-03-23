@@ -13,23 +13,51 @@ namespace XxmsApp.Piece
 {
 
     public interface IMeasureString { double StringSize(string text); }
+    
 
     public class CustomList : ListView
 	{
         public ObservableCollection<Message> source { get; set; } = new ObservableCollection<Message>();
         public int timeSize { get; set; } = 14;
+        protected bool DialogViewType => Properties.Resources.DialogsView == "True";
 
         public CustomList ()
 		{
+            // this.DataLoad(30);
 
-            ItemsSource = this.DataLoad();
+            if (this.DialogViewType)
+            {
+
+                ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
+                    Address = g.Key,
+                    Messages = g.ToArray()
+                } );
+
+            } else ItemsSource = this.DataLoad(30);
 
             ItemTemplate = this.DataView();
 
+            this.ItemSelected += CustomList_ItemSelected;
             source.CollectionChanged += Source_CollectionChanged;
 
+        }
 
-        }        
+        private async void CustomList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem == null) return;
+
+            if (this.DialogViewType)
+            {
+                await Navigation.PushAsync(new Views.Messages(e.SelectedItem), true);
+            }
+            else
+            {
+                await Navigation.PushAsync(new Views.Messages(e.SelectedItem), true);
+            }
+           
+            (sender as ListView).SelectedItem = null;
+        }
+
 
         private void Source_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -44,9 +72,9 @@ namespace XxmsApp.Piece
             }
         }
 
-        protected ObservableCollection<Message> DataLoad()
-        {   
-
+        protected ObservableCollection<Message> DataLoad(int limit = 0)
+        {
+            /*
             for (int i = 0; i < 20; i++)
             {
                 source.Add(new Message()
@@ -55,13 +83,15 @@ namespace XxmsApp.Piece
                     Time = DateTime.Now,
                     Address = (8918 + i^3).ToString()
                 });
-            }
+            }//*/
 
             var msgs = Cache.Read<Message>().OrderByDescending(m => m.Id).ToList();
 
-            source = new ObservableCollection<Message>(msgs.GetRange(0, Math.Min(30, msgs.Count)));
+            limit = limit > 0 ? Math.Min(limit, msgs.Count) : msgs.Count;
+            source = new ObservableCollection<Message>(msgs.GetRange(0, Math.Min(limit, msgs.Count)));
 
             return source;
+
         }
 
         protected DataTemplate DataView()
@@ -75,7 +105,7 @@ namespace XxmsApp.Piece
             {
                 var view = new RelativeLayout();
 
-                Label PhoneLabel = new Label { FontSize = 20, FontAttributes = FontAttributes.Bold };
+                Label PhoneLabel = new Label { FontSize = 18, FontAttributes = FontAttributes.Bold };
                 Label TimeLabel = new Label { FontSize = timeSize };  //, TextColor = Color.Gray
                 Label ValueLabel = new Label { FontSize = 14, Margin = new Thickness(0, 10) };                
 
