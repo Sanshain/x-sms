@@ -24,6 +24,8 @@ namespace XxmsApp.Views
             
             if (obj.GetType() == typeof(Dialog))
             {
+                Title = "Сообщения";
+
                 var dialog = obj as Dialog;
                 //for (int i = 0; i < dialog.Messages.Count(); i++)
                 foreach(var msg in dialog.Messages)

@@ -46,6 +46,11 @@ namespace XxmsApp.Piece
         {
             if (e.SelectedItem == null) return;
 
+            var msgView = new Views.Messages(e.SelectedItem);
+
+            await Navigation.PushAsync(msgView, true);
+
+            /*
             if (this.DialogViewType)
             {
                 await Navigation.PushAsync(new Views.Messages(e.SelectedItem), true);
@@ -53,7 +58,7 @@ namespace XxmsApp.Piece
             else
             {
                 await Navigation.PushAsync(new Views.Messages(e.SelectedItem), true);
-            }
+            }//*/
            
             (sender as ListView).SelectedItem = null;
         }
