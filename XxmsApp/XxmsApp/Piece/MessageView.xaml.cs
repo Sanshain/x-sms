@@ -20,7 +20,7 @@ namespace XxmsApp.Piece
 
             var rltv = new StackLayout
             {
-                Padding = new Thickness(5),
+                Padding = new Thickness(5)
             };
             var msText = new Label { Text = msg.Value, Margin = new Thickness(5) };            
 
@@ -36,7 +36,9 @@ namespace XxmsApp.Piece
 
 
             Content = new Frame {
-                Content = rltv, HasShadow = true, OutlineColor = Color.Red, Margin = new Thickness(10)
+                Content = rltv, Margin = new Thickness(10),
+                HasShadow = true, OutlineColor = Color.Red,             // material design
+                CornerRadius = 10, IsClippedToBounds = true             // border-radius
             };
 
         }

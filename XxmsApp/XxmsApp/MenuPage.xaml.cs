@@ -99,6 +99,14 @@ namespace XxmsApp
                     ((ListView)sender).SelectedItem = null;
 
                     break;
+
+                case "Настройки":
+
+                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SettingPage(), true);
+                    (this.Parent as MasterDetailPage).IsPresented = false;
+
+                    break;
+
                 default:
 
                     bool r = await DisplayAlert("Start read?", e.SelectedItem.ToString(), "Ok", "No");

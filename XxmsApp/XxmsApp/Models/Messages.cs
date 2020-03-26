@@ -8,21 +8,9 @@ using XxmsApp.Model;
 using SQLiteNetExtensions.Attributes;
 using System.Linq;
 
+
 namespace XxmsApp.Model
 {
-
-    // [Obsolete("пока не уверен, что стоит его использовать")]    
-
-    public class Dialog
-    {
-        public string Address { get; set; }
-
-        public DateTime Time => Messages?.FirstOrDefault()?.Time ?? DateTime.Now;
-        public string Label => Messages?.FirstOrDefault()?.Label ?? "Nothing";
-            
-        public IEnumerable<Message> Messages { get; set; }
-    }
-    
 
 
 
@@ -49,7 +37,7 @@ namespace XxmsApp.Model
 
         public IModel CreateAs(object obj)
         {
-            return obj as Message;
+            return obj as Message;            
         }
 
         // public Boolean Outbound { get; set; } = false;
@@ -57,5 +45,22 @@ namespace XxmsApp.Model
     }
 
 
+}
+
+
+
+namespace XxmsApp
+{
+    // [Obsolete("пока не уверен, что стоит его использовать")]    
+
+    public class Dialog
+    {
+        public string Address { get; set; }
+
+        public DateTime Time => Messages?.FirstOrDefault()?.Time ?? DateTime.Now;
+        public string Label => Messages?.FirstOrDefault()?.Label ?? "Nothing";
+
+        public IEnumerable<Message> Messages { get; set; }
+    }
 }
 

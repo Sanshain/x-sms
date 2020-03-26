@@ -17,26 +17,21 @@ namespace XxmsApp.Views
 		{
 			// InitializeComponent ();            
 
-
-            var count = 10;
-
             var messageViews = new StackLayout();
             
             if (obj.GetType() == typeof(Dialog))
-            {
-                Title = "Сообщения";
-
+            {                 
                 var dialog = obj as Dialog;
+
+                Title = "Сообщения c " + dialog.Address;
                 //for (int i = 0; i < dialog.Messages.Count(); i++)
-                foreach(var msg in dialog.Messages)
+                foreach (var msg in dialog.Messages)
                 {
                     Piece.MessageView msgView = new Piece.MessageView(msg);
 
                     messageViews.Children.Add(msgView);
                 }
             }
-
-
 
 
             RelativeLayout root = new RelativeLayout();
