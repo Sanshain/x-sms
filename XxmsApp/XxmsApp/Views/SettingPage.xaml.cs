@@ -13,8 +13,8 @@ namespace XxmsApp.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SettingPage : ContentPage
     {
-        public ObservableCollection<string> Items { get; set; }
-        ObservableCollection<Model.Setting> settings;
+        
+        Settings settings;
 
         public SettingPage()
         {
@@ -44,6 +44,7 @@ namespace XxmsApp.Views
 
             var itemTemplate = new DataTemplate(() =>
             {
+                /*
                 var view = new StackLayout {
                     Orientation = StackOrientation.Horizontal,
                     Padding = new Thickness(15, 0, 0, 0) };
@@ -64,27 +65,43 @@ namespace XxmsApp.Views
 
                 var viewCell = new ViewCell { View = view };
 
-                /*
+                return viewCell;
+                //*/
+
                 var sc = new SwitchCell { };
                 sc.SetBinding(SwitchCell.TextProperty, "Prop");
                 sc.SetBinding(SwitchCell.OnProperty, "Enabled");//*/
-                
+                sc.OnChanged += Sc_OnChanged;
 
-                return viewCell;
+                return sc;
+                
             });
             
 
             var lv = new ListView()
             {
                 ItemTemplate = itemTemplate,
-                ItemsSource = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
+                // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
+                // ItemsSource = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
+                
             };
-            settings.CollectionChanged += Settings_CollectionChanged;
+
+            lv.BindingContext = settings = Settings.Initialize();
+            lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list
+
+            settings.Units.CollectionChanged += Settings_CollectionChanged;
             lv.ItemTapped += Handle_ItemTapped;
 
             Content = lv;
 
             // Properties.Resources.Culture
+
+        }
+
+        private void Sc_OnChanged(object sender, ToggledEventArgs e)
+        {
+            var a = (sender as SwitchCell).BindingContext;
+            var b = e.Value;
 
         }
 
@@ -94,10 +111,12 @@ namespace XxmsApp.Views
             await DisplayAlert("Item Tapped", "Settings_CollectionChanged", "OK");
         }
 
+        /// just for CellView. Not for SwitchView!
         private void Swtch_Toggled(object sender, ToggledEventArgs e)
         {
             var setting = (((sender as Switch).Parent as StackLayout).Children.First() as Label).BindingContext;
             (setting as Model.Setting).Value = e.Value.ToString();
+            
         }
 
         void Handle_ItemTapped(object sender, ItemTappedEventArgs e)

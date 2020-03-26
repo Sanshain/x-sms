@@ -5,17 +5,40 @@ using System.Text;
 using SQLite;
 using XxmsApp.Model;
 using System.Linq;
+using System.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace XxmsApp.Model
 {
     [Table("Settings")]
-    public class Setting 
+    public class Setting : INotifyPropertyChanged
     {
+        string  _value;
+
         [PrimaryKey]
         public string Prop { get; set; }
-        public string Value { get; set; }
+        public string Value { get => _value; set 
+            {
+                _value = value;
+                OnPropertyChanged(_value);
+            }
+        }
 
         public bool Enabled => Convert.ToBoolean(Value);
+
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+
+
+
 
         public static implicit operator Setting((string Name, string Value) setting)
         {
@@ -48,22 +71,45 @@ namespace XxmsApp.Model
 namespace XxmsApp
 {
     // no Cachable
-    public static class Settings
+    public class Settings : IEnumerable<Setting>
     {
-        public static List<Setting> Initialize()
+        
+
+        public Settings() { }
+        public Settings(IEnumerable<Setting> _items) => Units = new ObservableCollection<Setting>(_items);
+        public ObservableCollection<Model.Setting> Units { get; set; } = new ObservableCollection<Setting>();
+
+
+        public static Settings Initialize()
         {
-            var settings = Read().ToList();
+            var settings = new Settings { Units = new ObservableCollection<Setting>(Read()) };
 
-            if (settings.Count() > 0) return settings;
-            else settings = new List<Setting>
+            if (settings.Count() == 0)
             {
-                (Name : "Автофокус", Value : true),
-                (Name : "Вид диалога", Value : true)
-            };
+                settings = new Settings(new List<Setting>
+                {
+                    (Name : "Автофокус", Value : true),
+                    (Name : "Вид диалога", Value : true)
+                });
 
-            Save(settings.ToArray());
+                Save(settings.ToArray());
+            }
+
+            foreach(Setting setting in settings)
+            {
+                setting.PropertyChanged += Setting_PropertyChanged;
+            }
 
             return settings;
+        }
+
+
+
+        private static void Setting_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Units.CollectionChanged
+
+            // (sender as Setting)
         }
 
 
@@ -89,7 +135,10 @@ namespace XxmsApp
                 }
             });
             return cnt;
-        } 
+        }
+
+        public IEnumerator GetEnumerator() => Units.GetEnumerator();
+        IEnumerator<Setting> IEnumerable<Setting>.GetEnumerator() { return Units.GetEnumerator(); }
 
     }
 
