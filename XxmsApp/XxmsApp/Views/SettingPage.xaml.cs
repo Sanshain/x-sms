@@ -70,7 +70,7 @@ namespace XxmsApp.Views
 
                 var sc = new SwitchCell { };
                 sc.SetBinding(SwitchCell.TextProperty, "Prop");
-                sc.SetBinding(SwitchCell.OnProperty, "Enabled");//*/
+                sc.SetBinding(SwitchCell.OnProperty, "Value");//*/
                 sc.OnChanged += Sc_OnChanged;
 
                 return sc;
@@ -83,14 +83,18 @@ namespace XxmsApp.Views
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 // ItemsSource = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
-                
+                ItemsSource = settings = Settings.Initialize()
             };
 
-            lv.BindingContext = settings = Settings.Initialize();
-            lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list
 
-            settings.Units.CollectionChanged += Settings_CollectionChanged;
-            lv.ItemTapped += Handle_ItemTapped;
+            // lv.BindingContext = settings = Settings.Initialize();
+            // lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list
+
+            // settings.Units.CollectionChanged += Settings_CollectionChanged;
+
+            settings.CollectionChanged += Settings_CollectionChanged;
+
+
 
             Content = lv;
 
@@ -115,7 +119,7 @@ namespace XxmsApp.Views
         private void Swtch_Toggled(object sender, ToggledEventArgs e)
         {
             var setting = (((sender as Switch).Parent as StackLayout).Children.First() as Label).BindingContext;
-            (setting as Model.Setting).Value = e.Value.ToString();
+            (setting as Model.Setting).Value = e.Value;
             
         }
 
