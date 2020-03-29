@@ -90,22 +90,24 @@ namespace XxmsApp.Views
             // lv.BindingContext = settings = Settings.Initialize();
             // lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list            
 
-            settings.CollectionChanged += Settings_CollectionChanged;
-
-
-
+            
             Content = lv;
-
+            Title = "Настройки";
             // Properties.Resources.Culture
 
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
 
+            settings.CollectionChanged += Settings_CollectionChanged;
+        }
 
         async private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
         {
 
-            await DisplayAlert("Item Changed", e.Id.ToString(), "Settings_CollectionChanged", "OK");
+            await DisplayAlert(e.ChangedItem.Prop, e.Id.ToString(), "Settings_CollectionChanged", "OK");
         }
 
 

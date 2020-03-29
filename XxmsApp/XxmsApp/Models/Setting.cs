@@ -46,14 +46,8 @@ namespace XxmsApp.Model
 
         public event PropertyChangedEventHandler PropertyChanged
         {
-            add
-            {
-                propertyChanged += value;
-            }
-            remove
-            {
-                propertyChanged -= value;
-            }
+            add => propertyChanged += value;
+            remove => propertyChanged -= value;
         }
 
         
@@ -105,16 +99,10 @@ namespace XxmsApp
     // no Cachable
     public class Settings : List<Setting>//, INotifyCollectionChanged // , IEnumerable<Setting>
     {
-        
 
-        public Settings(IEnumerable<Setting> _items) : base(_items)
-        {
+        int _initialized = 0;
 
-            foreach (Setting setting in this)
-            {
-                setting.PropertyChanged += new PropertyChangedEventHandler(this.Settings_PropertyChanged);
-            }
-        }
+        public Settings(IEnumerable<Setting> _items) : base(_items) { }
         // public Settings() { }
         // public Settings(IEnumerable<Setting> _items) => Units = new ObservableCollection<Setting>(_items);        
         // public ObservableCollection<Model.Setting> Units { get; set; } = new ObservableCollection<Setting>();
@@ -135,8 +123,13 @@ namespace XxmsApp
                 });
 
                 Save(settings.ToArray());
+            }            
+
+            foreach (Setting setting in settings)
+            {
+                setting.PropertyChanged += new PropertyChangedEventHandler(settings.Settings_PropertyChanged);
             }
-            
+
             return settings;
         }
 
@@ -147,12 +140,12 @@ namespace XxmsApp
 
         internal void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-
-            CollectionChanged?.Invoke(this,
-                new CollectionChangedEventArgs<Setting>(
-                    sender as Setting, 
-                    this.IndexOf(sender as Setting))
-            );
+            if (_initialized++ >= this.Count && CollectionChanged != null)
+            {
+                CollectionChanged(
+                    this,
+                    new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
+            }           
 
             /*
             var id = this.IndexOf(sender as Setting);
