@@ -76,8 +76,8 @@ namespace XxmsApp.Views
                 return sc;
                 
             });
-            
 
+            
             var lv = new ListView()
             {
                 ItemTemplate = itemTemplate,
@@ -88,9 +88,7 @@ namespace XxmsApp.Views
 
 
             // lv.BindingContext = settings = Settings.Initialize();
-            // lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list
-
-            // settings.Units.CollectionChanged += Settings_CollectionChanged;
+            // lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list            
 
             settings.CollectionChanged += Settings_CollectionChanged;
 
@@ -102,17 +100,20 @@ namespace XxmsApp.Views
 
         }
 
+
+
+        async private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
+        {
+
+            await DisplayAlert("Item Changed", e.Id.ToString(), "Settings_CollectionChanged", "OK");
+        }
+
+
         private void Sc_OnChanged(object sender, ToggledEventArgs e)
         {
             var a = (sender as SwitchCell).BindingContext;
             var b = e.Value;
 
-        }
-
-        async void Settings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            // e.NewItems[0].ToString()
-            await DisplayAlert("Item Tapped", "Settings_CollectionChanged", "OK");
         }
 
         /// just for CellView. Not for SwitchView!

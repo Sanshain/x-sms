@@ -56,6 +56,7 @@ namespace XxmsApp.Model
             }
         }
 
+        
 
         public static implicit operator Setting((string Name, string Value) setting)
         {
@@ -87,8 +88,22 @@ namespace XxmsApp.Model
 
 namespace XxmsApp
 {
+
+    public class CollectionChangedEventArgs<T> : EventArgs
+    {
+        public T ChangedItem { get; }
+        public int Id { get; }
+
+        public CollectionChangedEventArgs(T changedItem, int id)
+        {
+            ChangedItem = changedItem;
+            Id = id;
+        }
+
+    }
+
     // no Cachable
-    public class Settings : ObservableCollection<Setting> // , IEnumerable<Setting>
+    public class Settings : List<Setting>//, INotifyCollectionChanged // , IEnumerable<Setting>
     {
         
 
@@ -97,7 +112,7 @@ namespace XxmsApp
 
             foreach (Setting setting in this)
             {
-                setting.PropertyChanged += new PropertyChangedEventHandler(this.Setting1_PropertyChanged);
+                setting.PropertyChanged += new PropertyChangedEventHandler(this.Settings_PropertyChanged);
             }
         }
         // public Settings() { }
@@ -107,6 +122,7 @@ namespace XxmsApp
 
         public static Settings Initialize()
         {
+
             // var settings = new Settings { Units = new ObservableCollection<Setting>(Read()) };
             var settings = new Settings(Read());
 
@@ -120,76 +136,28 @@ namespace XxmsApp
 
                 Save(settings.ToArray());
             }
-
-            var setting_chanched =
-                settings[0].GetType().GetField("propertyChanged", BindingFlags.Instance | BindingFlags.NonPublic);
-            var handler = (PropertyChangedEventHandler)setting_chanched.GetValue(settings[0]);
-            Delegate[] delegates = handler?.GetInvocationList();
-
+            
             return settings;
         }
 
-        public override event NotifyCollectionChangedEventHandler CollectionChanged;
-        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        public delegate void CollectionChangedEventHandler(object sender, CollectionChangedEventArgs<Setting> e);
+
+        public event CollectionChangedEventHandler CollectionChanged;
+        // public event Action<Settings, CollectionChangedEventArgs<Setting>> CollectionChanged;        
+
+        internal void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // base.OnCollectionChanged(e);
 
-            if (CollectionChanged != null)
-            {
-                using (BlockReentrancy())
-                {
-                    CollectionChanged(this, e);
-                }
-            }
-
-            // e.Action == NotifyCollectionChangedAction.
-        }
-
-
-
-
-
-
-        protected override event PropertyChangedEventHandler PropertyChanged;
-        public event PropertyChangedEventHandler ValueChanged
-        {
-            add => PropertyChanged += value;
-            remove => PropertyChanged -= value;
-        }
-        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-        { 
-            if (PropertyChanged != null)
-            {
-                Delegate[] delegates = PropertyChanged?.GetInvocationList();
-
-                PropertyChanged(this, e);
-            }
-        }
-
-
-
-
-
-
-
-        internal void Setting1_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            // var id = this.IndexOf(sender as Setting);
-
-
-            
-            
-            var id = this.IndexOf(sender as Setting);
-            this[id] = sender as Setting;
-
-            /*
-            this.OnCollectionChanged(
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace,
-                sender, sender,
-                this.IndexOf(sender as Setting))
+            CollectionChanged?.Invoke(this,
+                new CollectionChangedEventArgs<Setting>(
+                    sender as Setting, 
+                    this.IndexOf(sender as Setting))
             );
 
-            // Units.CollectionChanged*/
+            /*
+            var id = this.IndexOf(sender as Setting);
+            this[id] = sender as Setting;///*/
+
         }
 
 
