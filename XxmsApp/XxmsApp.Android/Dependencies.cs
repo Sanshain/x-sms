@@ -27,7 +27,7 @@ namespace XxmsApp.Api
     [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]           // "android.provider.Telephony.SMS_RECEIVED"
     public class IncomingSms : BroadcastReceiver, IReceived
     {
-       
+        
         public event OnReceived Received;
         
         public override void OnReceive(Context context, Intent intent)
@@ -47,7 +47,7 @@ namespace XxmsApp.Api
 
         private void OnMessagesReiceved(SmsMessage[] messages)
         {
-            // var sb = new StringBuilder();
+            
             var smsMesages = new List<(string Address, string Message)>();
             var XMessages = new List<XxmsApp.Model.Message>();
 
@@ -59,26 +59,25 @@ namespace XxmsApp.Api
                 XMessages.Add(new XxmsApp.Model.Message
                 {
                     Address = messages[i].OriginatingAddress,
-                    Value = messages[i].MessageBody
+                    Value = messages[i].MessageBody,
+                    Time = DateTime.Now.AddMilliseconds(messages[i].TimestampMillis)
                 });
 
             }
 
-            Device.BeginInvokeOnMainThread(() => {
-                Received?.Invoke(XMessages);
-            });
+            
+            Received?.Invoke(XMessages);
 
-            /*
-            if (intent.Action.Equals(Telephony.Sms.Intents.SmsReceivedAction))
+            Device.BeginInvokeOnMainThread(() =>
             {
-                var msgs = Telephony.Sms.Intents.GetMessagesFromIntent(intent);
-                foreach (var msg in msgs)
-                {
-                    Log.Debug(TAG, $" MessageBody {msg.MessageBody}");
-                    Log.Debug(TAG, $"DisplayOriginatingAddress {msg.DisplayOriginatingAddress}");
-                    Log.Debug(TAG, $"OriginatingAddress {msg.OriginatingAddress}");
-                }
-            }//*/
+                MessagingCenter.Send<XxmsApp.App, List<XxmsApp.Model.Message>>(
+                    Xamarin.Forms.Application.Current as XxmsApp.App, 
+                    "MessageReceived",
+                    XMessages);
+            });
+            
+            var r = 0;
+            r++;
 
         }
     }

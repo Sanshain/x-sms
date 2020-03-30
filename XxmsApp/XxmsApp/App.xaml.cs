@@ -32,6 +32,30 @@ namespace XxmsApp
 
             xMessages = DependencyService.Get<XxmsApp.Api.IReceived>();
             xMessages.Received += XMessages_Received;//*/
+            
+            MessagingCenter.Subscribe<App, List<XxmsApp.Model.Message>>(
+                this,                                                       // кто подписывается на сообщения
+                "MessageReceived",                                              // название сообщения
+                async (sender, messages) => 
+                {
+                    var StartPage = (((MainPage as MasterDetailPage).Detail as NavigationPage).RootPage as XxmsApp.MainPage);
+
+                    var i = 0;                    
+                    
+                    while (i < messages.Count)
+                    {
+                        var b = await StartPage.DisplayAlert(
+                            messages[i]?.Address ?? "No address",
+                            messages[i].Value,
+                            "ok",
+                            $"Next ({++i}) message of {messages.Count.ToString()}" 
+                        );
+
+                        if (b) break;
+                    }
+
+                });    
+
 
         }
 
