@@ -27,13 +27,15 @@ namespace XxmsApp.Api
     [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]           // "android.provider.Telephony.SMS_RECEIVED"
     public class IncomingSms : BroadcastReceiver, IReceived
     {
-        
+       
         public event OnReceived Received;
         
         public override void OnReceive(Context context, Intent intent)
         {
-
-            Toast.MakeText(context, intent.GetStringExtra("key"), ToastLength.Long).Show();
+            
+            Device.BeginInvokeOnMainThread(() =>
+                Toast.MakeText(context, "New one message", ToastLength.Long).Show()
+            );//*/
 
             if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction) return;
 
@@ -41,14 +43,6 @@ namespace XxmsApp.Api
 
             OnMessagesReiceved(messages);
 
-            /*
-            var _messages = new List<string>();
-
-            for (var i = 0; i < messages.Length; i++)
-            {
-                _messages.Add(messages[i].OriginatingAddress + ":" +  messages[i].MessageBody);
-            }
-            //*/
         }
 
         private void OnMessagesReiceved(SmsMessage[] messages)
@@ -68,18 +62,11 @@ namespace XxmsApp.Api
                     Value = messages[i].MessageBody
                 });
 
-
-                //*/
-
-                /*
-                sb.Append(string.Format(
-                    "SMS From: {0}{1}Body: {2}{1}", 
-                    messages[i].OriginatingAddress,
-                    System.Environment.NewLine, 
-                    messages[i].MessageBody));//*/
             }
 
-            Received(XMessages);
+            Device.BeginInvokeOnMainThread(() => {
+                Received?.Invoke(XMessages);
+            });
 
             /*
             if (intent.Action.Equals(Telephony.Sms.Intents.SmsReceivedAction))

@@ -24,17 +24,14 @@ namespace XxmsApp
 
             DBUpdates();
 
-            
-            xMessages = DependencyService.Get<XxmsApp.Api.IReceived>();
-            xMessages.Received += XMessages_Received;//*/
-
-
-
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },
                 Detail = new NavigationPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black }
             });
+
+            xMessages = DependencyService.Get<XxmsApp.Api.IReceived>();
+            xMessages.Received += XMessages_Received;//*/
 
         }
 
