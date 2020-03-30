@@ -13,7 +13,7 @@ using System.Reflection;
 namespace XxmsApp.Model
 {
     [Table("Settings")]
-    public class Setting : INotifyPropertyChanged
+    public class Setting : INotifyPropertyChanged, IModel   
     {
         bool  _value;
 
@@ -34,11 +34,8 @@ namespace XxmsApp.Model
                 // OnPropertyChanged(_value.ToString());
             }
         }
-        /// <summary>
-        /// Binding bool property
-        /// </summary>
-        // public bool Enabled => Convert.ToBoolean(Value);
 
+        
 
 
         private event PropertyChangedEventHandler propertyChanged;
@@ -50,13 +47,14 @@ namespace XxmsApp.Model
             remove => propertyChanged -= value;
         }
 
-        
+
+
+
 
         public static implicit operator Setting((string Name, string Value) setting)
         {
             return new Setting { Prop = setting.Name, Value = bool.Parse(setting.Value) };
         }
-
 
         public static implicit operator Setting((string Name, bool Value) setting)
         {
@@ -65,6 +63,12 @@ namespace XxmsApp.Model
 
 
 
+        #region IModel realization
+
+        public bool IsActual => true;
+        public IModel CreateAs(object obj) => throw new NotImplementedException("It's compile time initialized class");
+
+        #endregion
 
         /*
         [Obsolete]
@@ -112,7 +116,7 @@ namespace XxmsApp
         {
 
             // var settings = new Settings { Units = new ObservableCollection<Setting>(Read()) };
-            var settings = new Settings(Read());
+            var settings = new Settings(Cache.Read<Setting>());  // Read()                  // for save time
 
             if (settings.Count() == 0)
             {
@@ -154,7 +158,7 @@ namespace XxmsApp
         }
 
 
-
+        [Obsolete("until replaced for Cache.Read<Setting>() for cache involved and saving time IO operation with DB")]
         static Setting[] Read() 
         {
             var s = Cache.database.Table<Setting>();

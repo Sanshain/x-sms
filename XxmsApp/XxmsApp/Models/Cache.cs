@@ -114,7 +114,7 @@ namespace XxmsApp
             // database.DropTable<Model.Contacts>();
             database.CreateTable<Model.Contacts>();
 
-            database.DropTable<Model.Setting>();
+            // database.DropTable<Model.Setting>();
             database.CreateTable<Model.Setting>();
 
         }
@@ -145,7 +145,14 @@ namespace XxmsApp
 
                     return msgs;
                 }
-            }
+            },
+            { typeof(Model.Setting), () => {
+
+                    throw new NotImplementedException(
+                        "This type has no low-level api for long execution, "+
+                        "therefore Update methods by Cache class for the type don't intended");
+                }
+            } 
 
         };
 
@@ -170,13 +177,13 @@ namespace XxmsApp
                 else
                 {
                     // подписываемся на событие On UpdateAsync()
-                    void ListenUpdates(IList<IModel> obj)
+                    void ListenLoading(IList<IModel> obj)
                     {
-                        cache[typeof(T)] = objects.Select(o => (object)o).ToList();
-                        Cache.OnUpdate -= ListenUpdates;
+                        
+                        Cache.OnUpdate -= ListenLoading;
                     }
 
-                    Cache.OnUpdate += ListenUpdates;
+                    Cache.OnUpdate += ListenLoading;
                 }
 
                 return objects;
@@ -225,6 +232,10 @@ namespace XxmsApp
 
             var objects = database.Table<T>().ToList();
 
+            cache[typeof(T)] = objects.Select(o => (object)o).ToList();
+
+
+
             OnUpdate?.Invoke(objects.Select(o => o as IModel).ToList());
 
             return objectList;
@@ -244,6 +255,10 @@ namespace XxmsApp
             var objectList = rawList.Select(o => (T)o).ToList();
 
             database.UpdateAll(objectList);
+
+
+
+            cache[typeof(T)] = objectList.Select(o => (object)o).ToList();
 
             return objectList;
             

@@ -106,8 +106,9 @@ namespace XxmsApp.Views
 
         async private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
         {
+            // await DisplayAlert(e.ChangedItem.Prop, e.Id.ToString(), "Settings_CollectionChanged", "OK");
 
-            await DisplayAlert(e.ChangedItem.Prop, e.Id.ToString(), "Settings_CollectionChanged", "OK");
+            Cache.database.Update((sender as Settings)[e.Id]);
         }
 
 
