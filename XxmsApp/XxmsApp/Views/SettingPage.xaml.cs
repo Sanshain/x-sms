@@ -120,12 +120,14 @@ namespace XxmsApp.Views
             
         }//*/
 
-        void SettingList_ItemTapped(object sender, ItemTappedEventArgs e)
+        async void SettingList_ItemTapped(object sender, ItemTappedEventArgs e)
         {
             if (e.Item == null)
                 return;
-            
-            // DisplayAlert("Setting description", (((ListView)sender).SelectedItem as Model.Setting).Desc, "OK");
+
+            var setting = (((ListView)sender).SelectedItem as Model.Setting);
+
+            await DisplayAlert("Описание", setting.Desc, "OK");
 
             //Deselect Item
             ((ListView)sender).SelectedItem = null;

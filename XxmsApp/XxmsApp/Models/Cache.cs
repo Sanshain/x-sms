@@ -114,7 +114,7 @@ namespace XxmsApp
             // database.DropTable<Model.Contacts>();
             database.CreateTable<Model.Contacts>();
 
-            database.DropTable<Model.Setting>();
+            // database.DropTable<Model.Setting>();
             database.CreateTable<Model.Setting>();
 
         }
@@ -193,7 +193,11 @@ namespace XxmsApp
 
         public static void Update<T>(T subject, int id) 
         {
-            cache[typeof(T)][id] = subject;                                                           // if (cache.ContainsKey(typeof(T))) 
+            if (cache.ContainsKey(typeof(T))) cache[typeof(T)][id] = subject;                                                           // 
+            else
+            {
+                // throw new KeyNotFoundException("The type yet was not added to cache");
+            }
         }
 
 
