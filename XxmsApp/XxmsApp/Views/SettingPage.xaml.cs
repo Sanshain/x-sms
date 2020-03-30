@@ -71,14 +71,14 @@ namespace XxmsApp.Views
                 var sc = new SwitchCell { };
                 sc.SetBinding(SwitchCell.TextProperty, "Prop");
                 sc.SetBinding(SwitchCell.OnProperty, "Value");//*/
-                sc.OnChanged += Sc_OnChanged;
+                // sc.OnChanged += Sc_OnChanged;                            // realized inside binding object
 
                 return sc;
                 
             });
 
             
-            var lv = new ListView()
+            var SettingList = new ListView()
             {
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
@@ -90,8 +90,8 @@ namespace XxmsApp.Views
             // lv.BindingContext = settings = Settings.Initialize();
             // lv.SetBinding(ListView.ItemsSourceProperty, "Units");         // if declare items inside settings list            
 
-            
-            Content = lv;
+            SettingList.ItemTapped += SettingList_ItemTapped;
+            Content = SettingList;
             Title = "Настройки";
             // Properties.Resources.Culture
 
@@ -104,7 +104,7 @@ namespace XxmsApp.Views
             settings.CollectionChanged += Settings_CollectionChanged;
         }
 
-        async private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
+        private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
         {
             // await DisplayAlert(e.ChangedItem.Prop, e.Id.ToString(), "Settings_CollectionChanged", "OK");
 
@@ -112,27 +112,20 @@ namespace XxmsApp.Views
         }
 
 
-        private void Sc_OnChanged(object sender, ToggledEventArgs e)
-        {
-            var a = (sender as SwitchCell).BindingContext;
-            var b = e.Value;
-
-        }
-
-        /// just for CellView. Not for SwitchView!
+        /* just for CellView. Not for SwitchView!
         private void Swtch_Toggled(object sender, ToggledEventArgs e)
         {
             var setting = (((sender as Switch).Parent as StackLayout).Children.First() as Label).BindingContext;
             (setting as Model.Setting).Value = e.Value;
             
-        }
+        }//*/
 
-        void Handle_ItemTapped(object sender, ItemTappedEventArgs e)
+        void SettingList_ItemTapped(object sender, ItemTappedEventArgs e)
         {
             if (e.Item == null)
                 return;
-
-            // await DisplayAlert("Item Tapped", "An item was tapped.", "OK");
+            
+            // DisplayAlert("Setting description", (((ListView)sender).SelectedItem as Model.Setting).Desc, "OK");
 
             //Deselect Item
             ((ListView)sender).SelectedItem = null;

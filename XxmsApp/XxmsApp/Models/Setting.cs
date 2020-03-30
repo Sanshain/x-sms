@@ -13,12 +13,13 @@ using System.Reflection;
 namespace XxmsApp.Model
 {
     [Table("Settings")]
-    public class Setting : INotifyPropertyChanged, IModel   
+    public class Setting : INotifyPropertyChanged // , IModel   
     {
         bool  _value;
 
         [PrimaryKey]
         public string Prop { get; set; }
+        // public string Desc { get; set; }
         public bool Value { get => _value; set 
             {
                 _value = value;
@@ -31,7 +32,6 @@ namespace XxmsApp.Model
                     propertyChanged(this, new PropertyChangedEventArgs(_value.ToString()));
                 }
 
-                // OnPropertyChanged(_value.ToString());
             }
         }
 
@@ -51,18 +51,24 @@ namespace XxmsApp.Model
 
 
 
-        public static implicit operator Setting((string Name, string Value) setting)
+        public static implicit operator Setting((string Name, string Value, string Desc) setting)
         {
-            return new Setting { Prop = setting.Name, Value = bool.Parse(setting.Value) };
+            return new Setting {
+                Prop = setting.Name,
+                Value = bool.Parse(setting.Value)
+                // Desc = setting.Desc
+            };
         }
 
-        public static implicit operator Setting((string Name, bool Value) setting)
+        public static implicit operator Setting((string Name, bool Value) setting) //, string Desc
         {
-            return new Setting { Prop = setting.Name, Value = setting.Value };
+            return new Setting { Prop = setting.Name, Value = setting.Value }; // , Desc = setting.Desc
         }
 
 
 
+
+        /*
         #region IModel realization
 
         public bool IsActual => true;
@@ -122,8 +128,10 @@ namespace XxmsApp
             {
                 settings = new Settings(new List<Setting>
                 {
-                    (Name : "Автофокус", Value : true),
+                    (Name : "Автофокус", Value : true), 
+                        // Desc : "Автофокус поля для ввода сообщения при выборе контакта"),
                     (Name : "Вид диалога", Value : true)
+                        // Desc : "Если выключен, то основной список будет показывать список сообщений")
                 });
 
                 Save(settings.ToArray());
@@ -149,7 +157,9 @@ namespace XxmsApp
                 CollectionChanged(
                     this,
                     new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
-            }           
+            }
+
+            Cache.Update(sender as Setting, this.IndexOf(sender as Setting));
 
             /*
             var id = this.IndexOf(sender as Setting);

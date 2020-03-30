@@ -114,7 +114,7 @@ namespace XxmsApp
             // database.DropTable<Model.Contacts>();
             database.CreateTable<Model.Contacts>();
 
-            // database.DropTable<Model.Setting>();
+            database.DropTable<Model.Setting>();
             database.CreateTable<Model.Setting>();
 
         }
@@ -164,7 +164,7 @@ namespace XxmsApp
         /// <typeparam name="T">model type</typeparam>
         /// <returns></returns>
         // public static List<T> Read<T>() where T: new() => database.Table<T>().ToList();
-        public static List<T> Read<T>(ObservableCollection<T> observable = null) where T : IModel, new()
+        public static List<T> Read<T>(ObservableCollection<T> observable = null) where T : new() // IModel
         {            
 
             if (cache.ContainsKey(typeof(T))) return cache[typeof(T)].Select(o => (T)o).ToList();
@@ -188,6 +188,12 @@ namespace XxmsApp
 
                 return objects;
             }
+        }
+
+
+        public static void Update<T>(T subject, int id) 
+        {
+            cache[typeof(T)][id] = subject;                                                           // if (cache.ContainsKey(typeof(T))) 
         }
 
 
@@ -247,8 +253,8 @@ namespace XxmsApp
         /// <typeparam name="T">type of model</typeparam>
         /// <param name="model">model instance (not important)</param>
         /// <returns>List of the model instances from API</returns>
-        [Obsolete("Sync method `Update` is not recommended, but allowed if really you need")]
-        public static List<T> Update<T>(List<T> model)
+        [Obsolete("Sync method `UpdateSync` is not recommended, but allowed if really you need")]
+        public static List<T> UpdateSync<T>(List<T> model)
         {
             var rawList = actions[typeof(T)]().GetAwaiter().GetResult();
 
