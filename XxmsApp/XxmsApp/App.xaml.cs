@@ -40,19 +40,39 @@ namespace XxmsApp
                 {
                     var StartPage = (((MainPage as MasterDetailPage).Detail as NavigationPage).RootPage as XxmsApp.MainPage);
 
-                    var i = 0;                    
-                    
+                    var i = 0;
+
+                    var msgs = new List<Model.Message>();
+                     
                     while (i < messages.Count)
                     {
+                        var id = msgs.FindIndex(m => m.Address == messages[i].Address && m.Time == messages[i].Time);
+
+                        if (id >= 0) msgs[id].Value += messages[i].Value;
+                        else
+                        {
+                            msgs.Add(messages[i]);
+                        }
+                        i++;
+                    }
+
+
+
+                    i = 0;
+                    while(i < msgs.Count)
+                    {
                         var b = await StartPage.DisplayAlert(
-                            messages[i]?.Address ?? "No address",
-                            messages[i].Value,
+                            msgs[i]?.Address,
+                            msgs[i].Value,
                             "ok",
-                            $"Next ({++i}) message of {messages.Count.ToString()}" 
+                            $"Next" // ({++i}) message of {msgs.Count.ToString()}
                         );
 
                         if (b) break;
                     }
+
+
+
 
                 });    
 

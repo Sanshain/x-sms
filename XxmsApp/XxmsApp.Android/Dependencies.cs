@@ -60,7 +60,7 @@ namespace XxmsApp.Api
                 {
                     Address = messages[i].OriginatingAddress,
                     Value = messages[i].MessageBody,
-                    Time = DateTime.Now.AddMilliseconds(messages[i].TimestampMillis)
+                    Time = new DateTime(1970, 1, 1).AddMilliseconds(messages[i].TimestampMillis)
                 });
 
             }
