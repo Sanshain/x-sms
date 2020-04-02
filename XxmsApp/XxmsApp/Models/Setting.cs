@@ -128,10 +128,18 @@ namespace XxmsApp
             {
                 settings = new Settings(new List<Setting>
                 {
-                    (Name : "Автофокус", Value : true, 
+                    (
+                        Name : "Автофокус", 
+                        Value : true, 
                         Desc : "Автофокус поля для ввода сообщения при выборе контакта"),
-                    (Name : "Вид диалога", Value : true,
-                        Desc : "Если выключен, то основной список будет показывать список сообщений")
+                    (
+                        Name : "Вид диалога", 
+                        Value : true,
+                        Desc : "Если выключен, то основной список будет показывать список сообщений"),
+                    (   
+                        Name : "LazyLoad", 
+                        Value : true,
+                        Desc : "Ленивая подгрузка сообщений при открытии диалога")
                 });
 
                 Save(settings.ToArray());

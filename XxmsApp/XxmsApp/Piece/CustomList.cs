@@ -15,25 +15,27 @@ namespace XxmsApp.Piece
     public interface IMeasureString { double StringSize(string text); }
     
 
-    public class CustomList : ListView
+    public class MainList : ListView
 	{
         public ObservableCollection<Message> source { get; set; } = new ObservableCollection<Message>();
         public int timeSize { get; set; } = 14;
         protected bool DialogViewType => Properties.Resources.DialogsView == "True";
 
-        public CustomList ()
+        /// <summary>
+        /// Для списка сообщений
+        /// </summary>
+        public MainList ()
 		{
-            // this.DataLoad(30);
+            // this.DataLoad(30);            
 
-            if (this.DialogViewType)
+            if (this.DialogViewType)                                        // by default
             {
-
                 ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
                     Address = g.Key,
-                    Messages = g.ToArray()
+                    Messages = g.Select(m => m)                          // .ToArray()
                 } );
 
-            } else ItemsSource = this.DataLoad(30);
+            } else ItemsSource = this.DataLoad(30);                         // else
 
             ItemTemplate = this.DataView();
 
@@ -48,7 +50,7 @@ namespace XxmsApp.Piece
 
             var msgView = new Views.Messages(e.SelectedItem);
 
-            await Navigation.PushAsync(msgView, true);
+            await Navigation.PushAsync(msgView, false);
 
             /*
             if (this.DialogViewType)

@@ -7,6 +7,18 @@ namespace XxmsApp
 {
     public static class Utils
     {
+
+
+
+        //public static Constraint Let(this double arg) => Constraint.Constant(arg);
+        public static Constraint Let(this double? arg) => arg != null ? Constraint.Constant(arg.Value) : null;
+        public static Constraint Let(this Func<RelativeLayout, double> func)// => Constraint.RelativeToParent(func);
+        {
+            return func != null ? Constraint.RelativeToParent(func) : null;
+        }
+        
+
+
         /// <summary>
         /// Append view element to RelativeLayout (more convenient to use). Its recommended
         /// </summary>
@@ -16,7 +28,7 @@ namespace XxmsApp
         /// <param name="y">y constant</param>
         /// <param name="W">w - func</param>
         /// <param name="H">h - func</param>
-        public static void Add(this RelativeLayout.IRelativeList<View> self,
+        public static void AddAsRelative(this RelativeLayout.IRelativeList<View> self,
             View view,
             double x = 0,
             double y = 0,
@@ -30,7 +42,28 @@ namespace XxmsApp
                 H != null ? Constraint.RelativeToParent(H) : null);
         }
 
+        public static void AddAsRelative(this RelativeLayout.IRelativeList<View> self,
+            View view,
+            Func<RelativeLayout, double> X = null,
+            Func<RelativeLayout, double> Y = null,
+            Func<RelativeLayout, double> W = null,
+            Func<RelativeLayout, double> H = null)
+        {
+            self.Add(view, X.Let(), Y.Let(), W.Let(), H.Let());
+        }
 
+        /// <summary>
+        /// Add range for StackLayout
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="views"></param>
+        public static void AddRange(this IList<View> self, View[] views)
+        {
+            foreach (var view in views)
+            {
+                self.Add(view);
+            }
+        }
 
         /*
         public static void Add(this RelativeLayout.IRelativeList<View> self,

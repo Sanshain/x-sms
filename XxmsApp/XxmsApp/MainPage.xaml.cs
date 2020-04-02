@@ -37,7 +37,7 @@ namespace XxmsApp
         private void Initialize()
         {
             var rootLayout = new AbsoluteLayout();
-            var dialogs = new Piece.CustomList();
+            var dialogs = new Piece.MainList();
             rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
             Content = rootLayout;            
@@ -57,16 +57,6 @@ namespace XxmsApp
         {
             var parent = (this.Parent as NavigationPage);
             parent.Popped += MainPage_PoppedToRoot;
-        }
-
-        private async void Dialogs_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-        {            
-
-            if (e.SelectedItem == null) return;
-
-            await Navigation.PushAsync(new Views.Messages(null), true);
-
-            (sender as ListView).SelectedItem = null;
         }
 
         private void Btn_Clicked(object sender, EventArgs e)
