@@ -43,74 +43,42 @@ namespace XxmsApp.Views
         }
 
         public Messages (object obj)
-		{
+        {
             // InitializeComponent ();            
 
-            var messageViews = new StackLayout
-            {
-                Padding = new Thickness(0, 0, 0, bottomHeight)
-            };
-
-
-            if (obj.GetType() == typeof(Dialog))
-            {
-                
-                t.Start();
-                
-
-                var dialog = obj as Dialog;
-                messages = dialog.Messages;
-
-                Title = "Сообщения c " + dialog.Address;
-
-                //for (int i = 0; i < dialog.Messages.Count(); i++)
-                // var limit = 30 < messages.Count() ? 30 : messages.Count() - 1;
-                // .ToList().GetRange(0, limit)
-
-                var counter = 1;
-
-                foreach (var msg in dialog.Messages)                    
-                {                    
-                    Piece.MessageView msgView = new Piece.MessageView(msg);
-
-                    messageViews.Children.Add(msgView);
-
-                    if (++counter > limit) break;
-                }                
-
-            }
-
             RelativeLayout root = new RelativeLayout();
-            var scroll = new ScrollView
-            {
-                Content = messageViews                
-            };
-
-            root.Children.Add(scroll, 
-                Constraint.Constant(0), 
-                Constraint.Constant(0), 
-                Constraint.RelativeToParent((par) => 
+            
+            var scroll = root.Children.AddAsRelative(new ScrollView
+                {
+                    Content = FillData(obj, new StackLayout
                     {
-                        return par.Width;
-                    }),
-                Constraint.RelativeToParent((par) => 
-                    {
-                        return par.Height;      
+                        Padding = new Thickness(0, 0, 0, bottomHeight)
                     })
-            );
+                },
+                0, 0, par => par.Width, par => par.Height
+            ) as ScrollView;            
 
+
+            root.Children.AddAsRelative(BottomCreation(scroll),
+                par => 0,
+                par => par.Height - bottomHeight,
+                par => par.Width,
+                par => bottomHeight
+             );
+
+            Content = root;
+
+        }
+
+
+
+        private StackLayout BottomCreation(ScrollView scroll)
+        {
             StackLayout bottom = new StackLayout
             {
                 BackgroundColor = Color.LightGray,
                 Orientation = StackOrientation.Horizontal
             };
-            root.Children.AddAsRelative(bottom,
-                par => 0,
-                par => par.Height - 50,
-                par => par.Width,
-                par => 50
-             );
-
 
             var mess_editor = new Entry
             {
@@ -121,30 +89,21 @@ namespace XxmsApp.Views
             };
 
 
-            
+
             scroll.SizeChanged += (object sender, EventArgs e) =>
             {
-                if (scrollHeight == 0) return;
-                if (mess_editor.IsFocused == false && scroll.Margin.Bottom == 0) return;
+                if (scrollHeight == 0 || (mess_editor.IsFocused == false && scroll.Margin.Bottom == 0)) return;
 
                 var kbHeight = scrollHeight - (int)scroll.Height;
 
-                // (scroll.Content as StackLayout).Margin = new Thickness(0, 0, 0, kbHeight);
-                // (scroll.Content as StackLayout).Children.Last().Margin = new Thickness(0, 0, 0, kbHeight);
-                // (scroll.Parent as RelativeLayout).Padding = new Thickness(0, 0, 0, bottomHeight + kbHeight);
-
                 if (scroll.Margin.Bottom == 0 && mess_editor.IsFocused)
                 {
-                    scroll.Margin = new Thickness(0, 0, 0, bottomHeight); // kbHeight                    
+                    scroll.Margin = new Thickness(0, 0, 0, bottomHeight);                // kbHeight                    
                 }
-                else if (mess_editor.IsFocused == false)
-                {
-                    scroll.Margin = new Thickness(0);
-                }
-
+                else if (mess_editor.IsFocused == false) scroll.Margin = new Thickness(0);
 
                 scroll.ScrollToAsync(scroll.Children.Last(), ScrollToPosition.End, false);
-                // 
+
             };
 
 
@@ -163,8 +122,46 @@ namespace XxmsApp.Views
                 }
             });
 
-             Content = root;
+            return bottom;
+        }
 
+        private StackLayout FillData(object obj, StackLayout messageViews = null)
+        {
+
+            messageViews = messageViews ?? new StackLayout
+            {
+                Padding = new Thickness(0, 0, 0, bottomHeight)
+            };
+
+            if (obj.GetType() == typeof(Dialog))
+            {
+
+                t.Start();
+
+
+                var dialog = obj as Dialog;
+                messages = dialog.Messages;
+
+                Title = "Сообщения c " + dialog.Address;
+
+                //for (int i = 0; i < dialog.Messages.Count(); i++)
+                // var limit = 30 < messages.Count() ? 30 : messages.Count() - 1;
+                // .ToList().GetRange(0, limit)
+
+                var counter = 1;
+
+                foreach (var msg in dialog.Messages)
+                {
+                    Piece.MessageView msgView = new Piece.MessageView(msg);
+
+                    messageViews.Children.Add(msgView);
+
+                    if (++counter > limit) break;
+                }
+
+            }
+
+            return messageViews;
         }
 
         private void MessageViews_SizeChanged(object sender, EventArgs e)

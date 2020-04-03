@@ -28,7 +28,7 @@ namespace XxmsApp
         /// <param name="y">y constant</param>
         /// <param name="W">w - func</param>
         /// <param name="H">h - func</param>
-        public static void AddAsRelative(this RelativeLayout.IRelativeList<View> self,
+        public static View AddAsRelative(this RelativeLayout.IRelativeList<View> self,
             View view,
             double x = 0,
             double y = 0,
@@ -40,9 +40,11 @@ namespace XxmsApp
                 Constraint.Constant(x),
                 W != null ? Constraint.RelativeToParent(W) : null,
                 H != null ? Constraint.RelativeToParent(H) : null);
+
+            return view;
         }
 
-        public static void AddAsRelative(this RelativeLayout.IRelativeList<View> self,
+        public static View AddAsRelative(this RelativeLayout.IRelativeList<View> self,
             View view,
             Func<RelativeLayout, double> X = null,
             Func<RelativeLayout, double> Y = null,
@@ -50,6 +52,8 @@ namespace XxmsApp
             Func<RelativeLayout, double> H = null)
         {
             self.Add(view, X.Let(), Y.Let(), W.Let(), H.Let());
+
+            return view;
         }
 
         /// <summary>
