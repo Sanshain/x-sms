@@ -18,6 +18,8 @@ namespace XxmsApp.Views
         int limit = 
             (Cache.Read<Setting>().FirstOrDefault(s => s.Prop == "LazyLoad")?.Value ?? false) ? 3 : 30;                                    //! for faster dcrolling on big gialogs
         int msgsCount = 0; // log var. No production
+
+        int scrollHeight;
         int bottomHeight = 50;
 
         Stopwatch t = new Stopwatch();
@@ -35,6 +37,8 @@ namespace XxmsApp.Views
             var scroll = ((Content as RelativeLayout).Children.First() as ScrollView);
 
             scroll.ScrollToAsync(scroll.Children.Last(), ScrollToPosition.End, false);
+
+            scrollHeight = (int)scroll.Height;
 
         }
 
@@ -115,10 +119,34 @@ namespace XxmsApp.Views
                 // BackgroundColor = Color.Gray,
                 // Opacity = 1
             };
-            mess_editor.Focused += (object sender, FocusEventArgs e) =>
-            {                
+
+
+            
+            scroll.SizeChanged += (object sender, EventArgs e) =>
+            {
+                if (scrollHeight == 0) return;
+                if (mess_editor.IsFocused == false && scroll.Margin.Bottom == 0) return;
+
+                var kbHeight = scrollHeight - (int)scroll.Height;
+
+                // (scroll.Content as StackLayout).Margin = new Thickness(0, 0, 0, kbHeight);
+                // (scroll.Content as StackLayout).Children.Last().Margin = new Thickness(0, 0, 0, kbHeight);
+                // (scroll.Parent as RelativeLayout).Padding = new Thickness(0, 0, 0, bottomHeight + kbHeight);
+
+                if (scroll.Margin.Bottom == 0 && mess_editor.IsFocused)
+                {
+                    scroll.Margin = new Thickness(0, 0, 0, bottomHeight); // kbHeight                    
+                }
+                else if (mess_editor.IsFocused == false)
+                {
+                    scroll.Margin = new Thickness(0);
+                }
+
+
                 scroll.ScrollToAsync(scroll.Children.Last(), ScrollToPosition.End, false);
+                // 
             };
+
 
             var sender_button = new Button
             {
@@ -139,5 +167,9 @@ namespace XxmsApp.Views
 
         }
 
+        private void MessageViews_SizeChanged(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
