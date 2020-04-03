@@ -148,15 +148,74 @@ namespace XxmsApp.Views
                 // var limit = 30 < messages.Count() ? 30 : messages.Count() - 1;
                 // .ToList().GetRange(0, limit)
 
+
                 var counter = 1;
 
                 foreach (var msg in dialog.Messages)
                 {
-                    Piece.MessageView msgView = new Piece.MessageView(msg);
+                    Piece.MessageView msgView = new Piece.MessageView(msg)
+                    {
+                        VerticalOptions = LayoutOptions.End
+                    };
 
                     messageViews.Children.Add(msgView);
 
                     if (++counter > limit) break;
+                }
+
+                if (limit == 3)
+                {
+                    
+                    var waitingLabel = new Label
+                    {
+                        VerticalOptions = LayoutOptions.End,
+                        HorizontalOptions = LayoutOptions.Center,
+                        Margin = new Thickness(0, 10),
+                        FontSize = 20,
+                        TextColor = Color.LightGray,
+                        Text = "Подгрузка..."
+                    };
+
+                    messageViews.Children.Insert(0, waitingLabel);
+
+                    var msgs = messages.ToArray();
+
+                    Device.StartTimer(TimeSpan.FromMilliseconds(250), () =>
+                    {
+                       
+
+                            messageViews.Children.Remove(waitingLabel);             // remove label
+                        
+                            counter = Math.Min(counter + msgs.Length, 100);
+
+                            for (int i = limit-1; i < counter; i++)
+                            {
+                                Piece.MessageView msgView = new Piece.MessageView(msgs[i])
+                                {
+                                    VerticalOptions = LayoutOptions.End
+                                };
+
+                                messageViews.Children.Insert(0, msgView);
+                            }
+
+                            messageViews.Children.Insert(0, new Button
+                            {
+                                Text = "Еще"
+                            });
+
+
+                            (messageViews.Parent as ScrollView).ScrollToAsync(
+                                (messageViews.Parent as ScrollView).Children.Last(), 
+                                ScrollToPosition.End, false);
+
+                            // here event: if scroll reached to end, append new 100
+
+
+
+
+                        return false;
+                    });
+
                 }
 
             }
