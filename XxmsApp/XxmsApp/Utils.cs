@@ -69,6 +69,14 @@ namespace XxmsApp
             }
         }
 
+        public static void Extend(this IList<View> self, params View[] views)
+        {
+            foreach (var view in views)
+            {
+                self.Add(view);
+            }
+        }
+
         /*
         public static void Add(this RelativeLayout.IRelativeList<View> self,
             View view,

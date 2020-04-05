@@ -15,24 +15,25 @@ namespace XxmsApp.Views
 	public partial class Messages : ContentPage
 	{
         IEnumerable<Model.Message> messages = null;
+        Message[] msgs;
         int limit = 
             (Cache.Read<Setting>().FirstOrDefault(s => s.Prop == "LazyLoad")?.Value ?? false) ? 4 : 30;                                    //! for faster dcrolling on big gialogs
-        int msgsCount = 0; // log var. No production
+        int _msgsCount = 0; // log var. No production
         int counter = 1;
 
         int scrollHeight;
         int bottomHeight = 50;
         
 
-        Stopwatch t = new Stopwatch();
+        Stopwatch _time = new Stopwatch();
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
 
-            t.Stop();
+            _time.Stop();
 
-            msgsCount = messages.Count();
+            _msgsCount = messages.Count();
 
             // DisplayAlert($"Time of loading {msgsCount} msgs", t.ElapsedMilliseconds.ToString(), "ok");
 
@@ -57,7 +58,7 @@ namespace XxmsApp.Views
                 {
                     Content = FillData(obj, new StackLayout
                     {
-                        Padding = new Thickness(0, 50, 0, bottomHeight)
+                        Padding = new Thickness(0, 30, 0, bottomHeight)
                     })
                 },
                 0, 0, par => par.Width, par => par.Height
@@ -141,7 +142,7 @@ namespace XxmsApp.Views
             if (obj.GetType() == typeof(Dialog))
             {
 
-                t.Start();
+                _time.Start();
 
 
                 var dialog = obj as Dialog;
@@ -177,24 +178,13 @@ namespace XxmsApp.Views
         {
             {
 
-                var uploadButton = new Button
-                {
-                    VerticalOptions = LayoutOptions.End,
-                    HorizontalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 15),
-                    MinimumHeightRequest = 30,
-                    Opacity = 0.7,
-                    FontSize = 15,
-                    // TextColor = Color.LightGray,
-                    Text = "Еще"
-                };
-
                 var uploadLabel = new Label
                 {
                     VerticalOptions = LayoutOptions.End,
-                    HorizontalOptions = LayoutOptions.Center,
-                    Margin = new Thickness(0, 10),
-                    MinimumHeightRequest = 30,
+                    // HorizontalOptions = LayoutOptions.CenterAndExpand,
+                    Margin = new Thickness(0, 10, 0, 0),
+                    // MinimumHeightRequest = 30,
+                    IsVisible = false,
                     Opacity = 0.7,
                     FontSize = 20,
                     TextColor = Color.LightGray,
@@ -202,90 +192,105 @@ namespace XxmsApp.Views
                 };
 
                 (messageViews.Parent.Parent as RelativeLayout).Children.AddAsRelative(
-                    uploadButton,
-                    par => (par.Width - uploadButton.Width) / 2,
-                    par => 5);
+                    uploadLabel,
+                    par => (par.Width - uploadLabel.Width) / 2,
+                    par => 5);///*/
 
                 messageViews.Children.Insert(0, new Label
                 {
                     VerticalOptions = LayoutOptions.EndAndExpand
                 });
 
-                var msgs = messages.ToArray();
+                msgs = messages.ToArray();
+
+
+
+                
+                Action<double> upload_messages = (scrolly) =>
+                {
+                    /*
+                    bool flagOpacity = true;                                    /// slow uploadLabel hidding
+                    Device.StartTimer(TimeSpan.FromMilliseconds(25), () =>
+                    {
+                        if (uploadLabel.Opacity > 0.05) uploadLabel.Opacity -= 0.05;
+                        else
+                        {
+                            flagOpacity = false;
+                            uploadLabel.IsVisible = false;
+                        }                        
+
+                        return flagOpacity;
+                    });//*/
+
+                    Device.StartTimer(TimeSpan.FromMilliseconds(250), () =>
+                    {
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            counter = UploadMessages(messageViews, counter);
+
+
+                            var len = ((messageViews.Parent as ScrollView).Content as StackLayout).Children.Count;
+
+                            (messageViews.Parent as ScrollView).ScrollToAsync(
+                                ((messageViews.Parent as ScrollView).Content as StackLayout).Children[len - 2],
+                                ScrollToPosition.MakeVisible, false);//*/
+                        
+                            // scrolly = ((messageViews.Parent as ScrollView).Content as StackLayout).Height - scrolly;
+                            // (messageViews.Parent as ScrollView).ScrollToAsync(0, scrolly, false);
+
+                            uploadLabel.IsVisible = false;
+                            
+                        });
+
+                        return false;
+                    });
+
+
+                };
 
                 (messageViews.Parent as ScrollView).Scrolled += (object sen, ScrolledEventArgs ev) =>
                 {
                     // var scroll = sender as ScrollView;
                     // double scrollingSpace = scroll.ContentSize.Height - scroll.Height;
-                    if (ev.ScrollY == 0)
-                    {
-                        uploadButton.Opacity = 0.7;
-                        uploadButton.IsVisible = true;
+
+
+                    uploadLabel.IsVisible = ev.ScrollY <= 20;
+
+                    if (ev.ScrollY <= 0)
+                    {                        
+                        upload_messages(ev.ScrollY);
                     }
-                    else if (ev.ScrollY < 0)
-                    {
-                        uploadButton.IsVisible = false;
-                    }
-                    else uploadButton.IsVisible = false;
+                    
                 };
 
-                var upload_messages = new EventHandler((object sender, EventArgs e) =>
-                {
-                    bool flagOpacity = true;
-                    Device.StartTimer(TimeSpan.FromMilliseconds(25), () =>
-                    {
-                        if (uploadButton.Opacity > 0.05) uploadButton.Opacity -= 0.05;
-                        else
-                        {
-                            flagOpacity = false;
-                            uploadButton.IsVisible = false;
-                        }                            
-
-                        return flagOpacity;
-                    });
-
-
-
-                    counter = Math.Min(msgs.Length, counter + 100);
-
-                    for (int i = limit - 1; i < counter; i++)
-                    {
-                        Piece.MessageView msgView = new Piece.MessageView(msgs[i])
-                        {
-                            VerticalOptions = LayoutOptions.End
-                        };
-
-                        messageViews.Children.Insert(1, msgView);
-                    }
-
-                    (messageViews.Parent as ScrollView).ScrollToAsync(
-                        (messageViews.Parent as ScrollView).Children.Last(),
-                        ScrollToPosition.End, false);
-
-
-
-                });
-
-                uploadButton.Clicked += upload_messages;
+                // uploadButton.Clicked += upload_messages;
 
             }
 
             return counter;
         }
 
-        private void Messages_Scrolled(object sender, ScrolledEventArgs e)
+        private int UploadMessages(StackLayout messageViews, int counter)
         {
-            throw new NotImplementedException();
+
+            counter = Math.Min(msgs.Length, counter + 100);         // messages uploading
+
+            for (int i = limit - 1; i < counter; i++)
+            {
+                Piece.MessageView msgView = new Piece.MessageView(msgs[i])
+                {
+                    VerticalOptions = LayoutOptions.End,
+                    // IsVisible = false
+                };
+
+                messageViews.Children.Insert(1, msgView);
+            }
+
+
+            return counter;
         }
 
-        private void WaitingLabel_Clicked(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
-        private void MessageViews_SizeChanged(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

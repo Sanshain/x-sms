@@ -48,7 +48,7 @@ namespace XxmsApp.Piece
         {
             if (e.SelectedItem == null) return;
 
-            var msgView = new Views.Messages(e.SelectedItem);
+            var msgView = new Views.MessagesPage(e.SelectedItem);
 
             await Navigation.PushAsync(msgView, false);
 
