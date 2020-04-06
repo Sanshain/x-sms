@@ -17,6 +17,9 @@ namespace XxmsApp.Views
 
         int bottomHeight = 50;
         int scrollHeight;
+        ListView messagesList;
+        Button sender_button;
+        Dialog dialog;
 
         public MessagesPage(object source)
         {
@@ -29,25 +32,59 @@ namespace XxmsApp.Views
             };
             Content = root;
 
-            var messagesList = new ListView
+            messagesList = new ListView
             {
                 ItemTemplate = new DataTemplate(this.CellInitialize),
                 HasUnevenRows = true,
-                Margin = new Thickness(0, 0, 0, bottomHeight)
+                Margin = new Thickness(0, 0, 0, bottomHeight),
+                SeparatorVisibility = SeparatorVisibility.None,
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                BackgroundColor = Color.LightSkyBlue
             };
 
-
+            
 
             if (source.GetType() == typeof(Dialog))
             {
 
-                var dialog = source as Dialog;
+                dialog = source as Dialog;
 
                 this.Title = "Сообщения c " + dialog.Address;
 
                 messagesList.ItemsSource = dialog.Messages.ToArray();
 
             }
+
+            /*
+            var msgsContainer = new Grid
+            {
+                BackgroundColor = Color.LightGreen,
+                VerticalOptions = LayoutOptions.FillAndExpand
+            };
+            msgsContainer.RowDefinitions = new RowDefinitionCollection
+            {
+                new RowDefinition { Height = GridLength.Star },
+                new RowDefinition { Height = GridLength.Auto }
+            };
+            msgsContainer.Children.Add(new BoxView
+            {
+                BackgroundColor = Color.Red,
+                VerticalOptions = LayoutOptions.StartAndExpand
+            }, 0, 0);
+            msgsContainer.Children.Add(messagesList, 0, 1);//*/
+
+            
+            var messagesContainer = new StackLayout
+            {
+                BackgroundColor = Color.LightGreen,
+                VerticalOptions = LayoutOptions.FillAndExpand
+
+            }.AddChilds(messagesList, new BoxView {
+                BackgroundColor = Color.Red,
+                IsVisible = false,
+                VerticalOptions = LayoutOptions.EndAndExpand
+            });//*/
+            
 
             root.Children.AddAsRelative(messagesList, 0, 0, p => p.Width, p => p.Height);
             root.Children.AddAsRelative(BottomCreation(),
@@ -61,12 +98,16 @@ namespace XxmsApp.Views
 
         private ViewCell CellInitialize()
         {
+
+            // var grid = new Grid
+
             var view = new StackLayout
             {
                 Orientation = StackOrientation.Vertical,
-                Padding = new Thickness(15, 0, 0, 0)
+                Padding = new Thickness(15, 0, 0, 0),
+                
             };
-
+            view.SizeChanged += View_SizeChanged;
 
             Label time = new Label { HorizontalOptions = LayoutOptions.Start };
             Label content = new Label
@@ -94,19 +135,67 @@ namespace XxmsApp.Views
             return viewCell;
         }
 
+        int count = 0;
+        bool inited = false;
+        double totalHeihght = 0;
+        private void View_SizeChanged(object sender, EventArgs e)
+        {
+            if (inited) return;
+
+            var item = (sender as StackLayout);
+            
+            var cellHeight = item.Height + item.Spacing * 2;
+            totalHeihght += cellHeight;
+
+            var cnt = (messagesList.ItemsSource as IEnumerable<Message>).Count();
+
+
+            if (++count == cnt)
+            {                
+                inited = true;
+
+                totalHeihght = totalHeihght + messagesList.Margin.Bottom * (count > 1 ? 2 : 1);
+
+                var containerHeight = (messagesList.Parent as Layout).Height;
+                if (totalHeihght + messagesList.Margin.Bottom *2 < containerHeight)
+                {
+                    messagesList.VerticalOptions = LayoutOptions.End;
+                }
+
+                /*
+                var containerHeight = (messagesList.Parent as StackLayout).Height;
+                messagesList.VerticalOptions = totalHeihght < containerHeight 
+                    ? LayoutOptions.End 
+                    : LayoutOptions.FillAndExpand;//*/
+
+                messagesList.HeightRequest = totalHeihght;
+                count = 0;
+                totalHeihght = 0;
+            }
+
+            sender_button.Text = count.ToString();
+        }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
 
-            var scroll = (this.Content as RelativeLayout).Children.First() as ListView;
+            var scroll = messagesList;
+            // ((this.Content as RelativeLayout).Children.First() as StackLayout).Children.First() as ListView;
 
             var msgs = (Message[])scroll.ItemsSource;
 
             scroll.ScrollTo(msgs.Last(), ScrollToPosition.End, false);            
 
             scrollHeight = (int)scroll.Height; // for kb height calculate
-            
+
+            /*
+            scroll.Header = new BoxView
+            {
+                VerticalOptions = LayoutOptions.StartAndExpand,
+                HeightRequest = scroll.Height
+            };//*/
+
         }
 
 
@@ -125,28 +214,82 @@ namespace XxmsApp.Views
             };
 
 
-            var scroll = (this.Content as RelativeLayout).Children.First() as ListView;
+            var listView = messagesList;
+            //  ((this.Content as RelativeLayout).Children.First() as StackLayout).Children.First() as ListView;
 
-            /*
-            scroll.SizeChanged += (object sender, EventArgs e) =>
+            
+            listView.SizeChanged += (object sender, EventArgs e) =>
             {
-                if (scrollHeight == 0 || (mess_editor.IsFocused == false && scroll.Margin.Bottom == 0)) return;
-
-                var kbHeight = scrollHeight - (int)scroll.Height;
-
-                if (scroll.Margin.Bottom == 0 && mess_editor.IsFocused)
+                if (scrollHeight == 0)
                 {
-                    scroll.Margin = new Thickness(0, 0, 0, bottomHeight);                // kbHeight                    
+                    return;
                 }
-                else if (mess_editor.IsFocused == false) scroll.Margin = new Thickness(0);
 
-                scroll.ScrollTo((scroll.ItemsSource as IEnumerable<Message>).Last(), ScrollToPosition.End, false);
+                if (mess_editor.IsFocused == false && listView.Margin.Bottom == 0)
+                {
+                    return;
+                }
+
+                var kbHeight = scrollHeight - (int)listView.Height;
+
+                if (kbHeight > 0)
+                {
+                    
+
+                    var el = dialog.Messages.First();
+                    var el2 = dialog.Messages.Last();
+                    listView.ScrollTo(el , ScrollToPosition.Start, false);
+                }
+                else
+                {
+                    
+                }
+               
+                /*
+                if (listView.Header != null && mess_editor.IsFocused)
+                {
+                    listView.Header = null;
+
+                }
+                else if (!mess_editor.IsFocused)
+                {
+                    listView.Header = new BoxView
+                    {
+                        VerticalOptions = LayoutOptions.StartAndExpand,
+                        HeightRequest = listView.Height
+                    };
+
+                    listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).First(), ScrollToPosition.MakeVisible, false);
+                }//*/
+
+                
+
+
+
+
+                /*
+                if (listView.Margin.Bottom == bottomHeight && mess_editor.IsFocused)                          // scroll.Margin.Bottom == 0 && 
+                {
+                    listView.Margin = new Thickness(0, 0, 0, kbHeight);
+
+                    listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).Last(), ScrollToPosition.End, false);
+                }
+                else if (mess_editor.IsFocused == false)
+                {
+                    // listView.Footer = null;
+
+                    listView.Margin = new Thickness(0, 0, 0, bottomHeight);
+
+                    listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).Last(), ScrollToPosition.End, false);
+                }//*/
+
+
             };//*/
 
 
-            var sender_button = new Button
+            sender_button = new Button
             {
-                Text = ">",
+                Text = "Send",
                 HorizontalOptions = LayoutOptions.End
             };
 

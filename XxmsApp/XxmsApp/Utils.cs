@@ -77,6 +77,16 @@ namespace XxmsApp
             }
         }
 
+        public static StackLayout AddChilds(this StackLayout self, params View[] views)
+        {
+            foreach (var view in views)
+            {
+                self.Children.Add(view);
+            }
+
+            return self;
+        }
+
         /*
         public static void Add(this RelativeLayout.IRelativeList<View> self,
             View view,
