@@ -23,16 +23,10 @@ namespace XxmsApp.Views
 
         public MessagesPage(object source)
         {
-            // InitializeComponent ();
-
-
-            var root = new RelativeLayout()
-            {
-                
-            };
+            var root = new RelativeLayout(){ };
             Content = root;
 
-            messagesList = new ListView
+            root.Children.AddAsRelative(messagesList = new ListView
             {
                 ItemTemplate = new DataTemplate(this.CellInitialize),
                 HasUnevenRows = true,
@@ -40,41 +34,23 @@ namespace XxmsApp.Views
                 SeparatorVisibility = SeparatorVisibility.None,
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 BackgroundColor = Color.LightSkyBlue
-            };
 
-            
-
-            if (source.GetType() == typeof(Dialog))
-            {
-
-                dialog = source as Dialog;
-
-                this.Title = "Сообщения c " + dialog.Address;
-
-                messagesList.ItemsSource = dialog.Messages.ToArray();
-
-            }
-
-            
-            var messagesContainer = new StackLayout
-            {
-                BackgroundColor = Color.LightGreen,
-                VerticalOptions = LayoutOptions.FillAndExpand
-
-            }.AddChilds(messagesList, new BoxView {
-                BackgroundColor = Color.Red,
-                IsVisible = false,
-                VerticalOptions = LayoutOptions.EndAndExpand
-            });//*/
-            
-
-            root.Children.AddAsRelative(messagesList, 0, 0, p => p.Width, p => p.Height);
+            }, 0, 0, p => p.Width, p => p.Height);
             root.Children.AddAsRelative(BottomCreation(),
                 p => 0,
                 p => p.Height - bottomHeight,
                 p => p.Width,
                 p => bottomHeight);
-            
+
+
+            if (source.GetType() == typeof(Dialog))
+            {
+                dialog = source as Dialog;
+
+                this.Title = "Сообщения c " + dialog.Address;
+
+                messagesList.ItemsSource = dialog.Messages.ToArray();
+            }
 
         }
 
@@ -115,6 +91,8 @@ namespace XxmsApp.Views
             return viewCell;
         }
 
+
+
         int count = 0;
         bool inited = false;
         double totalHeihght = 0;
@@ -147,18 +125,12 @@ namespace XxmsApp.Views
                     messagesList.VerticalOptions = LayoutOptions.End;
                 }
 
-                /*
-                var containerHeight = (messagesList.Parent as StackLayout).Height;
-                messagesList.VerticalOptions = totalHeihght < containerHeight 
-                    ? LayoutOptions.End 
-                    : LayoutOptions.FillAndExpand;//*/
-
                 messagesList.HeightRequest = totalHeihght;
                 count = 0;
                 totalHeihght = 0;
             }
 
-            sender_button.Text = count.ToString();
+            // sender_button.Text = count.ToString();
         }
 
 
@@ -175,15 +147,7 @@ namespace XxmsApp.Views
 
             scrollHeight = (int)scroll.Height; // for kb height calculate
 
-            /*
-            scroll.Header = new BoxView
-            {
-                VerticalOptions = LayoutOptions.StartAndExpand,
-                HeightRequest = scroll.Height
-            };//*/
-
         }
-
 
         private StackLayout BottomCreation()
         {
@@ -206,42 +170,9 @@ namespace XxmsApp.Views
             
             listView.SizeChanged += (object sender, EventArgs e) =>
             {
-                if (scrollHeight == 0)
-                {
-                    return;
-                }
 
-                if (mess_editor.IsFocused == false && listView.Margin.Bottom == 0)
-                {
-                    return;
-                }
-
-                var kbHeight = scrollHeight - (int)listView.Height;
-
-                if (kbHeight > 0)
-                {
-                    
-                }
-
-                /*
-                if (listView.Header != null && mess_editor.IsFocused)
-                {
-                    listView.Header = null;
-
-                }
-                else if (!mess_editor.IsFocused)
-                {
-                    listView.Header = new BoxView
-                    {
-                        VerticalOptions = LayoutOptions.StartAndExpand,
-                        HeightRequest = listView.Height
-                    };
-
-                    listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).First(), ScrollToPosition.MakeVisible, false);
-                }//*/
-
-
-
+                if (scrollHeight == 0 || (mess_editor.IsFocused == false && listView.Margin.Bottom == 0)) return;
+                if (scrollHeight - (int)listView.Height > 0) { var kbHeight = scrollHeight - (int)listView.Height; }
 
                 Device.StartTimer(TimeSpan.FromMilliseconds(200), () => {
 
@@ -254,8 +185,7 @@ namespace XxmsApp.Views
                     return false;
                 });
 
-
-            };//*/
+            };
 
 
             sender_button = new Button
