@@ -55,24 +55,6 @@ namespace XxmsApp.Views
 
             }
 
-            /*
-            var msgsContainer = new Grid
-            {
-                BackgroundColor = Color.LightGreen,
-                VerticalOptions = LayoutOptions.FillAndExpand
-            };
-            msgsContainer.RowDefinitions = new RowDefinitionCollection
-            {
-                new RowDefinition { Height = GridLength.Star },
-                new RowDefinition { Height = GridLength.Auto }
-            };
-            msgsContainer.Children.Add(new BoxView
-            {
-                BackgroundColor = Color.Red,
-                VerticalOptions = LayoutOptions.StartAndExpand
-            }, 0, 0);
-            msgsContainer.Children.Add(messagesList, 0, 1);//*/
-
             
             var messagesContainer = new StackLayout
             {
@@ -98,8 +80,6 @@ namespace XxmsApp.Views
 
         private ViewCell CellInitialize()
         {
-
-            // var grid = new Grid
 
             var view = new StackLayout
             {
@@ -138,6 +118,11 @@ namespace XxmsApp.Views
         int count = 0;
         bool inited = false;
         double totalHeihght = 0;
+        /// <summary>
+        /// for press less dialogs to bottom
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void View_SizeChanged(object sender, EventArgs e)
         {
             if (inited) return;
@@ -175,6 +160,7 @@ namespace XxmsApp.Views
 
             sender_button.Text = count.ToString();
         }
+
 
         protected override void OnAppearing()
         {
@@ -235,16 +221,8 @@ namespace XxmsApp.Views
                 if (kbHeight > 0)
                 {
                     
+                }
 
-                    var el = dialog.Messages.First();
-                    var el2 = dialog.Messages.Last();
-                    listView.ScrollTo(el , ScrollToPosition.Start, false);
-                }
-                else
-                {
-                    
-                }
-               
                 /*
                 if (listView.Header != null && mess_editor.IsFocused)
                 {
@@ -262,26 +240,19 @@ namespace XxmsApp.Views
                     listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).First(), ScrollToPosition.MakeVisible, false);
                 }//*/
 
-                
 
 
 
+                Device.StartTimer(TimeSpan.FromMilliseconds(200), () => {
 
-                /*
-                if (listView.Margin.Bottom == bottomHeight && mess_editor.IsFocused)                          // scroll.Margin.Bottom == 0 && 
-                {
-                    listView.Margin = new Thickness(0, 0, 0, kbHeight);
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        var last = (listView.ItemsSource as IEnumerable<Message>).Last();
+                        listView.ScrollTo(last, ScrollToPosition.End, false);
+                    });
 
-                    listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).Last(), ScrollToPosition.End, false);
-                }
-                else if (mess_editor.IsFocused == false)
-                {
-                    // listView.Footer = null;
-
-                    listView.Margin = new Thickness(0, 0, 0, bottomHeight);
-
-                    listView.ScrollTo((listView.ItemsSource as IEnumerable<Message>).Last(), ScrollToPosition.End, false);
-                }//*/
+                    return false;
+                });
 
 
             };//*/
