@@ -72,16 +72,11 @@ namespace XxmsApp.Views
         async private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-            {
+            {                
+
                 var msg = e.NewItems[0] as Message;
 
-                var smsMessenger = CrossMessaging.Current.SmsMessenger;
 
-                var b = await DisplayAlert("Are you shure?", "?", "Yes", "Cancel");
-                if (b)
-                    if (smsMessenger.CanSendSms) smsMessenger.SendSms(msg.Address, msg.Value);
-                    else
-                        DisplayAlert("Notify", "You have no permission", "Ok");
             }
         }
 
@@ -260,6 +255,15 @@ namespace XxmsApp.Views
 
             if (!string.IsNullOrWhiteSpace(editor.Text))
             {
+                // messagesList.VerticalOptions = LayoutOptions.FillAndExpand;
+
+                if (messagesList.HeightRequest > 0)
+                {
+                    inited = false;
+                    count = dialog.Messages.Count;
+                    totalHeihght = messagesList.HeightRequest - messagesList.Margin.Bottom;
+                }
+
                 dialog.CreateMessage(dialog.Address, editor.Text);
 
                 // messagesList.ItemsSource = null;
