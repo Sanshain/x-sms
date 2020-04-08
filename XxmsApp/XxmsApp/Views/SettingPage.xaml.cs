@@ -68,13 +68,23 @@ namespace XxmsApp.Views
                 
             });
 
-            
+            Button reset;
             var SettingList = new ListView()
             {
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 // ItemsSource = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
+                Footer = reset = new Button { Text = "Сброс настроек" },
                 ItemsSource = settings = Settings.Initialize()
+
+            };
+            reset.Clicked += async (object sender, EventArgs e) =>
+            {
+                
+                if (await DisplayAlert($"Сброс настроек", "Настройки Xxms будут сброшены на заводские", "Ладно", "Отмена"))
+                {
+                    Cache.database.DropTable<Model.Setting>();
+                }
             };
 
 
@@ -87,6 +97,7 @@ namespace XxmsApp.Views
             // Properties.Resources.Culture
 
         }
+
 
         protected override void OnAppearing()
         {
@@ -102,14 +113,6 @@ namespace XxmsApp.Views
             Cache.database.Update((sender as Settings)[e.Id]);
         }
 
-
-        /* just for CellView. Not for SwitchView!
-        private void Swtch_Toggled(object sender, ToggledEventArgs e)
-        {
-            var setting = (((sender as Switch).Parent as StackLayout).Children.First() as Label).BindingContext;
-            (setting as Model.Setting).Value = e.Value;
-            
-        }//*/
 
         async void SettingList_ItemTapped(object sender, ItemTappedEventArgs e)
         {

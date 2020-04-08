@@ -30,7 +30,6 @@ namespace XxmsApp
                     "Настройки",
                     "Read sms",
                     "О нас",
-                    "Сбросить настройки"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
             };
@@ -108,13 +107,6 @@ namespace XxmsApp
 
                     break;
 
-                case "Сбросить настройки":
-
-                    Cache.database.DropTable<Model.Setting>();
-
-                    DisplayAlert($"Настройки сброшены", "Перезапустите программу", "Ok");
-
-                    break;
                 default:
 
                     bool r = await DisplayAlert("Start read?", e.SelectedItem.ToString(), "Ok", "No");
