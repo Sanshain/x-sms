@@ -18,8 +18,9 @@ namespace XxmsApp.Model
         bool  _value;
 
         [PrimaryKey]
-        public string Prop { get; set; }
-        public string Desc { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string FullDescription { get; set; }
         public bool Value { get => _value; set 
             {
                 _value = value;
@@ -39,8 +40,6 @@ namespace XxmsApp.Model
 
 
         private event PropertyChangedEventHandler propertyChanged;
-
-
         public event PropertyChangedEventHandler PropertyChanged
         {
             add => propertyChanged += value;
@@ -54,15 +53,15 @@ namespace XxmsApp.Model
         public static implicit operator Setting((string Name, string Value, string Desc) setting)
         {
             return new Setting {
-                Prop = setting.Name,
+                Name = setting.Name,
                 Value = bool.Parse(setting.Value),
-                Desc = setting.Desc
+                Description = setting.Desc
             };
         }
 
         public static implicit operator Setting((string Name, bool Value, string Desc) setting) //
         {
-            return new Setting { Prop = setting.Name, Value = setting.Value, Desc = setting.Desc }; // 
+            return new Setting { Name = setting.Name, Value = setting.Value, Description = setting.Desc }; // 
         }
 
 
@@ -110,40 +109,118 @@ namespace XxmsApp
     public class Settings : List<Setting>//, INotifyCollectionChanged // , IEnumerable<Setting>
     {
 
+
         int _initialized = 0;
 
         public Settings(IEnumerable<Setting> _items) : base(_items) { }
         // public Settings() { }
         // public Settings(IEnumerable<Setting> _items) => Units = new ObservableCollection<Setting>(_items);        
         // public ObservableCollection<Model.Setting> Units { get; set; } = new ObservableCollection<Setting>();
+        
+
+
+        
+        
+        static Dictionary<string, bool> sttngs = new Dictionary<string, bool>();
+        [Description("Краткое описание, полное описание")]
+        public static bool AutoFocus
+        {
+            get
+            {
+                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
+                if (sttngs.ContainsKey(name)) return sttngs[name];
+                else
+                {
+                    return sttngs[name] = false;
+                }
+            }
+            set
+            {
+                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
+                if (sttngs.ContainsKey(name)) sttngs[name] = value;
+                else
+                {
+                    sttngs.Add(name, value);
+                }
+            }
+        }
+
+        [Description("Краткое описание, полное описание")]
+        public static bool AutoFocus2
+        {
+            get
+            {
+                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
+                return Cache.Read<Setting>().FirstOrDefault(s => s.Name == name)?.Value ?? false;
+            }
+            set
+            {
+                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
+                Cache.Read<Setting>().SingleOrDefault(s => s.Name == name).Value = value;
+            }
+        }
+
+        private static List<Setting> ConvertToList()
+        {
+            var props = typeof(Settings).GetProperties(BindingFlags.Static | BindingFlags.Public);
+
+            var stgs = props.Select(p =>
+            {
+                return new Setting
+                {
+                    Name = p.Name,
+                    Description = p.GetCustomAttribute<DescriptionAttribute>().Description,
+                    Value = (bool)p.GetValue(null)
+                };
+            }).ToList();
+
+            foreach (var prop in props)
+            {
+                var desc = prop.GetCustomAttribute<DescriptionAttribute>().Description;
+            }
+
+            return stgs;
+        }
+
+        private static void ReadToDict()
+        {
+            sttngs = Cache.Read<Setting>().ToDictionary(s => s.Name, s => s.Value);
+        }
+        //*/
+
 
 
         public static Settings Initialize()
         {
+            // PropertiesToList();
+
+
+            // ReadToDict();
+
 
             // var settings = new Settings { Units = new ObservableCollection<Setting>(Read()) };
             var settings = new Settings(Cache.Read<Setting>());  // Read()                  // for save time
 
             if (settings.Count() == 0)
             {
-                settings = new Settings(new List<Setting>
+                settings = new Settings(new List<Setting> // ConvertToList()
                 {
                     (
-                        Name : "Автофокус", 
-                        Value : true, 
+                        Name : "Автофокус",
+                        Value : true,
                         Desc : "Автофокус поля для ввода сообщения при выборе контакта"),
                     (
-                        Name : "Вид диалога", 
+                        Name : "Вид диалога",
                         Value : true,
                         Desc : "Если выключен, то основной список будет показывать список сообщений"),
-                    (   
-                        Name : "LazyLoad", 
+                    (
+                        Name : "LazyLoad",
                         Value : true,
                         Desc : "Ленивая подгрузка сообщений при открытии диалога")
                 });
 
                 Save(settings.ToArray());
-            }            
+            }
 
             foreach (Setting setting in settings)
             {
@@ -152,6 +229,8 @@ namespace XxmsApp
 
             return settings;
         }
+
+
 
         public delegate void CollectionChangedEventHandler(object sender, CollectionChangedEventArgs<Setting> e);
 

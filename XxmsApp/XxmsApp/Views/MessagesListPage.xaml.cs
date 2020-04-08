@@ -32,8 +32,8 @@ namespace XxmsApp.Views
                 HasUnevenRows = true,
                 Margin = new Thickness(0, 0, 0, bottomHeight),
                 SeparatorVisibility = SeparatorVisibility.None,
-                VerticalOptions = LayoutOptions.FillAndExpand,
-                BackgroundColor = Color.LightSkyBlue
+                VerticalOptions = LayoutOptions.FillAndExpand
+                // BackgroundColor = Color.LightSkyBlue
 
             }, 0, 0, p => p.Width, p => p.Height);
             root.Children.AddAsRelative(BottomCreation(),
@@ -47,12 +47,26 @@ namespace XxmsApp.Views
             {
                 dialog = source as Dialog;
 
+
                 this.Title = "Сообщения c " + dialog.Address;
 
-                messagesList.ItemsSource = dialog.Messages.ToArray();
+                /*
+                var bind = new Binding()
+                {
+                    Mode = BindingMode.Default,
+                    Source = dialog,
+                    Path = "Messages"
+                };
+
+                messagesList.SetBinding(ListView.ItemsSourceProperty, bind); // "Messages" */
+
+                messagesList.SetValue(ListView.ItemsSourceProperty, dialog.Messages);
+
+                // messagesList.ItemsSource = dialog.Messages;
             }
 
         }
+
 
         private ViewCell CellInitialize()
         {
@@ -60,8 +74,7 @@ namespace XxmsApp.Views
             var view = new StackLayout
             {
                 Orientation = StackOrientation.Vertical,
-                Padding = new Thickness(15, 0, 0, 0),
-                
+                Padding = new Thickness(15, 0, 0, 0)                
             };
             view.SizeChanged += View_SizeChanged;
 
@@ -79,12 +92,18 @@ namespace XxmsApp.Views
             var messageView = new Frame
             {
                 Content = view,
-                Margin = new Thickness(10),
+                // Margin = new Thickness(10, 10, 45, 10),
                 HasShadow = true,
                 OutlineColor = Color.Red,             // material design
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
             };
+
+            
+            messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, new BoolToMarginConverter());
+            /* System.Linq.Expressions.Expression<Func<Message, Thickness>> alignment = 
+                m => (m as Message).Incoming ? new Thickness(10, 10, 45, 10) : new Thickness(10, 10, 45, 10);*/
+           
 
             var viewCell = new ViewCell { View = messageView };
 
@@ -141,9 +160,9 @@ namespace XxmsApp.Views
             var scroll = messagesList;
             // ((this.Content as RelativeLayout).Children.First() as StackLayout).Children.First() as ListView;
 
-            var msgs = (Message[])scroll.ItemsSource;
+            var msgs = scroll.ItemsSource as IEnumerable<Message>;
 
-            scroll.ScrollTo(msgs.Last(), ScrollToPosition.End, false);            
+            if (msgs != null) scroll.ScrollTo(msgs.Last(), ScrollToPosition.End, false);            
 
             scrollHeight = (int)scroll.Height; // for kb height calculate
 
@@ -160,6 +179,7 @@ namespace XxmsApp.Views
             var mess_editor = new Entry
             {
                 Placeholder = "Введите сообщение",
+                Margin = new Thickness(10, 0, 0, 0),
                 HorizontalOptions = LayoutOptions.FillAndExpand
             };
 
@@ -193,6 +213,7 @@ namespace XxmsApp.Views
                 Text = "Send",
                 HorizontalOptions = LayoutOptions.End
             };
+            sender_button.Clicked += Sender_button_Clicked;
 
             bottom.Children.AddRange(new View[] { mess_editor,
                 new Frame(){
@@ -206,5 +227,24 @@ namespace XxmsApp.Views
             return bottom;
         }
 
+        private void Sender_button_Clicked(object sender, EventArgs e)
+        {
+            var bottom = ((sender as Button).Parent.Parent as StackLayout);
+            var editor = bottom.Children.OfType<Entry>().SingleOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(editor.Text))
+            {
+                dialog.CreateMessage(dialog.Address, editor.Text);
+
+                // messagesList.ItemsSource = null;
+                // messagesList.ItemsSource = dialog.Messages;
+
+                // messagesList.SetValue(ListView.ItemsSourceProperty, dialog.Messages);
+
+                DisplayAlert(dialog.Messages.GetType().Name, "type", "ok");
+            }
+
+
+        }
     }
 }

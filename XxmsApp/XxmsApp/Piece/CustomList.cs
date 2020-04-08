@@ -32,7 +32,7 @@ namespace XxmsApp.Piece
             {
                 ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
                     Address = g.Key,
-                    Messages = g.Select(m => m)                          // .ToArray()
+                    Messages = new ObservableCollection<Message>(g)
                 } );
 
             } else ItemsSource = this.DataLoad(30);                         // else

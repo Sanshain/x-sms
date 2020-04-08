@@ -121,7 +121,7 @@ namespace XxmsApp.Views
 
             var setting = (((ListView)sender).SelectedItem as Model.Setting);
 
-            await DisplayAlert("Описание", setting.Desc, "OK");
+            await DisplayAlert("Описание", setting.Description, "OK");
 
             //Deselect Item
             ((ListView)sender).SelectedItem = null;
