@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Plugin.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,12 +62,28 @@ namespace XxmsApp.Views
                 messagesList.SetBinding(ListView.ItemsSourceProperty, bind); // "Messages" */
 
                 messagesList.SetValue(ListView.ItemsSourceProperty, dialog.Messages);
+                dialog.Messages.CollectionChanged += Messages_CollectionChanged;
 
                 // messagesList.ItemsSource = dialog.Messages;
             }
 
         }
 
+        async private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                var msg = e.NewItems[0] as Message;
+
+                var smsMessenger = CrossMessaging.Current.SmsMessenger;
+
+                var b = await DisplayAlert("Are you shure?", "?", "Yes", "Cancel");
+                if (b)
+                    if (smsMessenger.CanSendSms) smsMessenger.SendSms(msg.Address, msg.Value);
+                    else
+                        DisplayAlert("Notify", "You have no permission", "Ok");
+            }
+        }
 
         private ViewCell CellInitialize()
         {
@@ -81,7 +98,7 @@ namespace XxmsApp.Views
             Label time = new Label { HorizontalOptions = LayoutOptions.Start };
             Label content = new Label
             {
-                HorizontalOptions = LayoutOptions.CenterAndExpand,
+                HorizontalOptions = LayoutOptions.StartAndExpand,
             };
 
             time.SetBinding(Label.TextProperty, "Time");
@@ -92,8 +109,7 @@ namespace XxmsApp.Views
             var messageView = new Frame
             {
                 Content = view,
-                // Margin = new Thickness(10, 10, 45, 10),
-                HasShadow = true,
+                HasShadow = true,                
                 OutlineColor = Color.Red,             // material design
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
@@ -101,9 +117,19 @@ namespace XxmsApp.Views
 
             
             messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, new BoolToMarginConverter());
-            /* System.Linq.Expressions.Expression<Func<Message, Thickness>> alignment = 
-                m => (m as Message).Incoming ? new Thickness(10, 10, 45, 10) : new Thickness(10, 10, 45, 10);*/
-           
+
+            /* System.Linq.Expressions.Expression<Func<Message, object>> colored =
+                m => m.IsValid.Value ? Color.Transparent : Color.LightBlue;
+            messageView.SetBinding(Frame.BackgroundColorProperty, colored);//*/
+
+            /* 
+            System.Linq.Expressions.Expression<Func<Message, Thickness>> alignment = 
+                m => (m as Message).Incoming ? new Thickness(10, 10, 45, 10) : new Thickness(10, 10, 45, 10);
+            messageView.SetBinding(Frame.MarginProperty, alignment, BindingMode.OneWay);
+
+            BackgroundColor = Color.LightCyan,
+             */
+
 
             var viewCell = new ViewCell { View = messageView };
 
@@ -241,7 +267,9 @@ namespace XxmsApp.Views
 
                 // messagesList.SetValue(ListView.ItemsSourceProperty, dialog.Messages);
 
-                DisplayAlert(dialog.Messages.GetType().Name, "type", "ok");
+                // DisplayAlert(dialog.Messages.GetType().Name, "type", "ok");
+
+                editor.Text = "";
             }
 
 

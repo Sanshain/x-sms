@@ -48,36 +48,67 @@ namespace XxmsApp.Model
     }
 
     [Table("Messages")]
-    public class Message : IModel
+    public class Message : IModel, INotifyPropertyChanged
     {
-        public bool IsActual => true;
+        
 
         public Message() { }
+        /// <summary>
+        /// Constructor for outgoing sms
+        /// </summary>
+        /// <param name="receiver"></param>
+        /// <param name="value"></param>
+        /// <param name="incoming"></param>
         public Message(string receiver, string value, bool incoming = false)
         {
             Time = DateTime.Now;
             Address = receiver;
             Value = value;
             Incoming = incoming;
+            IsValid = false;
         }
+
+
+
 
         [PrimaryKey, AutoIncrement, Column("_Number")]
         public int Id { get; set; }
-
 
         public DateTime Time { get; set; }
         public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
         public bool Incoming { get; set; } = true;
+        /// <summary>
+        /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
+        /// </summary>
+        bool? IsValid
+        {
+            get => valid;
+            set
+            {
+                if (!this.Incoming)
+                {
+                    valid = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsValid"));
+                }
+            }
+        }
+        [ManyToOne] public Contacts Contact { get; set; }
 
-        // [SQLite.Ignore]
-        public string Label
+
+
+
+        bool? valid = null;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        
+        public string Label                                        // [SQLite.Ignore]
         {
             get => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
         }
-        // [ForeignKey(typeof(Contacts))] // therror on deploy
-        [ManyToOne] public Contacts Contact { get; set; }
 
+
+        public bool IsActual => true;
         public IModel CreateAs(object obj)
         {
             return obj as Message;            
