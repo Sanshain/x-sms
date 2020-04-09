@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 using Plugin.ContactService.Shared;
+using Xamarin.Essentials;
 
 namespace XxmsApp.Views
 {
@@ -24,6 +25,7 @@ namespace XxmsApp.Views
         StackLayout msgFields;
         StackLayout bottom;
         Entry adresseeEntry;
+        Editor messageEditor;
         Frame messageFrame;
         Frame frameSend;
         ListView drdnList;
@@ -76,7 +78,7 @@ namespace XxmsApp.Views
             drdnList.ItemTapped += DrdnList_ItemTapped;
 
 
-            var messageEditor = new Editor { };
+            messageEditor = new Editor { };
             messageFrame = new Frame
             {
                 Margin = new Thickness(5),
@@ -270,17 +272,43 @@ namespace XxmsApp.Views
         /// <param name="sender"></param>
         /// <param name="e"></param>
         [Obsolete("This yet just gag. Need to realize")]
-        private void Send_Clicked(object sender, EventArgs e)
+        async private void Send_Clicked(object sender, EventArgs e)
         {
             var entryHeight = Device.GetNamedSize(NamedSize.Default, typeof(Entry));
 
+            var text = messageEditor.Text;
+            var receiver = adresseeEntry.Text;
+
             var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
 
-            DisplayAlert(
+            var b = await DisplayAlert(
                 msgFields.Height.ToString(),
                  ((sender as Button).Parent.Parent as StackLayout).Height.ToString(),
                 Application.Current.MainPage.Height.ToString() + " : " + pageHeight.ToString(),
                 entryHeight.ToString() + ":" + msgFields.Children[0].Height + ":" + (sender as Button).Height);
+
+            if (b == false) DisplayAlert("Info", "Отменен пользователем", "Ok");
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(receiver))
+                DisplayAlert("Info", "Не заполнены данные", "Ok");
+
+            string err = null;
+            try
+            {
+                var message = new SmsMessage(text, new[] { receiver });
+                await Sms.ComposeAsync(message);
+            }
+            catch (FeatureNotSupportedException ex)
+            {
+                err = ex.Message;
+                DisplayAlert("Не поддерживается", ex.Message, "Ok");
+            }
+            catch (Exception ex)
+            {
+                err = ex.Message;
+                DisplayAlert("Ошибка общая", ex.Message, "Ok");
+            }
+
+            if (err == null) DisplayAlert("Отправлено", "Sended", "Ok");
         }
 
     }

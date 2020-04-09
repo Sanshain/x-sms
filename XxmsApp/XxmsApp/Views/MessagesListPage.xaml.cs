@@ -1,4 +1,4 @@
-﻿using Plugin.Messaging;
+﻿using Xamarin.Essentials;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,6 +76,19 @@ namespace XxmsApp.Views
 
                 var msg = e.NewItems[0] as Message;
 
+                try
+                {
+                    var message = new SmsMessage(msg.Value, new[] { msg.Address });
+                    await Sms.ComposeAsync(message);
+                }
+                catch (FeatureNotSupportedException ex)
+                {
+                    DisplayAlert("Не поддерживается", ex.Message, "Ok");
+                }
+                catch (Exception ex)
+                {
+                    DisplayAlert("Ошибка общая", ex.Message, "Ok");
+                }
 
             }
         }
