@@ -25,10 +25,8 @@ namespace XxmsApp.Api
     
     [BroadcastReceiver(Enabled = true, Label = "SMS Receiver")]
     [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]           // "android.provider.Telephony.SMS_RECEIVED"
-    public class IncomingSms : BroadcastReceiver, IReceived
+    public class IncomingSms : BroadcastReceiver
     {
-        
-        public event OnReceived Received;
         
         public override void OnReceive(Context context, Intent intent)
         {
@@ -38,6 +36,8 @@ namespace XxmsApp.Api
             );//*/
 
             if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction) return;
+
+            // and Telephony.Sms.Intents.SmsDeliverAction ?? for delevered?
 
             SmsMessage[] messages = Telephony.Sms.Intents.GetMessagesFromIntent(intent);
 
@@ -64,9 +64,6 @@ namespace XxmsApp.Api
                 });
 
             }
-
-            
-            // Received?.Invoke(XMessages);
 
             Device.BeginInvokeOnMainThread(() =>
             {
