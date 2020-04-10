@@ -75,8 +75,7 @@ namespace XxmsApp.Views
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 ItemsSource = main_contacts
             };
-            drdnList.ItemTapped += DrdnList_ItemTapped;
-
+            drdnList.ItemTapped += DrdnList_ItemTapped;            
 
             messageEditor = new Editor { };
             messageFrame = new Frame
@@ -89,9 +88,7 @@ namespace XxmsApp.Views
             };
             messageFrame.Content = messageEditor;
             msgFields.Children.Add(messageFrame);
-
-            
-
+           
 
             bottom = new StackLayout { VerticalOptions = LayoutOptions.Center };// Initialize Button for send
 
@@ -114,6 +111,7 @@ namespace XxmsApp.Views
             messageEditor.Unfocused += MessageEditor_Unfocused;
             adresseeEntry.Focused += MessageEditor_Focused;
             adresseeEntry.Unfocused += MessageEditor_Unfocused;
+            
 
             // var contactsGetter = (Application.Current as App).contactsAwaiter;
 
@@ -138,7 +136,6 @@ namespace XxmsApp.Views
             }
         }
 
-        [Obsolete("need remade to filter")]
         private void AdresseeEntry_TextChanged(object sender, TextChangedEventArgs e)
         {
             drdnList.ItemsSource = (Application.Current as App)._contacts.Where(c =>
@@ -152,6 +149,10 @@ namespace XxmsApp.Views
             if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
             {
                 drdnList.SelectedItem = (drdnList.ItemsSource as List<Model.Contacts>).First();
+            }
+            else if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
+            {
+                drdnList.IsVisible = false;
             }
 
             if (!string.IsNullOrWhiteSpace((sender as Entry).Text)) (frameSend.Content as Button).IsEnabled = true;
@@ -198,18 +199,18 @@ namespace XxmsApp.Views
         bool focused = true;
         private void MessageEditor_Focused(object sender, FocusEventArgs e)
         {
-            /*
-            ((sender as View).Parent as Frame).HasShadow = true;            
-            ((sender as View).Parent as Frame).OutlineColor = Color.DarkRed;//*/
 
             if (sender == adresseeEntry && focused)
             {
-                // var stopwatch = new System.Diagnostics.Stopwatch();
-                // stopwatch.Start();
+                // var stopwatch = new System.Diagnostics.Stopwatch();  stopwatch.Start();
+
+
 
                 // msgFields.Children[1].IsVisible = false;
+                drdnList.IsVisible = true;                            // for case if it bu hidden on AdresseeEntry_TextChanged
 
                 msgFields.Children[1] = drdnList;
+                
                 focused = false;
 
                 Action ReFocus = () =>
@@ -230,10 +231,7 @@ namespace XxmsApp.Views
                 };
                 ReFocus();
 
-
-                // stopwatch.Stop();
-
-                // ((bottom.Children[0] as Frame).Content as Button).Text = stopwatch.Elapsed.ToString();
+                // stopwatch.Stop(); ((bottom.Children[0] as Frame).Content as Button).Text = stopwatch.Elapsed.ToString();
 
             }
 
@@ -250,7 +248,6 @@ namespace XxmsApp.Views
                 });    
             }
             
-
         }
 
 
@@ -301,6 +298,10 @@ namespace XxmsApp.Views
             {
                 var msgApi = DependencyService.Get<Api.IMessages>();
                 msgApi.Send(receiver, text);
+
+                DisplayAlert("Info", "Сообщение отправлено", "Ok");
+
+                messageEditor.Text = "";
             }
         }
 

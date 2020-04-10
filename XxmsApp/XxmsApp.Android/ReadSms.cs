@@ -20,6 +20,10 @@ namespace XxmsApp.Api.Droid
     
     class XMessages : IMessages
     {
+
+        internal static PendingIntent PendInSent;
+        internal static PendingIntent PendInDelivered;
+
         ContentResolver contentResolver;
 
         public List<XxmsApp.Model.Message> Read()
@@ -71,7 +75,7 @@ namespace XxmsApp.Api.Droid
         public bool Send(string adressee, string content)
         {
 
-            SmsManager.Default.SendTextMessage(adressee, null, content, null, null);
+            SmsManager.Default.SendTextMessage(adressee, null, content, PendInSent, PendInDelivered);
 
             return true;
         }

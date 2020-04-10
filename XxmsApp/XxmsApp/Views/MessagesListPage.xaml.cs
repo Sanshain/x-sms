@@ -76,6 +76,10 @@ namespace XxmsApp.Views
                 var msg = e.NewItems[0] as Message;
 
 
+                var msgApi = DependencyService.Get<Api.IMessages>();
+                msgApi.Send(msg.Address, msg.Value);
+
+
 
             }
         }
@@ -265,6 +269,7 @@ namespace XxmsApp.Views
                 }
 
                 dialog.CreateMessage(dialog.Address, editor.Text);
+
 
                 // messagesList.ItemsSource = null;
                 // messagesList.ItemsSource = dialog.Messages;

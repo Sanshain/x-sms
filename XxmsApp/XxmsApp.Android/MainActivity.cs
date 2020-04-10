@@ -12,6 +12,8 @@ using Xamarin.Forms.Platform.Android;
 using Android.Content;
 using Android.Telephony;
 
+using XxmsApp.Api.Droid;
+
 [assembly: Dependency(typeof(XxmsApp.Piece.MeasureString))]
 namespace XxmsApp.Piece
 { 
@@ -49,24 +51,7 @@ namespace XxmsApp.Droid
 
             LoadApplication(application);
 
-
-
-
-
-
-
-
-            String SENT = "SMS_SENT";
-            String DELIVERED = "SMS_DELIVERED";
-
-            PendingIntent sentPI = PendingIntent.GetBroadcast(global::Android.App.Application.Context, 0,
-                    new Intent(SENT), 0);
-
-            PendingIntent deliveredPI = PendingIntent.GetBroadcast(Android.App.Application.Context,
-                    0, new Intent(DELIVERED), 0);
-
-            RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.SentListener), new IntentFilter(SENT));
-            RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.DeliveredListener), new IntentFilter(DELIVERED));
+            CreateMessageStateListener();
 
             // set in App.xaml:
             // Xamarin.Forms.Application.Current.On<Xamarin.Forms.PlatformConfiguration.Android>()
@@ -75,6 +60,22 @@ namespace XxmsApp.Droid
             InstanceResolver = this.ContentResolver;
         }
 
+        private void CreateMessageStateListener()
+        {
+            const string SENT = "SMS_SENT";
+            const string DELIVERED = "SMS_DELIVERED";
+
+            XMessages.PendInSent = PendingIntent.GetBroadcast(
+                global::Android.App.Application.Context, 0,
+                new Intent(SENT), 0);
+
+            XMessages.PendInDelivered = PendingIntent.GetBroadcast(
+                Android.App.Application.Context,
+                0, new Intent(DELIVERED), 0);
+
+            RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.SentListener), new IntentFilter(SENT));
+            RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.DeliveredListener), new IntentFilter(DELIVERED));
+        }
     }
 
 
@@ -91,6 +92,9 @@ namespace XxmsApp.Droid
         RESULT_ERROR_LIMIT_EXCEEDED = 5,                            // Failed because we reached the sending queue limit.  {@hide}
         RESULT_ERROR_FDN_CHECK_FAILURE = 6                          // Failed because FDN is enabled. {@hide}
     }
+
+
+
 
     class XamBroadcastReceiver : BroadcastReceiver
     {
@@ -109,7 +113,6 @@ namespace XxmsApp.Droid
             Hook?.Invoke(intent, (int)this.ResultCode);
 
         }
-
 
 
         public static void SentListener(Intent intent, int res)

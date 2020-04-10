@@ -60,7 +60,7 @@ namespace XxmsApp.Views
                 //*/
 
                 var sc = new SwitchCell { };
-                sc.SetBinding(SwitchCell.TextProperty, "Prop");
+                sc.SetBinding(SwitchCell.TextProperty, "Name");
                 sc.SetBinding(SwitchCell.OnProperty, "Value");//*/
                 // sc.OnChanged += Sc_OnChanged;                            // realized inside binding object
 
