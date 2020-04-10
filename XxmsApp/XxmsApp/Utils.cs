@@ -87,19 +87,10 @@ namespace XxmsApp
             return self;
         }
 
-        public static MessageStateManager
+        
 
     }
 
-    public enum MessageStateManager
-    {
-        RESULT_ERROR_GENERIC_FAILURE = 1,                           // Generic failure
-        RESULT_ERROR_RADIO_OFF = 2,                                 // Radio off
-        RESULT_ERROR_NULL_PDU = 3,                                  // Null PDU or no pdu provided
-        RESULT_ERROR_NO_SERVICE = 4,                                // no service or service is currently unavailable
 
-        RESULT_ERROR_LIMIT_EXCEEDED = 5,                            // Failed because we reached the sending queue limit.  {@hide}
-        RESULT_ERROR_FDN_CHECK_FAILURE = 6                          // Failed because FDN is enabled. {@hide}
-    }
 
 }

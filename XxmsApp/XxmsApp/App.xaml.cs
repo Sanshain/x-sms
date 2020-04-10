@@ -15,7 +15,6 @@ namespace XxmsApp
 
         internal Task<List<Model.Contacts>> contactsWaiter;
         internal List<Model.Contacts> _contacts;
-        Api.IReceived xMessages;
 
         public App()
         {
@@ -30,8 +29,8 @@ namespace XxmsApp
                 Detail = new NavigationPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black }
             });
 
-            xMessages = DependencyService.Get<XxmsApp.Api.IReceived>();
-            xMessages.Received += XMessages_Received;//*/
+            // xMessages = DependencyService.Get<XxmsApp.Api.IReceived>();
+            // xMessages.Received += XMessages_Received;//*/
             
             MessagingCenter.Subscribe<App, List<XxmsApp.Model.Message>>(
                 this,                                                       // кто подписывается на сообщения
