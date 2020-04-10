@@ -66,7 +66,7 @@ namespace XxmsApp.Api
             }
 
             
-            Received?.Invoke(XMessages);
+            // Received?.Invoke(XMessages);
 
             Device.BeginInvokeOnMainThread(() =>
             {

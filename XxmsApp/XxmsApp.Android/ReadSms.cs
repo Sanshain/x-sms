@@ -8,6 +8,7 @@ using Android.Content;
 using Android.Database;
 using Android.OS;
 using Android.Runtime;
+using Android.Telephony;
 using Android.Views;
 using Android.Widget;
 using Xamarin.Forms;
@@ -67,5 +68,26 @@ namespace XxmsApp.Api.Droid
             return messages;
         }
 
+        public bool Send(string adressee, string content)
+        {
+
+            SmsManager.Default.SendTextMessage(adressee, null, content, null, null);
+
+            return true;
+        }
+
+
+
+
+
+
+
+
+
+
+        public void Send(Model.Message msg)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

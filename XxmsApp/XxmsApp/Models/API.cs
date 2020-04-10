@@ -24,6 +24,8 @@ namespace XxmsApp.Api
     {
         // List<string> Read();
         List<XxmsApp.Model.Message> Read();
+        bool Send(string adressee, string content);
+        void Send(XxmsApp.Model.Message msg);
     }
 
 }
