@@ -42,8 +42,6 @@ namespace XxmsApp.Droid
             ToolbarResource = Resource.Layout.Toolbar;
 
             base.OnCreate(bundle);
-            
-            Xamarin.Essentials.Platform.Init(this, bundle); // add this line to your code, it may also be called: bundle
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
@@ -77,12 +75,6 @@ namespace XxmsApp.Droid
             InstanceResolver = this.ContentResolver;
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
     }
 
 
