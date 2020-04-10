@@ -53,7 +53,7 @@ namespace XxmsApp.Views
                 VerticalOptions = LayoutOptions.Start,
                 Placeholder = "Введите номер телефона",
                 FontSize = Device.GetNamedSize(NamedSize.Default, typeof(Entry)),
-                TextColor = Color.Green
+                TextColor = Color.DarkGray
             };
             // adresseeEntry.SetBinding(Entry.TextProperty, "View");
             adresseeEntry.TextChanged += AdresseeEntry_TextChanged;

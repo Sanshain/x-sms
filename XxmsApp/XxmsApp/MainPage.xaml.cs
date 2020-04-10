@@ -16,11 +16,41 @@ namespace XxmsApp
 
         public MainPage()
         {
-            // InitializeComponent();
 
-            Initialize();
+            var rootLayout = Initialize() as AbsoluteLayout;
 
-            if ((Application.Current as App)._contacts.Count == 0)
+
+            ToolbarItem searchButton;
+            this.ToolbarItems.Add(searchButton = new ToolbarItem
+            {
+                Order = ToolbarItemOrder.Primary,
+                Icon = new FileImageSource { File = "d_search.png" },
+                Priority = 0,
+            });
+
+            searchButton.Clicked += (object sender, EventArgs e) =>
+            {
+                // searchButton.Icon = ImageSource.FromFile("search.png") as FileImageSource;
+
+                StackLayout searchLayout = new StackLayout
+                {
+                    Orientation = StackOrientation.Horizontal
+                };
+                Entry searchEntry = new Entry
+                {
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    Placeholder = "Enter text for search",
+                    BackgroundColor = Color.LightGray
+                };
+                searchEntry.Completed += (object s, EventArgs ev) => searchEntry.IsVisible = false;
+                searchLayout.Children.Add(searchEntry);
+
+                rootLayout.Children.Add(searchLayout, new Rectangle(0, 0, this.Width, 50), AbsoluteLayoutFlags.None);
+
+            };
+
+
+            if ((Application.Current as App)._contacts.Count == 0)       // если контактов нет, то запрашиваем их сразу же при загрузке
             {
                 (Application.Current as App).contactsWaiter.ContinueWith((cn) =>
                 {
@@ -34,23 +64,28 @@ namespace XxmsApp
 
         }
 
-        private void Initialize()
+
+        private Layout Initialize()
         {
             var rootLayout = new AbsoluteLayout();
             var dialogs = new Piece.MainList();
+
             rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
+
             Content = rootLayout;            
 
             subBtn.Clicked += Btn_Clicked;
-            // dialogs.ItemSelected += Dialogs_ItemSelected; // move realization inside CustomList
             this.Appearing += MainPage_Appearing;
+
             onPop = new Dictionary<Type, Action>
             {
                 { typeof(Views.Messages) , () => dialogs.SelectedItem = null }
             };
 
             Title = "Диалоги";
+
+            return rootLayout;
         }
 
         private void MainPage_Appearing(object sender, EventArgs e)
