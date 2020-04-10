@@ -87,27 +87,19 @@ namespace XxmsApp
             return self;
         }
 
-        /*
-        public static void Add(this RelativeLayout.IRelativeList<View> self,
-            View view,
-            double x,
-            double y,
-            (Func<RelativeLayout, double> W, Func<RelativeLayout, double> H) size)
-        {
-            self.Add(view,
-                Constraint.Constant(x),
-                Constraint.Constant(x),
-                Constraint.RelativeToParent(size.W),
-                Constraint.RelativeToParent(size.H));
-        }
-
-        public static void Add(this RelativeLayout.IRelativeList<View> self, 
-            View view, 
-            Point loc, 
-            (Func<RelativeLayout, double> W, Func<RelativeLayout, double> H) size)
-        {
-            self.Add(view, loc.X, loc.Y, size);
-        }//*/
+        public static MessageStateManager
 
     }
+
+    public enum MessageStateManager
+    {
+        RESULT_ERROR_GENERIC_FAILURE = 1,                           // Generic failure
+        RESULT_ERROR_RADIO_OFF = 2,                                 // Radio off
+        RESULT_ERROR_NULL_PDU = 3,                                  // Null PDU or no pdu provided
+        RESULT_ERROR_NO_SERVICE = 4,                                // no service or service is currently unavailable
+
+        RESULT_ERROR_LIMIT_EXCEEDED = 5,                            // Failed because we reached the sending queue limit.  {@hide}
+        RESULT_ERROR_FDN_CHECK_FAILURE = 6                          // Failed because FDN is enabled. {@hide}
+    }
+
 }
