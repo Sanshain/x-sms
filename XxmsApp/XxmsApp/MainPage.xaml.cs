@@ -26,7 +26,7 @@ namespace XxmsApp
             this.ToolbarItems.Add(searchButton = new ToolbarItem
             {
                 Order = ToolbarItemOrder.Primary,
-                Icon = new FileImageSource { File = "d_search.png" },
+                Icon = new FileImageSource { File = "i_search.png" },
                 Priority = 0
             });            
 
@@ -76,7 +76,7 @@ namespace XxmsApp
                             });
                         }
 
-                        var filename = (searchLayout.IsVisible ? "i" : "d") + "_search.png";
+                        var filename = (searchLayout.IsVisible ? "d" : "i") + "_search.png";
                         searchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;
 
                     };
