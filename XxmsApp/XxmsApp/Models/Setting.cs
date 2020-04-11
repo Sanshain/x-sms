@@ -188,8 +188,6 @@ namespace XxmsApp
         }
         //*/
 
-
-
         public static Settings Initialize()
         {
             // PropertiesToList();

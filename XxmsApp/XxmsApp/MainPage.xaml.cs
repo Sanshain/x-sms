@@ -21,31 +21,77 @@ namespace XxmsApp
 
 
             ToolbarItem searchButton;
+            StackLayout searchLayout = null;
+
             this.ToolbarItems.Add(searchButton = new ToolbarItem
             {
                 Order = ToolbarItemOrder.Primary,
                 Icon = new FileImageSource { File = "d_search.png" },
-                Priority = 0,
-            });
+                Priority = 0
+            });            
 
             searchButton.Clicked += (object sender, EventArgs e) =>
-            {
-                // searchButton.Icon = ImageSource.FromFile("search.png") as FileImageSource;
+            {                 
 
-                StackLayout searchLayout = new StackLayout
+                if (searchLayout != null)
                 {
-                    Orientation = StackOrientation.Horizontal
-                };
-                Entry searchEntry = new Entry
-                {
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    Placeholder = "Enter text for search",
-                    BackgroundColor = Color.LightGray
-                };
-                searchEntry.Completed += (object s, EventArgs ev) => searchEntry.IsVisible = false;
-                searchLayout.Children.Add(searchEntry);
+                    var searchEntry = searchLayout.Children.FirstOrDefault() as Entry;
 
-                rootLayout.Children.Add(searchLayout, new Rectangle(0, 0, this.Width, 50), AbsoluteLayoutFlags.None);
+                    if (searchLayout.IsVisible = !searchLayout.IsVisible)
+                    {
+                        searchEntry?.Focus();
+                    }
+
+                }
+                else
+                {
+                    searchLayout = new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal,
+                    };
+                    Entry searchEntry = new Entry
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        Placeholder = "Enter text for search",
+                        BackgroundColor = Color.LightGray,
+                        Opacity = 0.9
+                    };
+
+                    searchEntry.Completed += (object s, EventArgs ev) => searchLayout.IsVisible = false;
+                    Action<object, FocusEventArgs> FocusChanged = (s, ev) =>
+                    {
+                        if (ev.IsFocused)
+                        {
+                            searchEntry.Text = "";
+                            subBtn.IsVisible = false;
+                        }
+                        else
+                        {
+                            searchLayout.IsVisible = false;
+
+                            Device.StartTimer(TimeSpan.FromMilliseconds(150), () =>
+                            {
+                                Device.BeginInvokeOnMainThread(() => subBtn.IsVisible = true); return false;
+
+                            });
+                        }
+
+                        var filename = (searchLayout.IsVisible ? "i" : "d") + "_search.png";
+                        searchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;
+
+                    };
+
+                    searchEntry.Focused += new EventHandler<FocusEventArgs>(FocusChanged);
+                    searchEntry.Unfocused += new EventHandler<FocusEventArgs>(FocusChanged);
+
+                    searchLayout.Children.Add(searchEntry);
+                    rootLayout.Children.Add(searchLayout, new Rectangle(0, 0, this.Width, 50), AbsoluteLayoutFlags.None);
+
+                    searchEntry.Focus();
+
+                }
+
+
 
             };
 
