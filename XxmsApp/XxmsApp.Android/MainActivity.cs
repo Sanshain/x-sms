@@ -75,7 +75,37 @@ namespace XxmsApp.Droid
 
             RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.SentListener), new IntentFilter(SENT));
             RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.DeliveredListener), new IntentFilter(DELIVERED));
+
+
+            serviceConnection = new XmessagesServiceConnection(this);
+            Intent serviceToStart = new Intent(this, typeof(XmsService));
+            BindService(serviceToStart, this.serviceConnection, Bind.AutoCreate);
+
         }
+
+
+
+
+        XmessagesServiceConnection serviceConnection;
+
+        public void UpdateUiForBoundService()
+        {
+            Toast.MakeText(Android.App.Application.Context, "UpdateUiForBoundService", ToastLength.Long).Show();
+
+            // new AlertDialog.Builder()
+
+        }
+
+        public void UpdateUiForUnBoundService(string txt = "")
+        {
+            Toast.MakeText(Android.App.Application.Context, "Unbound service of " + txt, ToastLength.Long).Show();
+
+            // new AlertDialog.Builder()
+
+        }
+
+        public string ServiceText { get; set; }
+
     }
 
 

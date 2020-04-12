@@ -9,6 +9,7 @@ using Xamarin.Forms;
 namespace XxmsApp
 {
 
+
     public partial class App : Application
     {
         public const string DATABASE_FILENAME = "messages.db";
@@ -28,9 +29,6 @@ namespace XxmsApp
                 Master = new MenuPage { Title = "Title" },
                 Detail = new NavigationPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black }
             });
-
-            // xMessages = DependencyService.Get<XxmsApp.Api.IReceived>();
-            // xMessages.Received += XMessages_Received;//*/
             
             MessagingCenter.Subscribe<App, List<XxmsApp.Model.Message>>(
                 this,                                                       // кто подписывается на сообщения
@@ -54,7 +52,6 @@ namespace XxmsApp
                         }
                         i++;
                     }
-
                     
 
                     i = 0;
@@ -69,9 +66,6 @@ namespace XxmsApp
 
                         if (b) break;
                     }
-
-
-
 
                 });    
 

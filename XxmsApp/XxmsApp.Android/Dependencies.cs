@@ -82,28 +82,27 @@ namespace XxmsApp.Api
 
         public void ShowNotification()
         {
-
-
             var context = Android.App.Application.Context;
 
             Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
-                // .SetSmallIcon(Android.App.Application.Context.Resources.GetDrawable())
+                
                 .SetAutoCancel(true)
                 .SetTicker("notification_ticker_text")
                 .SetContentText("Content")
                 .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0))
-                .SetWhen(DateTime.Now.Millisecond)
+
                 .SetContentTitle("Title")
-                .SetDefaults((int) NotificationPriority.Default);
-            
+                .SetDefaults((int)NotificationPriority.Default);
+                // .SetSmallIcon(Android.App.Application.Context.Resources.GetDrawable())
+                // .SetWhen(DateTime.Now.Millisecond);
+
+
             Notification notification = builder.Build();
             ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
         }
 
-
-
-}
+    }
 }
