@@ -20,7 +20,7 @@ namespace XxmsApp
         {
             
             InitializeComponent();
-
+            
             DBUpdates();
 
             MainPage = (new MasterDetailPage()
@@ -55,7 +55,7 @@ namespace XxmsApp
                         i++;
                     }
 
-
+                    
 
                     i = 0;
                     while(i < msgs.Count)

@@ -21,8 +21,8 @@ namespace XxmsApp.Api.Droid
     class XMessages : IMessages
     {
 
-        internal static PendingIntent PendInSent;
-        internal static PendingIntent PendInDelivered;
+        internal static PendingIntent PendInSent { get; set; }
+        internal static PendingIntent PendInDelivered { get; set; }
 
         ContentResolver contentResolver;
 
