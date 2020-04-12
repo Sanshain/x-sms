@@ -74,13 +74,15 @@ namespace XxmsApp.Api
                     XMessages);
             });
 
-            ShowNotification();
+            ShowNotification(
+                "Новое сообщение от " + XMessages.First().Address,
+                XMessages.First().Value);
 
         }
 
 
 
-        public void ShowNotification()
+        public void ShowNotification(string title, string content)
         {
             var context = Android.App.Application.Context;
 
@@ -91,14 +93,14 @@ namespace XxmsApp.Api
                 
                 .SetAutoCancel(true)
                 .SetTicker("notification_ticker_text")
-                .SetContentText("Content")
+                .SetContentText(content)
                 .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0))
 
-                .SetContentTitle("Title")
-                .SetDefaults((int)NotificationPriority.Default);
+                .SetContentTitle(title)
+                .SetDefaults((int)NotificationPriority.High);
                 // .SetSmallIcon(Android.App.Application.Context.Resources.GetDrawable())
                 // .SetWhen(DateTime.Now.Millisecond);
-
+                
 
             Notification notification = builder.Build();
             ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);

@@ -92,6 +92,10 @@ namespace XxmsApp
                     var objects = messages.Select(m => m as object).ToList();//*/
 
                     sw.Stop();
+
+                    var di = DependencyService.Get <XxmsApp.Api.IMessages>();
+                    di.ShowNotification();
+
                     DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
 
                     // sw.Elapsed.ToString()

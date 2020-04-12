@@ -37,9 +37,12 @@ namespace XxmsApp.Droid
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static Android.Content.ContentResolver InstanceResolver;
+        internal static MainActivity Instance;
 
         protected override void OnCreate(Bundle bundle)
         {
+            Instance = this;
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 
@@ -101,7 +104,7 @@ namespace XxmsApp.Droid
             Toast.MakeText(Android.App.Application.Context, "Unbound service of " + txt, ToastLength.Long).Show();
 
             // new AlertDialog.Builder()
-
+            
         }
 
         public string ServiceText { get; set; }
