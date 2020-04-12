@@ -83,6 +83,7 @@ namespace XxmsApp.Api
         public void ShowNotification()
         {
 
+
             var context = Android.App.Application.Context;
 
             Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
