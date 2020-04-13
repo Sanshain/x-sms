@@ -99,40 +99,41 @@ namespace XxmsApp.Api.Droid
             Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
 
             const string CATEGORY_MESSAGE = "msg"; // developer.android.com/reference/android/app/Notification?hl=ru#CATEGORY_MESSAGE
-            
-            
+
+
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
-               
-                .SetColor(0x93C54B)                                                     // text color
-                .SetLights(Android.Graphics.Color.ParseColor("#ccffff"), 5000, 5000)    // установка освещения // 0xff0000ff
-
-                .SetVibrate(new long[200])                                              // vibration
-                .SetContentInfo("Info")                                                 // 
-                .SetOngoing(true)                                                       // first place and not clear? == 50/50
-                
-                .SetCategory(CATEGORY_MESSAGE)                                          // category of notify
-                .SetAutoCancel(false)                                                   // ?
-                .SetTicker("notification_ticker_text")                                  // ? my by this can be used for top view
+                .SetContentTitle("Title")
                 .SetContentText("Content")                                              // content
-                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0)) // where to pass view by clicked
-                
-                .SetFullScreenIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0), true)
-                .SetSubText("subtext")
-                .SetSound(Android.Net.Uri.Parse(""))
-                
+
+                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0)) // where to pass view by clicked                                
+                .SetAutoCancel(true)                                                    // автоотключение уведомления при переходе на активити
+
+                .SetLights(Android.Graphics.Color.ParseColor("#ccffff"), 5000, 5000)    // установка освещения // 0xff0000ff
+                .SetVibrate(new long[200])                                              // vibration (need homonymous permission)
+                                                                                        // .SetSound(Android.Net.Uri.Parse(""))                
+
+                .SetCategory(CATEGORY_MESSAGE)                                          // category of notify
                 .SetGroupSummary(true)
                 .SetGroup("messages")
-                // .SetVisibility()
-                
-                .SetUsesChronometer(true)
-                .SetContentTitle("Title")
-                .SetVisibility((int)ViewAttr.IsVisible)
-                .SetDefaults((int)NotificationPriority.Max);                            // priority
+                                               
+                .SetDefaults((int)NotificationPriority.High);                            // priority (high or max => sound as vk/watsapp)
+
+                // cool if need: 
+                // .SetUsesChronometer(true)                                        // include timer instead time into the notification
+                // .SetOngoing(true)                                                // not clearing (may be, first place also) by clean
+                // .SetSubText("subtext")                                           // subtext after value text
+                // .SetFullScreenIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0), true) // автопереход к активити при появлении уведомления
+
+                // same behavior:
+                // .SetVisibility((int)ViewAttr.Invisible)                                 // ?? same behavior ?? 
+                // .SetColor(0x669900) | .SetColor(Android.Resource.Color.HoloRedLight)    // same color color (just lollilop?)
+                // .SetContentInfo("Info")                                                 // same behavior
+                // .SetTicker("notification_ticker_text")                                  // same behavior (? my by this can be used for top view, but not worked)
 
 
                 // .SetExtras()                                                         // as I understand for saving data for next notification
-                // .SetDeleteIntent()                                                   // prohibition for clearing
+                // .SetDeleteIntent()                                                   // prohibition for clearing (but difficult) -> apply SetOngoing the simplest
                 // .SetSound(Android.Net.Uri.Parse(""))                                 // sound
                 // .SetCustomHeadsUpContentView()                                       // probably for ovverding head of notify as sms by Xiaomi
                 // .SetCustomContentView()                                              // too difficult to use
@@ -159,9 +160,9 @@ namespace XxmsApp.Api.Droid
 
     internal enum ViewAttr : int
     {
-        IsVisible = 0x00000000,
+        IsVisible = 0x00000000,                                     // сделать ее видимой
         Invisible = 0x00000004,
-        Gone = 0x00000008,
+        Gone = 0x00000008,                                          // переход к активити при всплытии уведомления
         VisibilityMask = 0x0000000C
     }
 

@@ -66,7 +66,7 @@ namespace XxmsApp.Droid
         private void CreateMessageStateListener()
         {
             const string SENT = "SMS_SENT";
-            const string DELIVERED = "SMS_DELIVERED";
+            const string DELIVERED = "SMS_DELIVERED";            
 
             XMessages.PendInSent = PendingIntent.GetBroadcast(
                 global::Android.App.Application.Context, 0,
@@ -78,7 +78,6 @@ namespace XxmsApp.Droid
 
             RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.SentListener), new IntentFilter(SENT));
             RegisterReceiver(new XamBroadcastReceiver(XamBroadcastReceiver.DeliveredListener), new IntentFilter(DELIVERED));
-
 
             serviceConnection = new XmessagesServiceConnection(this);
             Intent serviceToStart = new Intent(this, typeof(XmsService));
