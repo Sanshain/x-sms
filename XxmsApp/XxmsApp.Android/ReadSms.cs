@@ -92,6 +92,13 @@ namespace XxmsApp.Api.Droid
 
 
 
+
+
+
+
+
+
+
         public void ShowNotification(string title, string content)
         {
             var context = Android.App.Application.Context;
@@ -100,6 +107,7 @@ namespace XxmsApp.Api.Droid
 
             const string CATEGORY_MESSAGE = "msg"; // developer.android.com/reference/android/app/Notification?hl=ru#CATEGORY_MESSAGE
 
+            var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
@@ -110,50 +118,53 @@ namespace XxmsApp.Api.Droid
                 .SetAutoCancel(true)                                                    // автоотключение уведомления при переходе на активити
 
                 .SetLights(Android.Graphics.Color.ParseColor("#ccffff"), 5000, 5000)    // установка освещения // 0xff0000ff
-                .SetVibrate(new long[200])                                              // vibration (need homonymous permission)
-                                                                                        // .SetSound(Android.Net.Uri.Parse(""))                
+                .SetVibrate(new long[] { 1000, 1000, 1000 })                          // vibration (need homonymous permission)
 
-                .SetCategory(CATEGORY_MESSAGE)                                          // category of notify
-                .SetGroupSummary(true)
-                .SetGroup("messages")
-                                               
-                .SetDefaults((int)NotificationPriority.High);                            // priority (high or max => sound as vk/watsapp)
+                .SetPriority(1);
 
-                // cool if need: 
-                // .SetUsesChronometer(true)                                        // include timer instead time into the notification
-                // .SetOngoing(true)                                                // not clearing (may be, first place also) by clean
-                // .SetSubText("subtext")                                           // subtext after value text
-                // .SetFullScreenIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0), true) // автопереход к активити при появлении уведомления
+            // .SetCategory(NotificationCompat.CategoryMessage)                                          // category of notify
+            // .SetGroupSummary(true)
+            // .SetGroup("messages")
 
-                // same behavior:
-                // .SetVisibility((int)ViewAttr.Invisible)                                 // ?? same behavior ?? 
-                // .SetColor(0x669900) | .SetColor(Android.Resource.Color.HoloRedLight)    // same color color (just lollilop?)
-                // .SetContentInfo("Info")                                                 // same behavior
-                // .SetTicker("notification_ticker_text")                                  // same behavior (? my by this can be used for top view, but not worked)
+            // .SetDefaults((int)NotificationPriority.High);                            // priority (high or max => sound as vk/watsapp)
 
+            // cool if need: 
+            // .SetUsesChronometer(true)                                        // include timer instead time into the notification
+            // .SetOngoing(true)                                                // not clearing (may be, first place also) by clean
+            // .SetSubText("subtext")                                           // subtext after value text
+            // .SetFullScreenIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0), true) // автопереход к активити при появлении уведомления
 
-                // .SetExtras()                                                         // as I understand for saving data for next notification
-                // .SetDeleteIntent()                                                   // prohibition for clearing (but difficult) -> apply SetOngoing the simplest
-                // .SetSound(Android.Net.Uri.Parse(""))                                 // sound
-                // .SetCustomHeadsUpContentView()                                       // probably for ovverding head of notify as sms by Xiaomi
-                // .SetCustomContentView()                                              // too difficult to use
-                // .SetCustomBigContentView()                                           // too difficult to use
-                // .SetSmallIcon(XxmsApp.Droid.Resource.Drawable.icon)
-                // .SetWhen(DateTime.Now.Millisecond);                                  // set time for appearance
-                // .setOnlyAlertOnce                                                    // or see or vibro/sound
-                // .SetProgress()                                                       // в виде прогрессбара
-                // .SetPublicVersion()                                                  // поверх экрана блокировки
-                // .setVisibility                                                       // ??
-                // .limitCharSequenceLength                                             // ограничение на количество символов
-
-                // examples:
-
-                // .SetCustomContentView(context.PackageName, XxmsApp.Droid.Resource.Layout.notification_action)
-                // .SetLargeIcon(Android.Graphics.BitmapFactory.DecodeResource(XxmsApp.Droid.MainActivity.Instance.Resources, Android.Resource.Drawable.IcDialogInfo))
+            // same behavior:
+            // .SetVisibility((int)ViewAttr.Invisible)                                 // ?? same behavior ?? 
+            // .SetColor(0x669900) | .SetColor(Android.Resource.Color.HoloRedLight)    // same color color (just lollilop?)
+            // .SetContentInfo("Info")                                                 // same behavior
+            // .SetTicker("notification_ticker_text")                                  // same behavior (? my by this can be used for top view, but not worked)
 
 
+            // .SetExtras()                                                         // as I understand for saving data for next notification
+            // .SetDeleteIntent()                                                   // prohibition for clearing (but difficult) -> apply SetOngoing the simplest
+            // .SetSound(Android.Net.Uri.Parse(""))                                 // sound
+            // .SetCustomHeadsUpContentView()                                       // probably for ovverding head of notify as sms by Xiaomi
+            // .SetCustomContentView()                                              // too difficult to use
+            // .SetCustomBigContentView()                                           // too difficult to use
+            // .SetSmallIcon(XxmsApp.Droid.Resource.Drawable.icon)
+            // .SetWhen(DateTime.Now.Millisecond);                                  // set time for appearance
+            // .setOnlyAlertOnce                                                    // or see or vibro/sound
+            // .SetProgress()                                                       // в виде прогрессбара
+            // .SetPublicVersion()                                                  // поверх экрана блокировки
+            // .setVisibility                                                       // ??
+            // .limitCharSequenceLength                                             // ограничение на количество символов
+
+            // examples:
+
+            // .SetCustomContentView(context.PackageName, XxmsApp.Droid.Resource.Layout.notification_action)
+            // .SetLargeIcon(Android.Graphics.BitmapFactory.DecodeResource(XxmsApp.Droid.MainActivity.Instance.Resources, Android.Resource.Drawable.IcDialogInfo))
+
+
+            
             Notification notification = builder.Build();
-            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
+            notification.Defaults = NotificationDefaults.All;
+            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(2, notification);
         }
 
     }

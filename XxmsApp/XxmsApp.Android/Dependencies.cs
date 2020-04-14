@@ -97,7 +97,6 @@ namespace XxmsApp.Api
                 .SetAutoCancel(true)
                 
                 .SetDefaults((int)NotificationPriority.High);
-
                 
 
             Notification notification = builder.Build();

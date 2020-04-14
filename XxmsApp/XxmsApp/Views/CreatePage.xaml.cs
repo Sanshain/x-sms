@@ -146,13 +146,20 @@ namespace XxmsApp.Views
 
             }).ToList();
 
-            if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
+            if ((drdnList.ItemsSource as List<Model.Contacts>).Count >= 1)
             {
-                drdnList.SelectedItem = (drdnList.ItemsSource as List<Model.Contacts>).First();
+                if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
+                {
+                    drdnList.SelectedItem = (drdnList.ItemsSource as List<Model.Contacts>).First();
+                }                
+
+                if (msgFields.Children[1] != drdnList) msgFields.Children[1] = drdnList;
             }
-            else if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
+            else if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 0)
             {
-                drdnList.IsVisible = false;
+                // drdnList.IsVisible = false;
+
+                if (msgFields.Children[1] != messageFrame) msgFields.Children[1] = messageFrame;
             }
 
             if (!string.IsNullOrWhiteSpace((sender as Entry).Text)) (frameSend.Content as Button).IsEnabled = true;
