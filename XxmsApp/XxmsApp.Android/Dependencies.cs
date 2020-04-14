@@ -90,16 +90,14 @@ namespace XxmsApp.Api
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
-                
-                .SetAutoCancel(true)
-                .SetTicker("notification_ticker_text")
-                .SetContentText(content)
-                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0))
-
                 .SetContentTitle(title)
+                .SetContentText(content)
+
+                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0))
+                .SetAutoCancel(true)
+                
                 .SetDefaults((int)NotificationPriority.High);
-                // .SetSmallIcon(Android.App.Application.Context.Resources.GetDrawable())
-                // .SetWhen(DateTime.Now.Millisecond);
+
                 
 
             Notification notification = builder.Build();

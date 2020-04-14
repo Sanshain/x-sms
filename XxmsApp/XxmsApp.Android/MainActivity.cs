@@ -81,7 +81,12 @@ namespace XxmsApp.Droid
 
             serviceConnection = new XmessagesServiceConnection(this);
             Intent serviceToStart = new Intent(this, typeof(XmsService));
-            BindService(serviceToStart, this.serviceConnection, Bind.AutoCreate);
+            var r = BindService(serviceToStart, this.serviceConnection, Bind.AutoCreate);
+            
+            if (r)
+            {
+
+            }
 
         }
 

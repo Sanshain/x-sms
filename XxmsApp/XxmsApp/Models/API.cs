@@ -19,7 +19,7 @@ namespace XxmsApp.Api
         List<XxmsApp.Model.Message> Read();
         bool Send(string adressee, string content);
         void Send(XxmsApp.Model.Message msg);
-        void ShowNotification();
+        void ShowNotification(string title, string content);
     }
 
 }

@@ -8,7 +8,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
-
+using Android.Support.V4.App;
 using Android.Views;
 using Android.Widget;
 
@@ -35,7 +35,8 @@ namespace XxmsApp.Droid
 
 
 
-    [Service(IsolatedProcess = true)]                       // [Service(Exported = true, Name = "com.xamarin.example.DemoService")]
+    // [Service(IsolatedProcess = true)]                       // [Service(Exported = true, Name = "com.xamarin.example.DemoService")]
+    [Service(Name = "com.xamarin.ServicesDemo1")]
     public class XmsService : Service, IXmessages
     {
 
@@ -51,7 +52,7 @@ namespace XxmsApp.Droid
 
         public override IBinder OnBind(Intent intent)
         {
-            Android.Util.Log.Debug(TAG, "OnBind");
+            Console.WriteLine(TAG, "OnBind");
             this.Binder = new XmsServiceBinder(this);
             return this.Binder;
         }
@@ -64,19 +65,31 @@ namespace XxmsApp.Droid
         public override void OnCreate()
         {
             base.OnCreate();
-            Android.Util.Log.Debug(TAG, "OnCreate");
+
+            new XxmsApp.Api.Droid.XMessages().ShowNotification(
+                this.GetType().Name, 
+                System.Reflection.MethodBase.GetCurrentMethod().Name);
         }
         public override bool OnUnbind(Intent intent)
         {
-            Android.Util.Log.Debug(TAG, "OnUnbind");
+            new XxmsApp.Api.Droid.XMessages().ShowNotification(
+                this.GetType().Name,
+                System.Reflection.MethodBase.GetCurrentMethod().Name);
+
             return base.OnUnbind(intent);
         }
 
         public override void OnDestroy()
         {
-            Android.Util.Log.Debug(TAG, "OnDestroy");
+            new XxmsApp.Api.Droid.XMessages().ShowNotification(
+                this.GetType().Name,
+                System.Reflection.MethodBase.GetCurrentMethod().Name);
+
             base.OnDestroy();
         }
+
+
+
 
 
     }
@@ -87,7 +100,9 @@ namespace XxmsApp.Droid
     {
 
         static readonly string TAG = typeof(XmessagesServiceConnection).FullName;
-
+        
+        public bool IsConnected { get; private set; }
+        public XmsServiceBinder Binder { get; private set; }
         MainActivity mainActivity;
 
         public XmessagesServiceConnection(MainActivity activity)
@@ -95,11 +110,8 @@ namespace XxmsApp.Droid
             IsConnected = false;
             Binder = null;
             this.mainActivity = activity;
+            
         }
-
-        public bool IsConnected { get; private set; }
-        public XmsServiceBinder Binder { get; private set; }
-
 
 
         public string IXmessagesCall()
@@ -112,9 +124,12 @@ namespace XxmsApp.Droid
             Binder = service as XmsServiceBinder;
             IsConnected = this.Binder != null;
 
+            new XxmsApp.Api.Droid.XMessages().ShowNotification(
+                this.GetType().Name,
+                System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             string message = "onServiceConnected - ";
-            Android.Util.Log.Debug(TAG, $"OnServiceConnected {name.ClassName}");
+            Console.WriteLine(TAG, $"OnServiceConnected {name.ClassName}");
 
             if (IsConnected)
             {
@@ -127,7 +142,9 @@ namespace XxmsApp.Droid
                 mainActivity.UpdateUiForUnBoundService();
             }
 
-            Android.Util.Log.Info(TAG, message);
+            Console.WriteLine(TAG, message);
+
+            ShowNotification(TAG, message, this.mainActivity);
 
             mainActivity.ServiceText = message;
         }
@@ -139,11 +156,48 @@ namespace XxmsApp.Droid
         /// <param name="name"></param>
         public void OnServiceDisconnected(ComponentName name)
         {
-            Android.Util.Log.Debug(TAG, $"On__ServiceDisconnected {name.ClassName}");
+            Console.WriteLine(TAG, $"On__ServiceDisconnected {name.ClassName}");
             IsConnected = false;
             Binder = null;
             mainActivity.UpdateUiForUnBoundService("OnServiceDisconnected");
         }
+
+
+
+
+
+        public void ShowNotification(string title, string content, Context context = null)
+        {
+            context = context ?? Android.App.Application.Context;
+
+            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
+
+            const string CATEGORY_MESSAGE = "msg"; // developer.android.com/reference/android/app/Notification?hl=ru#CATEGORY_MESSAGE
+
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
+                .SetContentTitle(title)
+                .SetContentText(content)                                               // content
+
+                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0)) // where to pass view by clicked                                
+                .SetAutoCancel(true)                                                    // автоотключение уведомления при переходе на активити
+
+                .SetLights(Android.Graphics.Color.ParseColor("#ccffff"), 5000, 5000)    // установка освещения // 0xff0000ff
+                .SetVibrate(new long[200])                                              // vibration (need homonymous permission)
+                                                                                        // .SetSound(Android.Net.Uri.Parse(""))                
+
+                .SetCategory(CATEGORY_MESSAGE)                                          // category of notify
+                .SetGroupSummary(true)
+                .SetGroup("messages")
+
+                .SetDefaults((int)NotificationPriority.High);                            // priority (high or max => sound as vk/watsapp)
+
+
+            Notification notification = builder.Build();
+            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
+        }
+
     }
 
 }

@@ -92,7 +92,7 @@ namespace XxmsApp.Api.Droid
 
 
 
-        public void ShowNotification()
+        public void ShowNotification(string title, string content)
         {
             var context = Android.App.Application.Context;
 
@@ -103,8 +103,8 @@ namespace XxmsApp.Api.Droid
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
-                .SetContentTitle("Title")
-                .SetContentText("Content")                                              // content
+                .SetContentTitle(title)
+                .SetContentText(content)                                               // content
 
                 .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0)) // where to pass view by clicked                                
                 .SetAutoCancel(true)                                                    // автоотключение уведомления при переходе на активити
