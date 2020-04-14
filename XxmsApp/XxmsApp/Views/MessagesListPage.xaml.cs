@@ -164,7 +164,7 @@ namespace XxmsApp.Views
                 totalHeihght = totalHeihght + messagesList.Margin.Bottom * (count > 1 ? 2 : 1);
 
                 var containerHeight = (messagesList.Parent as Layout).Height;
-                if (totalHeihght + messagesList.Margin.Bottom *2 < containerHeight)
+                if (totalHeihght + messagesList.Margin.Bottom *2 < containerHeight - (messagesList.Margin.Bottom + 10))
                 {
                     messagesList.VerticalOptions = LayoutOptions.End;
                 }
