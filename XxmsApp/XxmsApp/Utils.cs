@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 
@@ -44,6 +45,8 @@ namespace XxmsApp
             return view;
         }
 
+
+
         public static View AddAsRelative(this RelativeLayout.IRelativeList<View> self,
             View view,
             Func<RelativeLayout, double> X = null,
@@ -55,6 +58,8 @@ namespace XxmsApp
 
             return view;
         }
+
+
 
         /// <summary>
         /// Add range for StackLayout
@@ -68,6 +73,7 @@ namespace XxmsApp
                 self.Add(view);
             }
         }
+
 
         public static void Extend(this IList<View> self, params View[] views)
         {
@@ -92,5 +98,103 @@ namespace XxmsApp
     }
 
 
+
+    public class SearchPanel
+    {
+
+        public ToolbarItem SearchButton { get; private set; } = null;
+        public StackLayout SearchLayout { get; private set; } = null;
+
+        private View bottomView = null;
+
+
+        public SearchPanel(ContentPage page, View subView = null)
+        {
+            AbsoluteLayout rootLayout = page.Content as AbsoluteLayout;
+            bottomView = subView ?? rootLayout.Children.Last();
+
+            page.ToolbarItems.Add(SearchButton = new ToolbarItem
+            {
+                Order = ToolbarItemOrder.Primary,
+                Icon = new FileImageSource { File = "i_search.png" },
+                Priority = 0
+            });
+
+            SearchButton.Clicked += (object sender, EventArgs e) =>
+            {
+
+                if (SearchLayout != null)
+                {
+                    var searchEntry = SearchLayout.Children.FirstOrDefault() as Entry;
+
+                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible)
+                    {
+                        searchEntry?.Focus();
+                    }
+
+                }
+                else
+                {
+                    SearchLayout = new StackLayout
+                    {
+                        Orientation = StackOrientation.Horizontal,
+                    };
+                    Entry searchEntry = new Entry
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        Placeholder = "Enter text for search",
+                        BackgroundColor = Color.LightGray,
+                        Opacity = 0.9
+                    };
+
+                    searchEntry.Completed += (object s, EventArgs ev) =>
+                    {
+                        SearchLayout.IsVisible = false;
+
+
+                    };
+
+                    searchEntry.Focused += SearchEntry_Focused;
+                    searchEntry.Unfocused += SearchEntry_Focused;
+
+                    SearchLayout.Children.Add(searchEntry);
+                    rootLayout.Children.Add(SearchLayout, new Rectangle(0, 0, page.Width, 50), AbsoluteLayoutFlags.None);
+
+                    searchEntry.Focus();
+
+                }
+
+            };
+
+        }
+
+        public static SearchPanel Initialize(ContentPage page, View subBtn = null)
+        {
+            return new SearchPanel(page, subBtn);
+        }
+
+        private void SearchEntry_Focused(object sender, FocusEventArgs ev)
+        {
+            if (ev.IsFocused)
+            {
+                (sender as Entry).Text = "";
+                bottomView.IsVisible = false;
+            }
+            else
+            {
+                SearchLayout.IsVisible = false;
+
+                Device.StartTimer(TimeSpan.FromMilliseconds(150), () =>
+                {
+                    Device.BeginInvokeOnMainThread(() => bottomView.IsVisible = true); return false;
+
+                });
+            }
+
+            var filename = (SearchLayout.IsVisible ? "d" : "i") + "_search.png";
+            SearchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;
+        }
+
+    }
 
 }

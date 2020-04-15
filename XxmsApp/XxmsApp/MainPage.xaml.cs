@@ -8,8 +8,10 @@ using Xamarin.Forms;
 
 namespace XxmsApp
 {
-	public partial class MainPage : ContentPage
-	{
+
+
+    public partial class MainPage : ContentPage
+    {
 
         Dictionary<Type, Action> onPop;
         Button subBtn = new Button { Text = "Создать", IsEnabled = false };
@@ -19,82 +21,9 @@ namespace XxmsApp
 
             var rootLayout = Initialize() as AbsoluteLayout;
 
+            SearchPanel.Initialize(this);
 
-            ToolbarItem searchButton;
-            StackLayout searchLayout = null;
-
-            this.ToolbarItems.Add(searchButton = new ToolbarItem
-            {
-                Order = ToolbarItemOrder.Primary,
-                Icon = new FileImageSource { File = "i_search.png" },
-                Priority = 0
-            });            
-
-            searchButton.Clicked += (object sender, EventArgs e) =>
-            {                 
-
-                if (searchLayout != null)
-                {
-                    var searchEntry = searchLayout.Children.FirstOrDefault() as Entry;
-
-                    if (searchLayout.IsVisible = !searchLayout.IsVisible)
-                    {
-                        searchEntry?.Focus();
-                    }
-
-                }
-                else
-                {
-                    searchLayout = new StackLayout
-                    {
-                        Orientation = StackOrientation.Horizontal,
-                    };
-                    Entry searchEntry = new Entry
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        Placeholder = "Enter text for search",
-                        BackgroundColor = Color.LightGray,
-                        Opacity = 0.9
-                    };
-
-                    searchEntry.Completed += (object s, EventArgs ev) => searchLayout.IsVisible = false;
-                    Action<object, FocusEventArgs> FocusChanged = (s, ev) =>
-                    {
-                        if (ev.IsFocused)
-                        {
-                            searchEntry.Text = "";
-                            subBtn.IsVisible = false;
-                        }
-                        else
-                        {
-                            searchLayout.IsVisible = false;
-
-                            Device.StartTimer(TimeSpan.FromMilliseconds(150), () =>
-                            {
-                                Device.BeginInvokeOnMainThread(() => subBtn.IsVisible = true); return false;
-
-                            });
-                        }
-
-                        var filename = (searchLayout.IsVisible ? "d" : "i") + "_search.png";
-                        searchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;
-
-                    };
-
-                    searchEntry.Focused += new EventHandler<FocusEventArgs>(FocusChanged);
-                    searchEntry.Unfocused += new EventHandler<FocusEventArgs>(FocusChanged);
-
-                    searchLayout.Children.Add(searchEntry);
-                    rootLayout.Children.Add(searchLayout, new Rectangle(0, 0, this.Width, 50), AbsoluteLayoutFlags.None);
-
-                    searchEntry.Focus();
-
-                }
-
-
-
-            };
-
+            // SearchPanelInitialize(rootLayout);
 
             if ((Application.Current as App)._contacts.Count == 0)       // если контактов нет, то запрашиваем их сразу же при загрузке
             {
