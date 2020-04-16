@@ -59,9 +59,9 @@ namespace XxmsApp.Views
             {
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
-                // ItemsSource = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 Footer = reset = new Button { Text = "Сброс настроек" },
                 ItemsSource = settings = Options.Settings.Initialize()
+                // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
 
             };
             reset.Clicked += async (object sender, EventArgs e) =>
@@ -89,7 +89,7 @@ namespace XxmsApp.Views
         {
             base.OnAppearing();
 
-            settings.CollectionChanged += Settings_CollectionChanged1;
+            if (settings != null) settings.CollectionChanged += Settings_CollectionChanged1;
         }
 
         private void Settings_CollectionChanged1(object sender, CollectionChangedEventArgs<Options.Setting> e)

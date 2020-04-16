@@ -14,6 +14,19 @@ using System.Diagnostics;
 namespace XxmsApp.Options
 {
 
+    public class CollectionChangedEventArgs<T> : EventArgs
+    {
+        public T ChangedItem { get; }
+        public int Id { get; }
+
+        public CollectionChangedEventArgs(T changedItem, int id)
+        {
+            ChangedItem = changedItem;
+            Id = id;
+        }
+
+    }
+
     public class FullDescriptionAttribute : DescriptionAttribute
     {
 
@@ -25,9 +38,11 @@ namespace XxmsApp.Options
 
     }
 
+    [Table("Settings")]
     public class Setting : INotifyPropertyChanged
     {
-        
+
+        [PrimaryKey]
         public string Name { get; set; }
         public string Description { get; set; }
         public string FullDescription { get; set; }
@@ -43,6 +58,12 @@ namespace XxmsApp.Options
         bool content;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+
+        public static implicit operator Setting((string Name, bool Value, string Desc) setting) 
+        {
+            return new Setting { Name = setting.Name, Content = setting.Value, Description = setting.Desc }; // 
+        }
     }
 
 
@@ -146,13 +167,11 @@ namespace XxmsApp.Options.Database
     /// <summary>
     /// Alternative solution for storing settings in the database
     /// </summary>
-    public abstract class ModelSettings : AbstractSettings
+    public class ModelSettings : AbstractSettings
     {
         public ModelSettings(IEnumerable<Setting> settings) : base(settings) { }
 
         static Dictionary<string, bool> settings = new Dictionary<string, bool>();
-
-
 
         protected new static Func<bool> Get = () =>
         {
@@ -162,8 +181,6 @@ namespace XxmsApp.Options.Database
             else return settings[name] = false;
 
         };
-
-
 
         protected new static Action<bool> Set = (value) =>
         {
@@ -190,6 +207,71 @@ namespace XxmsApp.Options.Database
         }
 
         public override event CollectionChangedEventHandler CollectionChanged;
+
+
+
+        public static ModelSettings Initialize()
+        {
+
+            var settings = new ModelSettings(Cache.Read<Setting>());  // Read()                  
+
+            if (settings.Count == 0)
+            {
+                settings = new ModelSettings(new List<Setting> // ConvertToList()
+                {(
+                        Name : "Автофокус",
+                        Value : true,
+                        Desc : "Автофокус поля для ввода сообщения при выборе контакта"), (
+
+                        Name : "Вид диалога",
+                        Value : true,
+                        Desc : "Если выключен, то основной список будет показывать список сообщений"), (
+
+                        Name : "LazyLoad",
+                        Value : true,
+                        Desc : "Ленивая подгрузка сообщений при открытии диалога")
+                });
+
+                Cache.UpdateSync(settings);                                             // Save(settings.ToArray());
+            }
+
+            settings.ForEach(s => s.PropertyChanged += new PropertyChangedEventHandler(settings.Setting_PropertyChanged));
+
+            return settings;
+        }
+
+
+
+
+
+
+
+
+
+
+        /*
+        [Obsolete("until replaced for Cache.Read<Setting>() for cache involved and saving time IO operation with DB")]
+        static Setting[] Read()
+        {
+            var s = Cache.database.Table<Setting>(); 
+            var a = s.ToArray();
+            return a;
+        }
+
+        [Obsolete("for reaching to common interface by Cache this is obsolete")]
+        public static int Save(Setting[] settings)
+        {
+            int cnt = 0;
+            Cache.database.RunInTransaction(() =>
+            {
+
+                foreach (var setting in settings)
+                {
+                    cnt += Cache.database.InsertOrReplace(setting);
+                }
+            });
+            return cnt;
+        }//*/
 
     }
 }

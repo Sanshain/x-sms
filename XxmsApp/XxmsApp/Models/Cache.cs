@@ -257,16 +257,14 @@ namespace XxmsApp
         /// <typeparam name="T">type of model</typeparam>
         /// <param name="model">model instance (not important)</param>
         /// <returns>List of the model instances from API</returns>
-        [Obsolete("Sync method `UpdateSync` is not recommended, but allowed if really you need")]
+        // [Obsolete("Sync method `UpdateSync` is not recommended, but allowed if really you need")]
         public static List<T> UpdateSync<T>(List<T> model)
         {
             var rawList = actions[typeof(T)]().GetAwaiter().GetResult();
 
             var objectList = rawList.Select(o => (T)o).ToList();
 
-            database.UpdateAll(objectList);
-
-
+            database.UpdateAll(objectList, true);
 
             cache[typeof(T)] = objectList.Select(o => (object)o).ToList();
 
