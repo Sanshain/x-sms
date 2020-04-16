@@ -21,7 +21,7 @@ namespace XxmsApp
 
             var rootLayout = Initialize() as AbsoluteLayout;
 
-            SearchPanel.Initialize(this);
+            SearchPanel<Dialog>.Initialize(this);
 
             // SearchPanelInitialize(rootLayout);
 

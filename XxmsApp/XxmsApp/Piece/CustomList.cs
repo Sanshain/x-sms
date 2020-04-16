@@ -13,7 +13,51 @@ namespace XxmsApp.Piece
 {
 
     public interface IMeasureString { double StringSize(string text); }
-    
+
+
+    public class DialogCell : ViewCell
+    {
+        public int TimeSize { get; set; } = 14;
+
+        Label PhoneLabel = null;
+        Label TimeLabel = null;
+        Label ValueLabel = null;
+        Label CapacityLabel = null;
+
+        public DialogCell()
+        {
+            double timeWidth = Utils.CalcString(DateTime.Now.ToString());
+
+            var view = new RelativeLayout();
+
+            PhoneLabel = new Label { FontSize = 18, FontAttributes = FontAttributes.Bold };
+            TimeLabel = new Label { FontSize = TimeSize };  //, TextColor = Color.Gray
+            ValueLabel = new Label { FontSize = 14, Margin = new Thickness(0, 10) };
+            CapacityLabel = new Label { FontSize = 12, TextColor = Color.LightSlateGray, Margin = new Thickness(0, 10) };
+
+
+            view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
+            view.Children.Add(TimeLabel,
+                Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
+            view.Children.Add(ValueLabel, Constraint.Constant(10), Constraint.Constant(25),
+                Constraint.RelativeToParent((par) => par.Width)
+            );
+
+            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.GetWidth(), p => 25);//*/
+
+            View = view;
+        }
+
+        protected override void OnBindingContextChanged()
+        {
+            base.OnBindingContextChanged();
+
+            PhoneLabel.SetBinding(Label.TextProperty, "Address");
+            TimeLabel.SetBinding(Label.TextProperty, "Time");
+            ValueLabel.SetBinding(Label.TextProperty, "Label");
+            CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
+        }
+    }
 
     public class MainList : ListView
 	{
@@ -24,7 +68,7 @@ namespace XxmsApp.Piece
         /// <summary>
         /// Для списка сообщений
         /// </summary>
-        public MainList ()
+        public MainList () : base(ListViewCachingStrategy.RecycleElementAndDataTemplate)
 		{
             // this.DataLoad(30);            
 
@@ -33,11 +77,13 @@ namespace XxmsApp.Piece
                 ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
                     Address = g.Key,
                     Messages = new ObservableCollection<Message>(g)
-                } );
+                } ).ToList();
 
-            } else ItemsSource = this.DataLoad(30);                         // else
+            } else ItemsSource = this.DataLoad(30);                         // else            
 
-            ItemTemplate = this.DataView();
+            HasUnevenRows = true;
+            ItemTemplate = this.DataView();            
+            //ItemTemplate = new DataTemplate(typeof(DialogCell));            // this.DataView();
 
             this.ItemSelected += CustomList_ItemSelected;
             source.CollectionChanged += Source_CollectionChanged;
@@ -101,12 +147,14 @@ namespace XxmsApp.Piece
 
         }
 
+
+        [Obsolete("not cached")]
         protected DataTemplate DataView()
         {
             
             HasUnevenRows = true;                                       // Включает multiline для ItemTemplate
 
-            double timeWidth = calculateWidth();
+            double timeWidth = Utils.CalcString(DateTime.Now.ToString());
 
             return new DataTemplate(() =>
             {
@@ -119,7 +167,7 @@ namespace XxmsApp.Piece
                 PhoneLabel.SetBinding(Label.TextProperty, "Address");
                 TimeLabel.SetBinding(Label.TextProperty, "Time");
                 ValueLabel.SetBinding(Label.TextProperty, "Label");
-                                
+
                 view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
                 view.Children.Add(TimeLabel, 
                     Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
@@ -148,14 +196,7 @@ namespace XxmsApp.Piece
             }
         }//*/
 
-        protected double calculateWidth()
-        {
 
-            var service = DependencyService.Get<IMeasureString>();
-            var timeWidth = service.StringSize(DateTime.Now.ToString());
-
-            return timeWidth;
-        }
 
     }
 }

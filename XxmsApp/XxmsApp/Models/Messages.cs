@@ -129,7 +129,26 @@ namespace XxmsApp
 
     public class Dialog 
     {
+        string count = string.Empty;
 
+        ObservableCollection<Message> messages = new ObservableCollection<Message>();
+        public ObservableCollection<Message> Messages
+        {
+            get
+            {
+                return messages;
+            }
+            set
+            {
+                messages = value;
+                count = $"({messages?.Count.ToString()})";
+            }
+        }
+
+        public DateTime Time => Messages?.FirstOrDefault()?.Time ?? DateTime.Now;
+        public string Label => Messages?.FirstOrDefault()?.Label ?? "Nothing";
+        // public string Count => $"({Messages?.Count.ToString()})";
+        public string Count => count;
 
         public IEnumerable<Message> CreateMessage(string receiver, string value)
         {
@@ -142,10 +161,11 @@ namespace XxmsApp
 
         public string Address { get; set; }
 
-        public DateTime Time => Messages?.FirstOrDefault()?.Time ?? DateTime.Now;
-        public string Label => Messages?.FirstOrDefault()?.Label ?? "Nothing";
+        public override string ToString()
+        {
+            return this.Address;
+        }
 
-        public ObservableCollection<Message> Messages { get; set; }
     }
 }
 
