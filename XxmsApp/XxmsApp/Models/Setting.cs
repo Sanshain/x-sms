@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace XxmsApp.Model
 {
@@ -106,89 +107,24 @@ namespace XxmsApp
     }
 
     // no Cachable
-    public class Settings : List<Setting>//, INotifyCollectionChanged // , IEnumerable<Setting>
+    [Obsolete]
+    public class ModelSettings : List<Setting>//, INotifyCollectionChanged // , IEnumerable<Setting>
     {
 
 
         int _initialized = 0;
 
-        public Settings(IEnumerable<Setting> _items) : base(_items) { }
+        public ModelSettings(IEnumerable<Setting> _items) : base(_items) { }
         // public Settings() { }
         // public Settings(IEnumerable<Setting> _items) => Units = new ObservableCollection<Setting>(_items);        
         // public ObservableCollection<Model.Setting> Units { get; set; } = new ObservableCollection<Setting>();
         
 
 
-        
-        
-        static Dictionary<string, bool> sttngs = new Dictionary<string, bool>();
-        [Description("Краткое описание, полное описание")]
-        public static bool AutoFocus
-        {
-            get
-            {
-                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
-                if (sttngs.ContainsKey(name)) return sttngs[name];
-                else
-                {
-                    return sttngs[name] = false;
-                }
-            }
-            set
-            {
-                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
-                if (sttngs.ContainsKey(name)) sttngs[name] = value;
-                else
-                {
-                    sttngs.Add(name, value);
-                }
-            }
-        }
 
-        [Description("Краткое описание, полное описание")]
-        public static bool AutoFocus2
-        {
-            get
-            {
-                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
-                return Cache.Read<Setting>().FirstOrDefault(s => s.Name == name)?.Value ?? false;
-            }
-            set
-            {
-                var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
-                Cache.Read<Setting>().SingleOrDefault(s => s.Name == name).Value = value;
-            }
-        }
-
-        private static List<Setting> ConvertToList()
-        {
-            var props = typeof(Settings).GetProperties(BindingFlags.Static | BindingFlags.Public);
-
-            var stgs = props.Select(p =>
-            {
-                return new Setting
-                {
-                    Name = p.Name,
-                    Description = p.GetCustomAttribute<DescriptionAttribute>().Description,
-                    Value = (bool)p.GetValue(null)
-                };
-            }).ToList();
-
-            foreach (var prop in props)
-            {
-                var desc = prop.GetCustomAttribute<DescriptionAttribute>().Description;
-            }
-
-            return stgs;
-        }
-
-        private static void ReadToDict()
-        {
-            sttngs = Cache.Read<Setting>().ToDictionary(s => s.Name, s => s.Value);
-        }
         //*/
 
-        public static Settings Initialize()
+        public static ModelSettings Initialize()
         {
             // PropertiesToList();
 
@@ -197,11 +133,11 @@ namespace XxmsApp
 
 
             // var settings = new Settings { Units = new ObservableCollection<Setting>(Read()) };
-            var settings = new Settings(Cache.Read<Setting>());  // Read()                  // for save time
+            var settings = new ModelSettings(Cache.Read<Setting>());  // Read()                  // for save time
 
             if (settings.Count() == 0)
             {
-                settings = new Settings(new List<Setting> // ConvertToList()
+                settings = new ModelSettings(new List<Setting> // ConvertToList()
                 {
                     (
                         Name : "Автофокус",

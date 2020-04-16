@@ -14,23 +14,10 @@ namespace XxmsApp.Views
     public partial class SettingPage : ContentPage
     {
         
-        Settings settings;
+        Options.Settings settings;
 
         public SettingPage()
         {
-            /*
-             
-            InitializeComponent();
-
-            this.SettingsList.ItemsSource = Items;
-
-            this.SettingsList.ItemsSource = new Dictionary<string, bool>()
-            {
-                {"Автофокус", Convert.ToBoolean(Properties.Resources.AutoFocus)},
-                {"В виде диалогов", Convert.ToBoolean(Properties.Resources.DialogsView)}
-            };
-            
-            //*/
 
 
             var itemTemplate = new DataTemplate(() =>
@@ -61,8 +48,7 @@ namespace XxmsApp.Views
 
                 var sc = new SwitchCell { };
                 sc.SetBinding(SwitchCell.TextProperty, "Name");
-                sc.SetBinding(SwitchCell.OnProperty, "Value");//*/
-                // sc.OnChanged += Sc_OnChanged;                            // realized inside binding object
+                sc.SetBinding(SwitchCell.OnProperty, "Content");//*/
 
                 return sc;
                 
@@ -75,7 +61,7 @@ namespace XxmsApp.Views
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 // ItemsSource = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 Footer = reset = new Button { Text = "Сброс настроек" },
-                ItemsSource = settings = Settings.Initialize()
+                ItemsSource = settings = Options.Settings.Initialize()
 
             };
             reset.Clicked += async (object sender, EventArgs e) =>
@@ -103,14 +89,20 @@ namespace XxmsApp.Views
         {
             base.OnAppearing();
 
-            settings.CollectionChanged += Settings_CollectionChanged;
+            settings.CollectionChanged += Settings_CollectionChanged1;
         }
+
+        private void Settings_CollectionChanged1(object sender, CollectionChangedEventArgs<Options.Setting> e)
+        {
+            
+        }
+
 
         private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
         {
             // await DisplayAlert(e.ChangedItem.Prop, e.Id.ToString(), "Settings_CollectionChanged", "OK");
 
-            Cache.database.Update((sender as Settings)[e.Id]);
+            Cache.database.Update((sender as ModelSettings)[e.Id]);
         }
 
 
