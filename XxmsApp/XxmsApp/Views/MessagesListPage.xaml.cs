@@ -68,18 +68,15 @@ namespace XxmsApp.Views
 
         }
 
-        async private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
             {                
 
                 var msg = e.NewItems[0] as Message;
 
-
                 var msgApi = DependencyService.Get<Api.IMessages>();
                 msgApi.Send(msg.Address, msg.Value);
-
-
 
             }
         }

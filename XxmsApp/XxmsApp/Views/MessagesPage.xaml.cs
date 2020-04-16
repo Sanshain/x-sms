@@ -17,7 +17,7 @@ namespace XxmsApp.Views
         IEnumerable<Model.Message> messages = null;
         Message[] msgs;
         int limit = 
-            (Cache.Read<Setting>().FirstOrDefault(s => s.Name == "LazyLoad")?.Value ?? false) ? 4 : 30;                                    //! for faster dcrolling on big gialogs
+            (Cache.Read<Options.Setting>().FirstOrDefault(s => s.Name == "LazyLoad")?.Content ?? false) ? 4 : 30;                                    //! for faster dcrolling on big gialogs
         int _msgsCount = 0; // log var. No production
         int counter = 1;
 

@@ -14,7 +14,7 @@ namespace XxmsApp.Views
     public partial class SettingPage : ContentPage
     {
         
-        Options.Settings settings;
+        Options.AbstractSettings settings;
 
         public SettingPage()
         {
@@ -47,7 +47,7 @@ namespace XxmsApp.Views
                 //*/
 
                 var sc = new SwitchCell { };
-                sc.SetBinding(SwitchCell.TextProperty, "Name");
+                sc.SetBinding(SwitchCell.TextProperty, "Description");
                 sc.SetBinding(SwitchCell.OnProperty, "Content");//*/
 
                 return sc;
@@ -60,7 +60,8 @@ namespace XxmsApp.Views
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 Footer = reset = new Button { Text = "Сброс настроек" },
-                ItemsSource = settings = Options.Settings.Initialize()
+                // ItemsSource = settings = Options.Settings.Initialize()
+                ItemsSource = settings = Options.Database.ModelSettings.Initialize()
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
 
             };
@@ -68,8 +69,10 @@ namespace XxmsApp.Views
             {
                 
                 if (await DisplayAlert($"Сброс настроек", "Настройки Xxms будут сброшены на заводские", "Ладно", "Отмена"))
-                {
-                    Cache.database.DropTable<Model.Setting>();
+                {                    
+                    Cache.database.DeleteAll<Options.Setting>();        // Cache.database.DropTable<Options.Setting>();
+
+                    Cache.CacheClear<Options.Setting>();
                 }
             };
 
@@ -92,17 +95,9 @@ namespace XxmsApp.Views
             if (settings != null) settings.CollectionChanged += Settings_CollectionChanged1;
         }
 
-        private void Settings_CollectionChanged1(object sender, CollectionChangedEventArgs<Options.Setting> e)
+        private void Settings_CollectionChanged1(object sender, Options.CollectionChangedEventArgs<Options.Setting> e)
         {
             
-        }
-
-
-        private void Settings_CollectionChanged(object sender, CollectionChangedEventArgs<Model.Setting> e)
-        {
-            // await DisplayAlert(e.ChangedItem.Prop, e.Id.ToString(), "Settings_CollectionChanged", "OK");
-
-            Cache.database.Update((sender as ModelSettings)[e.Id]);
         }
 
 
@@ -111,9 +106,9 @@ namespace XxmsApp.Views
             if (e.Item == null)
                 return;
 
-            var setting = (((ListView)sender).SelectedItem as Model.Setting);
+            var setting = (((ListView)sender).SelectedItem as Options.Setting);
 
-            await DisplayAlert("Описание", setting.Description, "OK");
+            await DisplayAlert("Описание", setting.FullDescription, "OK", "Отмена");
 
             //Deselect Item
             ((ListView)sender).SelectedItem = null;

@@ -82,7 +82,7 @@ namespace XxmsApp.Piece
             } else ItemsSource = this.DataLoad(30);                         // else            
 
             HasUnevenRows = true;
-            ItemTemplate = this.DataView();            
+            ItemTemplate = this.DataView();                          // в DialogCell из-за вычисления отступа скорее всего тормоза
             //ItemTemplate = new DataTemplate(typeof(DialogCell));            // this.DataView();
 
             this.ItemSelected += CustomList_ItemSelected;

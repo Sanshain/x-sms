@@ -275,7 +275,6 @@ namespace XxmsApp.Views
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        [Obsolete("This yet just gag. Need to realize")]
         async private void Send_Clicked(object sender, EventArgs e)
         {
             var entryHeight = Device.GetNamedSize(NamedSize.Default, typeof(Entry));

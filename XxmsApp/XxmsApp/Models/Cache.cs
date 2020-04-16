@@ -115,7 +115,7 @@ namespace XxmsApp
             database.CreateTable<Model.Contacts>();
 
             //database.DropTable<Model.Setting>();
-            database.CreateTable<Model.Setting>();
+            database.CreateTable<Options.Setting>();
 
         }
 
@@ -125,7 +125,7 @@ namespace XxmsApp
         static Dictionary<Type, Func<Task<List<object>>>> actions = new Dictionary<Type, Func<Task<List<object>>>>()
         {
 
-            { typeof(Model.Contacts),  async () => 
+            { typeof(Model.Contacts),  async () =>
                 {
                     return (await Plugin.ContactService.CrossContactService.Current.GetContactListAsync())
                         .Select(r => r as object).ToList();
@@ -146,13 +146,13 @@ namespace XxmsApp
                     return msgs;
                 }
             },
-            { typeof(Model.Setting), () => {
+            { typeof(Options.Setting), () => {
 
                     throw new NotImplementedException(
                         "This type has no low-level api for long execution, "+
                         "therefore Update methods by Cache class for the type don't intended");
                 }
-            } 
+            }
 
         };
 
@@ -165,12 +165,12 @@ namespace XxmsApp
         /// <returns></returns>
         // public static List<T> Read<T>() where T: new() => database.Table<T>().ToList();
         public static List<T> Read<T>(ObservableCollection<T> observable = null) where T : new() // IModel
-        {            
+        {
 
             if (cache.ContainsKey(typeof(T))) return cache[typeof(T)].Select(o => (T)o).ToList();
             else
             {
-                var objects = database.Table<T>().ToList();                
+                var objects = database.Table<T>().ToList();
 
                 if (objects.Count > 0) cache[typeof(T)] = objects.Select(o => (object)o).ToList();
 
@@ -179,7 +179,7 @@ namespace XxmsApp
                     // подписываемся на событие On UpdateAsync()
                     void ListenLoading(IList<IModel> obj)
                     {
-                        
+
                         Cache.OnUpdate -= ListenLoading;
                     }
 
@@ -191,11 +191,19 @@ namespace XxmsApp
         }
 
 
-        public static void Update<T>(T subject, int id) 
+        public static bool CacheClear<T>()
+        {
+            cache.Remove(typeof(T));
+
+            return true;
+        }
+
+        public static void Update<T>(T subject, int id) where T : new() 
         {
             if (cache.ContainsKey(typeof(T))) cache[typeof(T)][id] = subject;                                                           // 
             else
             {
+                cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
                 // throw new KeyNotFoundException("The type yet was not added to cache");
             }
         }
