@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Diagnostics;
-
+using System.Runtime.CompilerServices;
 
 namespace XxmsApp.Options
 {
@@ -362,7 +362,7 @@ namespace XxmsApp.Options
 
 
 
-namespace XxmsApp.Options.Database
+namespace XxmsApp.Options
 {
     /// <summary>
     /// Alternative solution for storing settings in the database
@@ -432,6 +432,8 @@ namespace XxmsApp.Options.Database
 
             if (settings.Count == 0)
             {
+
+                /*
                 settings = new ModelSettings(new List<Setting> // ConvertToList()
                 {(
                         Name : "AutoFocus",
@@ -448,7 +450,9 @@ namespace XxmsApp.Options.Database
                         Value : true,
                         Desc : "Ленивая подгрузка сообщений",
                         FullDesc : "Ленивая подгрузка сообщений при открытии диалога")
-                });
+                });//*/
+                
+                settings = new ModelSettings(Settings.ToList());
 
                 Save(settings.ToArray());
             }

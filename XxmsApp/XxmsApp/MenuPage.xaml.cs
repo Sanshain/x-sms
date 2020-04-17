@@ -30,6 +30,7 @@ namespace XxmsApp
                     "Настройки",
                     "Настройки 2",
                     "Настройки 3",
+                    "Настройки 0",
                     "Read sms",
                     "О нас",
                 },
@@ -57,7 +58,11 @@ namespace XxmsApp
                 };
             };//*/
 
-
+            /*
+            var method = typeof(MenuPage).GetMethod("GoToSettings", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var handle = method.MethodHandle;
+            System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(handle);//*/
 
             Content = menuContainer;
 
@@ -108,9 +113,7 @@ namespace XxmsApp
 
                 case "Настройки":
 
-                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
-                        new Views.SettingPage(Options.ObSettings.Initialize()), true);
-                    (this.Parent as MasterDetailPage).IsPresented = false;
+                    GoToSettings();
 
                     break;
 
@@ -129,6 +132,16 @@ namespace XxmsApp
                     (this.Parent as MasterDetailPage).IsPresented = false;
 
                     break;
+
+
+                case "Настройки 0":
+
+                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
+                        new Views.SettingPage(null), true);
+                    (this.Parent as MasterDetailPage).IsPresented = false;
+
+                    break;
+
 
                 default:
 
@@ -150,6 +163,13 @@ namespace XxmsApp
                 return false;
             });//*/
 
+        }
+
+        private void GoToSettings()
+        {
+            (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
+                new Views.SettingPage(Options.ObSettings.Initialize()), true);
+            (this.Parent as MasterDetailPage).IsPresented = false;
         }
     }
 }

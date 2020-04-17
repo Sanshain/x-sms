@@ -62,10 +62,21 @@ namespace XxmsApp.Views
                 Footer = reset = new Button { Text = "Сброс настроек" },
                 // ItemsSource = settings = Options.Settings.Initialize()
                 // ItemsSource = settings = Options.Database.ModelSettings.Initialize()
-                ItemsSource = settings = settingList // Options.ObSettings.Initialize()
+                // ItemsSource = settings = Options.ObSettings.Initialize()
+
+                // 
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
 
             };
+
+            if (settingList != null) SettingList.ItemsSource = (settings = settingList);
+            else SettingList.ItemsSource = new List<object> {
+                new { Description = "1", Content = true },
+                new { Description = "1", Content = false },
+                new { Description = "1", Content = true }
+            };
+
+
             reset.Clicked += async (object sender, EventArgs e) =>
             {
                 
