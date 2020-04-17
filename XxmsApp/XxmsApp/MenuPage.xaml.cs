@@ -98,7 +98,7 @@ namespace XxmsApp
                     sw.Stop();
 
                     var di = DependencyService.Get <XxmsApp.Api.IMessages>();
-                    di.ShowNotification("Test", "content");
+                    // di.ShowNotification("Test", "content");
 
                     DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
 

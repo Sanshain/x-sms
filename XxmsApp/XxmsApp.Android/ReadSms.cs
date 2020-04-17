@@ -18,12 +18,19 @@ using XxmsApp.Model;
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]
 namespace XxmsApp.Api.Droid
 {
-    
+
     class XMessages : IMessages
     {
 
+        /// <summary>
+        /// Для получения информации о том, что смс ушла до получателя
+        /// </summary>
         internal static PendingIntent PendInSent { get; set; }
+        /// <summary>
+        /// Для получения информации о том, что смс дошла до получателя
+        /// </summary>
         internal static PendingIntent PendInDelivered { get; set; }
+
 
         ContentResolver contentResolver;
 
@@ -34,20 +41,22 @@ namespace XxmsApp.Api.Droid
 
             // List<string> xms = new List<string>();
 
-            ICursor qs = contentResolver.Query(
-                Android.Net.Uri.Parse("content://sms/inbox"), null, null, null, null);  
-            //on "ORDER BY _id DESC" - timeout exception error
+            ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms"), null, null, null, null);
+            // ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms/inbox"), null, null, null, null); //on "ORDER BY _id DESC" - timeout exception error
 
             List<XxmsApp.Model.Message> messages = new List<Model.Message>();
 
             while (qs.MoveToNext())
             {
+                var income = qs.GetShort(qs.GetColumnIndex("type"));
+
                 XxmsApp.Model.Message msg = new Model.Message
                 {
                     Id = qs.GetInt(qs.GetColumnIndex("_id")),
                     // Time = DateTime.FromBinary(qs.GetLong(qs.GetColumnIndex("date"))),
                     Address = qs.GetString(qs.GetColumnIndex("address")),
-                    Value = qs.GetString(qs.GetColumnIndex("body"))
+                    Value = qs.GetString(qs.GetColumnIndex("body")),
+                    Incoming = income == 1 ? true : false
                 };
 
                 var time = qs.GetLong(qs.GetColumnIndex("date"));
@@ -81,100 +90,12 @@ namespace XxmsApp.Api.Droid
             return true;
         }
 
-
-
-
-
         public void Send(XxmsApp.Model.Message msg)
         {
             SmsManager.Default.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
         }
 
 
-
-
-
-
-
-
-
-
-        public void ShowNotification(string title, string content)
-        {
-            var context = Android.App.Application.Context;
-
-            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
-
-            const string CATEGORY_MESSAGE = "msg"; // developer.android.com/reference/android/app/Notification?hl=ru#CATEGORY_MESSAGE
-
-            var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
-                .SetContentTitle(title)
-                .SetContentText(content)                                               // content
-
-                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0)) // where to pass view by clicked                                
-                .SetAutoCancel(true)                                                    // автоотключение уведомления при переходе на активити
-
-                .SetLights(Android.Graphics.Color.ParseColor("#ccffff"), 5000, 5000)    // установка освещения // 0xff0000ff
-                .SetVibrate(new long[] { 1000, 1000, 1000 })                          // vibration (need homonymous permission)
-
-                .SetPriority(1);
-
-            // .SetCategory(NotificationCompat.CategoryMessage)                                          // category of notify
-            // .SetGroupSummary(true)
-            // .SetGroup("messages")
-
-            // .SetDefaults((int)NotificationPriority.High);                            // priority (high or max => sound as vk/watsapp)
-
-            // cool if need: 
-            // .SetUsesChronometer(true)                                        // include timer instead time into the notification
-            // .SetOngoing(true)                                                // not clearing (may be, first place also) by clean
-            // .SetSubText("subtext")                                           // subtext after value text
-            // .SetFullScreenIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0), true) // автопереход к активити при появлении уведомления
-
-            // same behavior:
-            // .SetVisibility((int)ViewAttr.Invisible)                                 // ?? same behavior ?? 
-            // .SetColor(0x669900) | .SetColor(Android.Resource.Color.HoloRedLight)    // same color color (just lollilop?)
-            // .SetContentInfo("Info")                                                 // same behavior
-            // .SetTicker("notification_ticker_text")                                  // same behavior (? my by this can be used for top view, but not worked)
-
-
-            // .SetExtras()                                                         // as I understand for saving data for next notification
-            // .SetDeleteIntent()                                                   // prohibition for clearing (but difficult) -> apply SetOngoing the simplest
-            // .SetSound(Android.Net.Uri.Parse(""))                                 // sound
-            // .SetCustomHeadsUpContentView()                                       // probably for ovverding head of notify as sms by Xiaomi
-            // .SetCustomContentView()                                              // too difficult to use
-            // .SetCustomBigContentView()                                           // too difficult to use
-            // .SetSmallIcon(XxmsApp.Droid.Resource.Drawable.icon)
-            // .SetWhen(DateTime.Now.Millisecond);                                  // set time for appearance
-            // .setOnlyAlertOnce                                                    // or see or vibro/sound
-            // .SetProgress()                                                       // в виде прогрессбара
-            // .SetPublicVersion()                                                  // поверх экрана блокировки
-            // .setVisibility                                                       // ??
-            // .limitCharSequenceLength                                             // ограничение на количество символов
-
-            // examples:
-
-            // .SetCustomContentView(context.PackageName, XxmsApp.Droid.Resource.Layout.notification_action)
-            // .SetLargeIcon(Android.Graphics.BitmapFactory.DecodeResource(XxmsApp.Droid.MainActivity.Instance.Resources, Android.Resource.Drawable.IcDialogInfo))
-
-
-            
-            Notification notification = builder.Build();
-            notification.Defaults = NotificationDefaults.All;
-            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(2, notification);
-        }
-
-    }
-
-    internal enum ViewAttr : int
-    {
-        IsVisible = 0x00000000,                                     // сделать ее видимой
-        Invisible = 0x00000004,
-        Gone = 0x00000008,                                          // переход к активити при всплытии уведомления
-        VisibilityMask = 0x0000000C
     }
 
 }

@@ -69,18 +69,18 @@ namespace XxmsApp.Droid
         }
         public override bool OnUnbind(Intent intent)
         {
-            new XxmsApp.Api.Droid.XMessages().ShowNotification(
-                this.GetType().Name,
-                System.Reflection.MethodBase.GetCurrentMethod().Name);
+            /*
+            new XxmsApp.Api.Droid.XMessages().ShowNotification(this.GetType().Name,
+                System.Reflection.MethodBase.GetCurrentMethod().Name);*/
 
             return base.OnUnbind(intent);
         }
 
         public override void OnDestroy()
         {
-            new XxmsApp.Api.Droid.XMessages().ShowNotification(
-                this.GetType().Name,
-                System.Reflection.MethodBase.GetCurrentMethod().Name);
+            /*
+            new XxmsApp.Api.Droid.XMessages().ShowNotification(this.GetType().Name,
+                System.Reflection.MethodBase.GetCurrentMethod().Name);//*/
 
             base.OnDestroy();
         }
