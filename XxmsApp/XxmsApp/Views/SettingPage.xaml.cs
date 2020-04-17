@@ -61,7 +61,8 @@ namespace XxmsApp.Views
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 Footer = reset = new Button { Text = "Сброс настроек" },
                 // ItemsSource = settings = Options.Settings.Initialize()
-                ItemsSource = settings = Options.Database.ModelSettings.Initialize()
+                // ItemsSource = settings = Options.Database.ModelSettings.Initialize()
+                ItemsSource = settings = Options.ObSettings.Initialize()
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
 
             };
@@ -73,6 +74,8 @@ namespace XxmsApp.Views
                     Cache.database.DeleteAll<Options.Setting>();        // Cache.database.DropTable<Options.Setting>();
 
                     Cache.CacheClear<Options.Setting>();
+
+                    Options.ObSettings.RemoveAllCurrentProps();
                 }
             };
 

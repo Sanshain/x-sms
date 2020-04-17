@@ -11,6 +11,7 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Diagnostics;
 
+
 namespace XxmsApp.Options
 {
 
@@ -151,23 +152,39 @@ namespace XxmsApp.Options
         public ObSettings(IEnumerable<Setting> settings) : base(settings) { }
 
 
+        private static string Serialize(Setting msg)
+        {
+            return $"{ msg.Name }%{ msg.Content.ToString() }%{msg.Description }%{ msg.FullDescription }";
+        }
+        private static Setting Unserialize(string usmsg)
+        {
+            var attrs = usmsg.Split('%');
+            return new Setting
+            {
+                Name = attrs[0],
+                Content = Convert.ToBoolean(attrs[1]),
+                Description = attrs[2],
+                FullDescription = attrs[3]
+            };
+        }
+
         protected new static Func<bool> Get = () =>
         {
             var method = new StackTrace(false).GetFrame(1).GetMethod();
             var name = method.Name.Substring(4);
 
-            if (App.Current.Properties.ContainsKey(name)) return (bool)App.Current.Properties[name];
+            if (App.Current.Properties.ContainsKey(name)) return Unserialize(App.Current.Properties[name].ToString()).Content;
             else
             {                              
                 var desc = method.DeclaringType.GetProperty(name).GetCustomAttribute(typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
-                App.Current.Properties[name] = new Setting
+                App.Current.Properties[name] = Serialize(new Setting
                 {
                     Content = false,
                     Name = name,
                     Description = desc.Description,
                     FullDescription = desc.FullDescription
-                };
+                });
 
                 return App.Current.Properties[name] as Setting;
             }
@@ -178,39 +195,39 @@ namespace XxmsApp.Options
         {
             var method = System.Reflection.MethodBase.GetCurrentMethod();
             var name = method.Name.Substring(4);
-            if (App.Current.Properties.ContainsKey(name)) (App.Current.Properties[name] as Setting).Content = value;
+            if (App.Current.Properties.ContainsKey(name))
+            {
+                var setting = Unserialize(App.Current.Properties[name] as string);
+                setting.Content = value;
+                App.Current.Properties[name] = Serialize(setting);
+            }
             else
             {
                 var desc = method.DeclaringType.GetProperty(name).GetCustomAttribute(typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
-                App.Current.Properties.Add(name, new Setting
+                // throw new Exception("unsuppoerted setting");
+
+                App.Current.Properties.Add(name, Serialize(new Setting
                 {
                     Name = name,
                     Content = value,
                     Description = desc.Description,
                     FullDescription = desc.FullDescription
-                });
-                throw new Exception("unsuppoerted setting");
+                }));
+
             }                
         };
 
 
-        public new static Settings Initialize()
+        public new static ObSettings Initialize()
         {
             Stopwatch sw = new Stopwatch(); sw.Start();
 
-            if (App.Current.Properties.Count == 0)
-            {
-                var list = Settings.ToList();
-                for (int i = 0; i < list.Count; i++)
-                {
-                    App.Current.Properties.Add(list[i].Name, list[i]);
-                }
-            }
+            var stgs = App.Current.Properties;
 
-            var ss = App.Current.Properties.ToDictionary(k => k.Key, v => v.Value as Setting);
+            var ss = Reset().ToDictionary(k => k.Key, v => Unserialize(v.Value as string));
 
-            var settings = new Settings(ss.Values.ToList());
+            var settings = new ObSettings(ss.Values.ToList());
 
             settings.ForEach(s => s.PropertyChanged += settings.Setting_Changed);
 
@@ -219,6 +236,62 @@ namespace XxmsApp.Options
             return settings;
         }
 
+        public override event CollectionChangedEventHandler CollectionChanged;
+
+
+
+        internal new void Setting_Changed(object sender, PropertyChangedEventArgs e)
+        {
+            CollectionChanged?.Invoke(this, new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
+
+            App.Current.Properties[(sender as Setting).Name] = Serialize(sender as Setting);
+
+            App.Current.SavePropertiesAsync();
+        }
+
+
+
+        private static IDictionary<string, object> Reset()
+        {
+            var stgs = App.Current.Properties;
+
+            if (App.Current.Properties.Count == 0) FillCurrentAppProps(Settings.ToList().ToDictionary(s => s.Name, s => Serialize(s)));
+
+            else if (App.Current.Properties.Any(kv =>
+                {
+                    bool v = kv.Value.GetType() != typeof(string);
+                    return v;
+                }))
+            {
+                RemoveAllCurrentProps();
+
+                FillCurrentAppProps(Settings.ToList().ToDictionary(s => s.Name, s => Serialize(s)));
+            }
+
+            return App.Current.Properties;
+        }
+
+        public static IDictionary<string, object> RemoveAllCurrentProps()
+        {
+            // remove unnecessary
+            var UnKeys = new List<string>();
+            foreach (var kv in App.Current.Properties) UnKeys.Add(kv.Key);          // if (!list.Any(el => el.Name == kv.Key)) 
+            foreach (var key in UnKeys) App.Current.Properties.Remove(key);
+
+            return App.Current.Properties;
+        }
+
+        private static void FillCurrentAppProps(Dictionary<string, string> dict)
+        {
+            foreach (var kv in dict)
+            {
+                if (App.Current.Properties.ContainsKey(kv.Key))
+                {
+                    App.Current.Properties[kv.Key] = kv.Value;
+                }
+                else App.Current.Properties.Add(kv.Key, kv.Value);
+            }
+        }
     }
 
 

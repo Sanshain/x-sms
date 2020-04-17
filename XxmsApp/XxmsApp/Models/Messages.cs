@@ -48,6 +48,7 @@ namespace XxmsApp.Model
     }
 
     [Table("Messages")]
+    [Serializable]    
     public class Message : IModel, INotifyPropertyChanged
     {
         
