@@ -28,9 +28,6 @@ namespace XxmsApp
                 ItemsSource = new string[]
                 {
                     "Настройки",
-                    "Настройки 2",
-                    "Настройки 3",
-                    "Настройки 0",
                     "Read sms",
                     "О нас",
                 },
@@ -117,31 +114,6 @@ namespace XxmsApp
 
                     break;
 
-                case "Настройки 2":
-
-                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
-                        new Views.SettingPage(Options.Settings.Initialize()), true);
-                    (this.Parent as MasterDetailPage).IsPresented = false;
-
-                    break;
-
-                case "Настройки 3":
-
-                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
-                        new Views.SettingPage(Options.Database.ModelSettings.Initialize()), true);
-                    (this.Parent as MasterDetailPage).IsPresented = false;
-
-                    break;
-
-
-                case "Настройки 0":
-
-                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
-                        new Views.SettingPage(null), true);
-                    (this.Parent as MasterDetailPage).IsPresented = false;
-
-                    break;
-
 
                 default:
 
@@ -165,11 +137,13 @@ namespace XxmsApp
 
         }
 
+        Views.SettingPage settingsPage = null;
         private void GoToSettings()
         {
-            (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(
-                new Views.SettingPage(Options.ObSettings.Initialize()), true);
+            settingsPage = settingsPage ?? new Views.SettingPage(Options.ModelSettings.Initialize());
+            (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(settingsPage, true);
             (this.Parent as MasterDetailPage).IsPresented = false;
+            
         }
     }
 }

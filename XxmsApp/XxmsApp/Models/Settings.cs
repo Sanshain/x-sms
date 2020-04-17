@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 
 namespace XxmsApp.Options
 {
+    public delegate void CollectionChangedEventHandler(object sender, CollectionChangedEventArgs<Setting> e);
 
     public class CollectionChangedEventArgs<T> : EventArgs
     {
@@ -130,8 +131,7 @@ namespace XxmsApp.Options
 
             App.Current.Properties[(sender as Setting).Name] = (sender as Setting).Content;
         }        
-
-        public delegate void CollectionChangedEventHandler(object sender, CollectionChangedEventArgs<Setting> e);
+        
         public virtual event CollectionChangedEventHandler CollectionChanged;
     }
 
@@ -382,7 +382,7 @@ namespace XxmsApp.Options
 
         private void ModelSettings_CollectionChanged(object sender, CollectionChangedEventArgs<Setting> e)
         {
-            Cache.database.Update((sender as Options.Database.ModelSettings)[e.Id]);
+            Cache.database.Update((sender as Options.ModelSettings)[e.Id]);
         }
 
 
@@ -412,7 +412,7 @@ namespace XxmsApp.Options
 
         private void Setting_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (_initialized++ >= this.Count && CollectionChanged != null)
+            if ( CollectionChanged != null) // _initialized++ >= this.Count &&
             {
                 CollectionChanged(this, new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
 
@@ -423,7 +423,7 @@ namespace XxmsApp.Options
         }
 
 
-        public new static ModelSettings Initialize()
+        public static ModelSettings Initialize()
         {
 
             Stopwatch sw = new Stopwatch(); sw.Start();

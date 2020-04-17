@@ -13,80 +13,42 @@ namespace XxmsApp.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SettingPage : ContentPage
     {
-        
+
         Options.AbstractSettings settings;
 
-        public SettingPage(Options.AbstractSettings settingList)
+        
+
+        public SettingPage(Options.AbstractSettings settingList = null)
         {
 
 
-            var itemTemplate = new DataTemplate(() =>
-            {
-                /*
-                var view = new StackLayout {
-                    Orientation = StackOrientation.Horizontal,
-                    Padding = new Thickness(15, 0, 0, 0) };
+            var itemTemplate = new DataTemplate(() => CellGenerate());
 
-                Label setting = new Label {
-                    HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
-                Switch swtch = new Switch {
-                    HorizontalOptions = LayoutOptions.End,
-                    VerticalOptions = LayoutOptions.Center
-                };
 
-                setting.SetBinding(Label.TextProperty, "Prop");
-                swtch.SetBinding(Switch.IsEnabledProperty, "Enabled");
-                swtch.Toggled += Swtch_Toggled;
-
-                view.Children.Add(setting);
-                view.Children.Add(swtch);
-
-                var viewCell = new ViewCell { View = view };
-
-                return viewCell;
-                //*/
-
-                var sc = new SwitchCell { };
-                sc.SetBinding(SwitchCell.TextProperty, "Description");
-                sc.SetBinding(SwitchCell.OnProperty, "Content");//*/
-
-                return sc;
-                
-            });
-            
             Button reset;
             var SettingList = new ListView()
             {
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 Footer = reset = new Button { Text = "Сброс настроек" },
-                // ItemsSource = settings = Options.Settings.Initialize()
-                // ItemsSource = settings = Options.Database.ModelSettings.Initialize()
+                // ItemsSource = settings = Options.Settings.Initialize()                
                 // ItemsSource = settings = Options.ObSettings.Initialize()
-
-                // 
+                ItemsSource = settings = settingList ?? Options.ModelSettings.Initialize()
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
 
-            };
-
-            if (settingList != null) SettingList.ItemsSource = (settings = settingList);
-            else SettingList.ItemsSource = new List<object> {
-                new { Description = "1", Content = true },
-                new { Description = "1", Content = false },
-                new { Description = "1", Content = true }
             };
 
 
             reset.Clicked += async (object sender, EventArgs e) =>
             {
-                
+
                 if (await DisplayAlert($"Сброс настроек", "Настройки Xxms будут сброшены на заводские", "Ладно", "Отмена"))
-                {                    
+                {
                     Cache.database.DeleteAll<Options.Setting>();        // Cache.database.DropTable<Options.Setting>();
 
                     Cache.CacheClear<Options.Setting>();
 
-                    Options.ObSettings.RemoveAllCurrentProps();
+                    // Options.ObSettings.RemoveAllCurrentProps();
                 }
             };
 
@@ -101,25 +63,57 @@ namespace XxmsApp.Views
 
         }
 
+        private static object CellGenerate()
+        {
+            /*
+            var view = new StackLayout {
+                Orientation = StackOrientation.Horizontal,
+                Padding = new Thickness(15, 0, 0, 0) };
+
+            Label setting = new Label {
+                HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
+            Switch swtch = new Switch {
+                HorizontalOptions = LayoutOptions.End,
+                VerticalOptions = LayoutOptions.Center
+            };
+
+            setting.SetBinding(Label.TextProperty, "Prop");
+            swtch.SetBinding(Switch.IsEnabledProperty, "Enabled");
+            swtch.Toggled += Swtch_Toggled;
+
+            view.Children.Add(setting);
+            view.Children.Add(swtch);
+
+            var viewCell = new ViewCell { View = view };
+
+            return viewCell;
+            //*/
+
+            var sc = new SwitchCell { };
+            sc.SetBinding(SwitchCell.TextProperty, "Description");
+            sc.SetBinding(SwitchCell.OnProperty, "Content");//*/
+
+            return sc;
+        }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
 
-            if (settings != null) settings.CollectionChanged += Settings_CollectionChanged1;
+            if (settings != null) settings.CollectionChanged += Settings_CollectionChanged;
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
 
-            App.Current.SavePropertiesAsync();
+            // App.Current.SavePropertiesAsync();
         }
 
 
-        private void Settings_CollectionChanged1(object sender, Options.CollectionChangedEventArgs<Options.Setting> e)
+        private void Settings_CollectionChanged(object sender, Options.CollectionChangedEventArgs<Options.Setting> e)
         {
-            
+            var id = this.GetHashCode();
         }
 
 
