@@ -84,7 +84,10 @@ namespace XxmsApp.Options
         {
             var name = new StackTrace(false).GetFrame(1).GetMethod().Name.Substring(4);
 
-            if (App.Current.Properties.ContainsKey(name)) return (bool)App.Current.Properties[name];
+            if (App.Current.Properties.ContainsKey(name))
+            {
+                return (bool)App.Current.Properties[name];
+            }
             else return (bool)(App.Current.Properties[name] = false);
 
         };
@@ -103,8 +106,8 @@ namespace XxmsApp.Options
 
             List<Setting> stgs = props.Select(p =>
             {
-                var attr = p.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
-                
+                var attr = p.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;               
+
                 var value = (bool)p.GetValue(null);
 
                 return new Setting
@@ -119,18 +122,7 @@ namespace XxmsApp.Options
             return stgs;
         }
 
-        public static Settings Initialize()
-        {
-            Stopwatch sw = new Stopwatch(); sw.Start();
 
-            var settings = new Settings(Settings.ToList());
-
-            settings.ForEach(s => s.PropertyChanged += settings.Setting_Changed);
-
-            sw.Stop(); var l = sw.ElapsedMilliseconds;
-
-            return settings;
-        }
 
         internal void Setting_Changed(object sender, PropertyChangedEventArgs e)
         {
@@ -219,7 +211,8 @@ namespace XxmsApp.Options
         };
 
 
-        public new static ObSettings Initialize()
+        int initialized = 0;
+        public static ObSettings Initialize()
         {
             Stopwatch sw = new Stopwatch(); sw.Start();
 
@@ -233,6 +226,10 @@ namespace XxmsApp.Options
 
             sw.Stop(); var l = sw.ElapsedMilliseconds;
 
+
+            settings.initialized = settings.Count(s => s.Content);
+
+
             return settings;
         }
 
@@ -242,16 +239,19 @@ namespace XxmsApp.Options
 
         internal new void Setting_Changed(object sender, PropertyChangedEventArgs e)
         {
-            CollectionChanged?.Invoke(this, new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
+            if (initialized == 0)
+            {
+                CollectionChanged?.Invoke(this, new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
 
-            App.Current.Properties[(sender as Setting).Name] = Serialize(sender as Setting);
+                App.Current.Properties[(sender as Setting).Name] = Serialize(sender as Setting);
+            }
 
-            App.Current.SavePropertiesAsync();
+            else initialized--;
+            
         }
 
 
-
-        private static IDictionary<string, object> Reset()
+        internal static IDictionary<string, object> Reset()
         {
             var stgs = App.Current.Properties;
 
@@ -281,7 +281,7 @@ namespace XxmsApp.Options
             return App.Current.Properties;
         }
 
-        private static void FillCurrentAppProps(Dictionary<string, string> dict)
+        internal static void FillCurrentAppProps(Dictionary<string, string> dict)
         {
             foreach (var kv in dict)
             {
@@ -310,7 +310,48 @@ namespace XxmsApp.Options
         [FullDescription("Краткое описание", "Полное описание")]
         public static bool AutoFocus2 { get => Get(); set => Set(value); }
 
-  
+
+        public static Settings Initialize()
+        {
+            Stopwatch sw = new Stopwatch(); sw.Start();
+
+            var lst = Reset();
+
+            var settings = new Settings(lst);
+
+            settings.ForEach(s => s.PropertyChanged += settings.Setting_Changed);
+
+            sw.Stop(); var l = sw.ElapsedMilliseconds;
+
+            return settings;
+        }
+
+        internal static List<Setting> Reset()
+        {
+
+            if (App.Current.Properties.Any(kv =>
+            {
+                bool v = kv.Value.GetType() != typeof(bool);
+                return v;
+            }))
+            {
+                ObSettings.RemoveAllCurrentProps();
+            }
+
+            return Settings.ToList();
+        }
+
+        internal static void FillCurrentAppProps(Dictionary<string, bool> dict)
+        {
+            foreach (var kv in dict)
+            {
+                if (App.Current.Properties.ContainsKey(kv.Key))
+                {
+                    App.Current.Properties[kv.Key] = kv.Value;
+                }
+                else App.Current.Properties.Add(kv.Key, kv.Value);
+            }
+        }
 
     }
 

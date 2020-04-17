@@ -16,7 +16,7 @@ namespace XxmsApp.Views
         
         Options.AbstractSettings settings;
 
-        public SettingPage()
+        public SettingPage(Options.AbstractSettings settingList)
         {
 
 
@@ -53,7 +53,7 @@ namespace XxmsApp.Views
                 return sc;
                 
             });
-
+            
             Button reset;
             var SettingList = new ListView()
             {
@@ -62,7 +62,7 @@ namespace XxmsApp.Views
                 Footer = reset = new Button { Text = "Сброс настроек" },
                 // ItemsSource = settings = Options.Settings.Initialize()
                 // ItemsSource = settings = Options.Database.ModelSettings.Initialize()
-                ItemsSource = settings = Options.ObSettings.Initialize()
+                ItemsSource = settings = settingList // Options.ObSettings.Initialize()
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
 
             };
@@ -97,6 +97,14 @@ namespace XxmsApp.Views
 
             if (settings != null) settings.CollectionChanged += Settings_CollectionChanged1;
         }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+
+            App.Current.SavePropertiesAsync();
+        }
+
 
         private void Settings_CollectionChanged1(object sender, Options.CollectionChangedEventArgs<Options.Setting> e)
         {
