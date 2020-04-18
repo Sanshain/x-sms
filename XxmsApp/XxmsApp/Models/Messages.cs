@@ -37,7 +37,7 @@ namespace XxmsApp.Model
             {
                 typeof(Thickness), v => v ? new Thickness(10, 10, 45, 10) : new Thickness(45, 10, 10, 10) },
             {
-                typeof(Color), v => v ? Color.LightGreen : Color.Default }
+                typeof(Color), v => v ? Color.Default : Color.LightGreen }
 
         };
 
@@ -163,8 +163,8 @@ namespace XxmsApp
             }
         }
 
-        public DateTime Time => Messages?.FirstOrDefault()?.Time ?? DateTime.Now;
-        public string Label => Messages?.FirstOrDefault()?.Label ?? "Nothing";
+        public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
+        public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
         // public string Count => $"({Messages?.Count.ToString()})";
         public string Count => count;
 

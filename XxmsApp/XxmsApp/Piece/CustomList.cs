@@ -76,7 +76,7 @@ namespace XxmsApp.Piece
             {
                 ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
                     Address = g.Key,
-                    Messages = new ObservableCollection<Message>(g)
+                    Messages = new ObservableCollection<Message>(g.Reverse())
                 } ).ToList();
 
             } else ItemsSource = this.DataLoad(30);                         // else            
