@@ -14,7 +14,7 @@ namespace XxmsApp.Views
 	public partial class MessagesPage : ContentPage
 	{
 
-
+        double vCellPadding;
         int bottomHeight = 50;
         int scrollHeight;
         ListView messagesList;
@@ -87,7 +87,8 @@ namespace XxmsApp.Views
             var view = new StackLayout
             {
                 Orientation = StackOrientation.Vertical,
-                Padding = new Thickness(15, 0, 0, 0)                
+                Padding = new Thickness(15, 0, 0, 0) ,
+                BackgroundColor = Color.Green
             };
             view.SizeChanged += View_SizeChanged;
 
@@ -105,13 +106,17 @@ namespace XxmsApp.Views
             var messageView = new Frame
             {
                 Content = view,
+                // Padding = new Thickness(0),
                 HasShadow = true,                
                 OutlineColor = Color.Red,             // material design
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
+
             };
 
-            
+            vCellPadding = messageView.Padding.Bottom + messageView.Padding.Top;
+
+
             messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, new BoolToMarginConverter());
 
             /* System.Linq.Expressions.Expression<Func<Message, object>> colored =
@@ -147,8 +152,9 @@ namespace XxmsApp.Views
             if (inited) return;
 
             var item = (sender as StackLayout);
-            
-            var cellHeight = item.Height + item.Spacing * 2;
+
+
+            var cellHeight = item.Height + vCellPadding + item.Spacing * 4;
             totalHeihght += cellHeight;
 
             var cnt = (messagesList.ItemsSource as IEnumerable<Message>).Count();
@@ -158,10 +164,13 @@ namespace XxmsApp.Views
             {                
                 inited = true;
 
-                totalHeihght = totalHeihght + messagesList.Margin.Bottom * (count > 1 ? 2 : 1);
+                var h = Content.Height;
+
+                // totalHeihght = totalHeihght + messagesList.Margin.Bottom * (count > 1 ? 2 : 1);
 
                 var containerHeight = (messagesList.Parent as Layout).Height;
-                if (totalHeihght + messagesList.Margin.Bottom *2 < containerHeight - (messagesList.Margin.Bottom + 10))
+                // if (totalHeihght + messagesList.Margin.Bottom *2 < containerHeight - (messagesList.Margin.Bottom + 10))
+                if (totalHeihght < containerHeight - (messagesList.Margin.Bottom + 10))
                 {
                     messagesList.VerticalOptions = LayoutOptions.End;
                 }

@@ -8,7 +8,7 @@ using Android.Content;
 using Android.Database;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.App;
+using Android.Support.V7.App;
 using Android.Telephony;
 using Android.Views;
 using Android.Widget;
@@ -93,6 +93,36 @@ namespace XxmsApp.Api.Droid
         public void Send(XxmsApp.Model.Message msg)
         {
             SmsManager.Default.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
+        }
+
+
+
+
+
+        [Obsolete]
+        public void ShowNotification(string title, string content)
+        {
+            var context = Android.App.Application.Context;
+
+            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
+
+            var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+                builder.SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
+                .SetContentTitle(title)
+                .SetContentText(content)                                               // content
+
+                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0)) // where to pass view by clicked                                
+                .SetAutoCancel(true)                                                    // автоотключение уведомления при переходе на активити
+                
+                .SetPriority(NotificationCompat.PriorityMax);
+                // .SetDefaults((int)NotificationPriority.High);
+
+
+            Notification notification = builder.Build();
+            notification.Defaults = NotificationDefaults.All;
+            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify("Новое сообщение", 2, notification);
         }
 
 

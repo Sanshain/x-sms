@@ -86,7 +86,9 @@ namespace XxmsApp.Api
         {
             var context = Android.App.Application.Context;
 
-            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
+            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));            
+
+            
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
