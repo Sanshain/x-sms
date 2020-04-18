@@ -108,7 +108,7 @@ namespace XxmsApp
 
         static Cache()
         {
-            //database.DropTable<Model.Message>();
+            // database.DropTable<Model.Message>();
             database.CreateTable<Model.Message>();
 
             // database.DropTable<Model.Contacts>();

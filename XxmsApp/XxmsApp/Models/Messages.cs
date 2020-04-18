@@ -11,13 +11,15 @@ using Xamarin.Forms;
 using System.Globalization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using XxmsApp.Api;
 
 namespace XxmsApp.Model
 {
 
+
+
     public class IncomingConverter : IValueConverter
     {
-
 
         public static IncomingConverter Single
         {
@@ -77,12 +79,12 @@ namespace XxmsApp.Model
         /// <param name="receiver"></param>
         /// <param name="value"></param>
         /// <param name="incoming"></param>
-        public Message(string receiver, string value, bool incoming = false)
+        public Message(string receiver, string value, MessageState state = MessageState.Incoming)
         {
             Time = DateTime.Now;
             Address = receiver;
             Value = value;
-            Incoming = incoming;
+            Status = state;
             IsValid = false;
         }
 
@@ -95,7 +97,8 @@ namespace XxmsApp.Model
         public DateTime Time { get; set; }
         public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
-        public bool Incoming { get; set; } = true;
+        public bool Incoming => Status == MessageState.Incoming || Status == MessageState.Unread;
+        public MessageState Status { get; set; } = MessageState.Incoming;
         /// <summary>
         /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
         /// </summary>
@@ -145,7 +148,7 @@ namespace XxmsApp
 {
     // [Obsolete("пока не уверен, что стоит его использовать")]    
 
-    public class Dialog 
+    public class Dialog
     {
         string count = string.Empty;
 
@@ -165,6 +168,14 @@ namespace XxmsApp
 
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
+        public bool State
+        {
+            get
+            {
+                return !(Messages?.LastOrDefault()?.Incoming ?? true);
+            }
+        }
+
         // public string Count => $"({Messages?.Count.ToString()})";
         public string Count => count;
 

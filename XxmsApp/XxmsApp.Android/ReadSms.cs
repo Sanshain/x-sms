@@ -58,7 +58,7 @@ namespace XxmsApp.Api.Droid
                     // Time = DateTime.FromBinary(qs.GetLong(qs.GetColumnIndex("date"))),
                     Address = qs.GetString(qs.GetColumnIndex("address")),
                     Value = qs.GetString(qs.GetColumnIndex("body")),
-                    Incoming = income == 1 ? true : false
+                    Status = (MessageState)income
                 };
 
                 var time = qs.GetLong(qs.GetColumnIndex("date"));

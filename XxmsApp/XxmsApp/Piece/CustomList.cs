@@ -23,6 +23,7 @@ namespace XxmsApp.Piece
         Label TimeLabel = null;
         Label ValueLabel = null;
         Label CapacityLabel = null;
+        Image StateImage = null;
 
         public DialogCell()
         {
@@ -35,7 +36,13 @@ namespace XxmsApp.Piece
             TimeLabel = new Label { FontSize = TimeSize };  //, TextColor = Color.Gray
             ValueLabel = new Label { FontSize = 14, Margin = new Thickness(0, 10) };
             CapacityLabel = new Label { FontSize = 12, TextColor = Color.LightSlateGray, Margin = new Thickness(0, 10) };
-
+            StateImage = new Image
+            {
+                Source = ImageSource.FromFile("ok.png") as FileImageSource,
+                HeightRequest = charLen * 2,
+                WidthRequest = charLen * 2,
+                Margin = new Thickness(0, 10),                
+            };
 
             view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
             view.Children.Add(TimeLabel,
@@ -45,6 +52,7 @@ namespace XxmsApp.Piece
             );
 
             view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length * charLen, p => 25);//*/
+            view.Children.AddAsRelative(StateImage, p => p.Width - 9 * charLen, p => 25);                           //*/
 
             View = view;
         }
@@ -52,11 +60,13 @@ namespace XxmsApp.Piece
         protected override void OnBindingContextChanged()
         {
             base.OnBindingContextChanged();
-
+            
             PhoneLabel.SetBinding(Label.TextProperty, "Address");
             TimeLabel.SetBinding(Label.TextProperty, "Time");
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
+            StateImage.SetBinding(Image.IsVisibleProperty, "State");
+
         }
     }
 
