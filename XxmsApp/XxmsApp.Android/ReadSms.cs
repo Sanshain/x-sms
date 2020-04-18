@@ -8,12 +8,14 @@ using Android.Content;
 using Android.Database;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V7.App;
+
 using Android.Telephony;
 using Android.Views;
 using Android.Widget;
 using Xamarin.Forms;
 using XxmsApp.Model;
+
+using Android.Support.V7.App;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]
 namespace XxmsApp.Api.Droid
@@ -123,7 +125,14 @@ namespace XxmsApp.Api.Droid
             Notification notification = builder.Build();
             notification.Defaults = NotificationDefaults.All;
             ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify("Новое сообщение", 2, notification);
+
+
+            Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
+            vibrator.Vibrate(400);
+            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);            
+
         }
+
 
 
     }
