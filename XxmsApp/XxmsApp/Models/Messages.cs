@@ -15,35 +15,52 @@ using System.ComponentModel;
 namespace XxmsApp.Model
 {
 
-    public class BoolToMarginConverter : IValueConverter
+    public class IncomingConverter : IValueConverter
     {
+
+
+        public static IncomingConverter Single
+        {
+            get
+            {
+                if (instance == null) instance = new IncomingConverter();
+
+                // return instance ?? (instance = new IncomingConverter());
+
+                return instance;
+            }
+        }
+
+        static IncomingConverter instance = null;
+        static Dictionary<Type, Func<bool, object>> values = new Dictionary<Type, Func<bool, object>>()
+        {
+            {
+                typeof(Thickness), v => v ? new Thickness(10, 10, 45, 10) : new Thickness(45, 10, 10, 10) },
+            {
+                typeof(Color), v => v ? Color.LightGreen : Color.Default }
+
+        };
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="value">Message (bool)</param>
-        /// <param name="targetType">bool or Margin (Thinkness)</param>
+        /// <param name="value">Message is incoming (bool)</param>
+        /// <param name="targetType">(Backcolor) Color or Margin (Thinkness)</param>
         /// <param name="parameter"></param>
         /// <param name="culture"></param>
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
 
-            if ((bool)value)
-            {
-                if (targetType == typeof(Thickness)) return new Thickness(10, 10, 45, 10);
-                else if (targetType == typeof(Color)) return null;
-            }
+            if (values.ContainsKey(targetType)) return values[targetType]((bool)value);
             else
-            {
-                if (targetType == typeof(Thickness)) return new Thickness(45, 10, 10, 10);
-                else if (targetType == typeof(Color)) return null;
-            }
-            return null;
+                throw new Exception("Unsuppoerted type in " + System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
+
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException("just for OneWay binding");
+            throw new NotImplementedException(this.GetType().Name + " just for OneWay binding ");
         }
     }
 

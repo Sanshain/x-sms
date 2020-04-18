@@ -87,8 +87,7 @@ namespace XxmsApp.Views
             var view = new StackLayout
             {
                 Orientation = StackOrientation.Vertical,
-                Padding = new Thickness(15, 0, 0, 0) ,
-                BackgroundColor = Color.Green
+                Padding = new Thickness(15, 0, 0, 0)
             };
             view.SizeChanged += View_SizeChanged;
 
@@ -105,32 +104,22 @@ namespace XxmsApp.Views
 
             var messageView = new Frame
             {
-                Content = view,
+                Content = view,                
+                // BackgroundColor = Color.Red,
                 // Padding = new Thickness(0),
                 HasShadow = true,                
                 OutlineColor = Color.Red,             // material design
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
-
+                
             };
 
             vCellPadding = messageView.Padding.Bottom + messageView.Padding.Top;
 
 
-            messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, new BoolToMarginConverter());
-
-            /* System.Linq.Expressions.Expression<Func<Message, object>> colored =
-                m => m.IsValid.Value ? Color.Transparent : Color.LightBlue;
-            messageView.SetBinding(Frame.BackgroundColorProperty, colored);//*/
-
-            /* 
-            System.Linq.Expressions.Expression<Func<Message, Thickness>> alignment = 
-                m => (m as Message).Incoming ? new Thickness(10, 10, 45, 10) : new Thickness(10, 10, 45, 10);
-            messageView.SetBinding(Frame.MarginProperty, alignment, BindingMode.OneWay);
-
-            BackgroundColor = Color.LightCyan,
-             */
-
+            messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, IncomingConverter.Single);
+            messageView.SetBinding(Frame.BackgroundColorProperty, "Incoming", BindingMode.OneWay, IncomingConverter.Single);
+   
 
             var viewCell = new ViewCell { View = messageView };
 
@@ -159,25 +148,17 @@ namespace XxmsApp.Views
 
             var cnt = (messagesList.ItemsSource as IEnumerable<Message>).Count();
 
-
             if (++count == cnt)
             {                
                 inited = true;
 
-                var h = Content.Height;
-
-                // totalHeihght = totalHeihght + messagesList.Margin.Bottom * (count > 1 ? 2 : 1);
-
-                var containerHeight = (messagesList.Parent as Layout).Height;
-                // if (totalHeihght + messagesList.Margin.Bottom *2 < containerHeight - (messagesList.Margin.Bottom + 10))
-                if (totalHeihght < containerHeight - (messagesList.Margin.Bottom + 10))
+                if (totalHeihght < messagesList.Height)
                 {
                     messagesList.VerticalOptions = LayoutOptions.End;
+                    messagesList.HeightRequest = totalHeihght;
                 }
 
-                messagesList.HeightRequest = totalHeihght;
-                count = 0;
-                totalHeihght = 0;
+                totalHeihght = count = 0;
             }
 
             // sender_button.Text = count.ToString();
