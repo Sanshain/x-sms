@@ -29,6 +29,7 @@ namespace XxmsApp.Piece
             double timeWidth = Utils.CalcString(DateTime.Now.ToString());
 
             var view = new RelativeLayout();
+            var charLen = "a".GetWidth();
 
             PhoneLabel = new Label { FontSize = 18, FontAttributes = FontAttributes.Bold };
             TimeLabel = new Label { FontSize = TimeSize };  //, TextColor = Color.Gray
@@ -43,7 +44,7 @@ namespace XxmsApp.Piece
                 Constraint.RelativeToParent((par) => par.Width)
             );
 
-            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.GetWidth(), p => 25);//*/
+            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length * charLen, p => 25);//*/
 
             View = view;
         }
@@ -82,8 +83,8 @@ namespace XxmsApp.Piece
             } else ItemsSource = this.DataLoad(30);                         // else            
 
             HasUnevenRows = true;
-            ItemTemplate = this.DataView();                          // в DialogCell из-за вычисления отступа скорее всего тормоза
-            //ItemTemplate = new DataTemplate(typeof(DialogCell));            // this.DataView();
+            // ItemTemplate = this.DataView();                          // в DialogCell из-за вычисления отступа скорее всего тормоза
+            ItemTemplate = new DataTemplate(typeof(DialogCell));            // this.DataView();
 
             this.ItemSelected += CustomList_ItemSelected;
             source.CollectionChanged += Source_CollectionChanged;
