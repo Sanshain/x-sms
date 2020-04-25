@@ -104,7 +104,20 @@ namespace XxmsApp
         {
             if (itemSource == null) itemSource = listView.ItemsSource as IEnumerable<T>;
 
-            listView.ItemsSource = itemSource.Where(item => item.ToString().ToLower().Contains(searchedText.ToLower()));
+            listView.ItemsSource = itemSource.Where(item => {
+
+                try
+                {
+                    var r = item.ToString().ToLower().Contains(searchedText.ToLower());
+                    return r;
+                }
+                catch(Exception ex)
+                {
+                    Console.Write(ex.Message);
+                }
+                return false;
+                
+            });
         }
 
 

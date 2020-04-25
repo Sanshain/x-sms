@@ -43,6 +43,8 @@ namespace XxmsApp.Api.Droid
 
             // List<string> xms = new List<string>();
 
+            // var fields = new string[] { "_id", "address", "body", "type", "read", "sim_id", "status", "error_code", "date" };
+
             ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms"), null, null, null, null);
             // ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms/inbox"), null, null, null, null); //on "ORDER BY _id DESC" - timeout exception error
 
@@ -50,7 +52,7 @@ namespace XxmsApp.Api.Droid
 
             while (qs.MoveToNext())
             {
-                var income = qs.GetShort(qs.GetColumnIndex("type"));
+                var income = qs.GetShort(qs.GetColumnIndex("type"));                
 
                 XxmsApp.Model.Message msg = new Model.Message
                 {
@@ -58,7 +60,13 @@ namespace XxmsApp.Api.Droid
                     // Time = DateTime.FromBinary(qs.GetLong(qs.GetColumnIndex("date"))),
                     Address = qs.GetString(qs.GetColumnIndex("address")),
                     Value = qs.GetString(qs.GetColumnIndex("body")),
-                    Status = (MessageState)income
+                    Incoming = income == 1 ? true : false,
+                    IsRead = qs.GetShort(qs.GetColumnIndex("read")),
+                    Sim = (byte)qs.GetShort(qs.GetColumnIndex("sim_id")),
+                    Status = qs.GetInt(qs.GetColumnIndex("status")),
+                    ErrorCode = qs.GetInt(qs.GetColumnIndex("error_code"))
+
+                    // Protocol = qs.GetString(qs.GetColumnIndex("protocol"))               // 0 - входящее, null - исходящее
                 };
 
                 var time = qs.GetLong(qs.GetColumnIndex("date"));
@@ -97,7 +105,55 @@ namespace XxmsApp.Api.Droid
             SmsManager.Default.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
         }
 
+        public List<Sim> GetSimInfo()
+        {
+            var ls = new List<Sim>();
 
+            var context = Android.App.Application.Context;
+
+            SubscriptionManager localSubscriptionManager = SubscriptionManager.From(context);
+
+            foreach (var simInfo in localSubscriptionManager.ActiveSubscriptionInfoList)
+            {
+                int slot = simInfo.SimSlotIndex;             // 1
+                int id = simInfo.SubscriptionId;             // 6                
+                string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
+                string IccId = simInfo.IccId;                // 897010287534043278ff
+
+                ls.Add(new Sim(slot, id, sim1, IccId));
+            }
+
+
+            if (localSubscriptionManager.ActiveSubscriptionInfoCount > 1)                            // READ_PHONE_STATE permission
+            {
+                var localList = localSubscriptionManager.ActiveSubscriptionInfoList;
+                SubscriptionInfo simInfo = (SubscriptionInfo)localList[0];
+                SubscriptionInfo simInfo1 = (SubscriptionInfo)localList[1];
+
+                var number = simInfo.Number;        // is null
+                var carrier = simInfo.CarrierName;  // same as DisplayName
+
+                
+                int slot = simInfo.SimSlotIndex;             // 1
+                int id = simInfo.SubscriptionId;             // 6                
+                string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
+                string IccId = simInfo.IccId;                // 897010287534043278ff
+                ls.Add(new Sim(slot, id, sim1, IccId));
+
+                String sim2 = simInfo1.DisplayName;
+
+            }
+            else
+            {
+                TelephonyManager tManager = (TelephonyManager)context.GetSystemService(Context.TelephonyService);
+                // String pNumber = tManager.Line1Number;                                          // is string.Empty
+                String networkOperatorName = tManager.NetworkOperatorName;                      // Get carrier name (Network Operator Name)                
+            }
+
+
+
+            return ls;
+        }
 
 
 
@@ -136,5 +192,6 @@ namespace XxmsApp.Api.Droid
 
 
     }
+
 
 }

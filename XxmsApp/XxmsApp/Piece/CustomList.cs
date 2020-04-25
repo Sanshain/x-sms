@@ -65,7 +65,7 @@ namespace XxmsApp.Piece
             TimeLabel.SetBinding(Label.TextProperty, "Time");
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
-            StateImage.SetBinding(Image.IsVisibleProperty, "State");
+            StateImage.SetBinding(Image.IsVisibleProperty, "LastIsIncoming");
 
         }
     }
@@ -83,6 +83,8 @@ namespace XxmsApp.Piece
 		{
             // this.DataLoad(30);            
 
+            
+
             if (this.DialogViewType)                                        // by default
             {
                 ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
@@ -90,7 +92,8 @@ namespace XxmsApp.Piece
                     Messages = new ObservableCollection<Message>(g.Reverse())
                 } ).ToList();
 
-            } else ItemsSource = this.DataLoad(30);                         // else            
+            } else ItemsSource = this.DataLoad(30);                         // else    
+                        
 
             HasUnevenRows = true;
             // ItemTemplate = this.DataView();                          // в DialogCell из-за вычисления отступа скорее всего тормоза

@@ -96,11 +96,13 @@ namespace XxmsApp.Views
             {
                 HorizontalOptions = LayoutOptions.StartAndExpand,
             };
+            Label status = new Label();
 
             time.SetBinding(Label.TextProperty, "Time");
             content.SetBinding(Label.TextProperty, "Value");
+            status.SetBinding(Label.TextProperty, "States");
 
-            view.Children.Extend(time, content);
+            view.Children.Extend(time, content, status);
 
             var messageView = new Frame
             {

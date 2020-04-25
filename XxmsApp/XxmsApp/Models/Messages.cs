@@ -66,6 +66,7 @@ namespace XxmsApp.Model
         }
     }
 
+
     [Table("Messages")]
     [Serializable]    
     public class Message : IModel, INotifyPropertyChanged
@@ -79,12 +80,12 @@ namespace XxmsApp.Model
         /// <param name="receiver"></param>
         /// <param name="value"></param>
         /// <param name="incoming"></param>
-        public Message(string receiver, string value, MessageState state = MessageState.Incoming)
+        public Message(string receiver, string value,bool incoming = true)
         {
             Time = DateTime.Now;
             Address = receiver;
             Value = value;
-            Status = state;
+            Incoming = incoming;
             IsValid = false;
         }
 
@@ -97,8 +98,26 @@ namespace XxmsApp.Model
         public DateTime Time { get; set; }
         public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
-        public bool Incoming => Status == MessageState.Incoming || Status == MessageState.Unread;
-        public MessageState Status { get; set; } = MessageState.Incoming;
+        public bool Incoming { get; set; } = true;
+
+        public byte Sim { get; set; } = 0;
+        public int Status { get; set; } = 0;                                    // 0 - получено, -1 - нет уведомления о получении
+        public int ErrorCode { get; set; } = 0;                                 // 0 - отправлено
+        public int? IsRead { get; set; } = null;                                // 1|[2|3]
+
+        public string States
+        {
+            get
+            {
+                return
+                    "Sim: " + this.Sim + ", " +
+                    "Status:" + this.Status.ToString() + ", " +
+                    "ErrorCode:" + this.ErrorCode.ToString() + ", " +
+                    "IsRead:" + this.IsRead.ToString() + ", ";
+            }
+        }
+
+
         /// <summary>
         /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
         /// </summary>
@@ -168,13 +187,8 @@ namespace XxmsApp
 
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
-        public bool State
-        {
-            get
-            {
-                return !(Messages?.LastOrDefault()?.Incoming ?? true);
-            }
-        }
+        public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);
+
 
         // public string Count => $"({Messages?.Count.ToString()})";
         public string Count => count;

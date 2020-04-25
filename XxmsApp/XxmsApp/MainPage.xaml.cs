@@ -60,6 +60,25 @@ namespace XxmsApp
 
             Title = "Диалоги";
 
+            Device.StartTimer(TimeSpan.FromSeconds(2), () =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    var lst = (dialogs.ItemsSource as List<Dialog>).SelectMany(m => m.Messages).ToList();
+
+                    /*
+                    foreach (var item in lst.Where(m => m.Status == Api.MessageState.Unsent))
+                    {
+                        DisplayAlert($"{item.Address}({item.Time.ToString()})", item.Value.ToString(), "ok");
+                    }//*/
+
+                    // DisplayAlert(lst.Count.ToString(), lst.Count(m => m.Status == Api.MessageState.Unsent).ToString(), "ok");
+                });
+
+                return false;
+            });
+
+
             return rootLayout;
         }
 

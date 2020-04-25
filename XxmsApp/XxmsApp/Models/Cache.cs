@@ -114,7 +114,7 @@ namespace XxmsApp
             // database.DropTable<Model.Contacts>();
             database.CreateTable<Model.Contacts>();
 
-            //database.DropTable<Model.Setting>();
+            // database.DropTable<Options.Setting>();
             database.CreateTable<Options.Setting>();
 
         }

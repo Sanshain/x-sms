@@ -44,7 +44,9 @@ namespace XxmsApp.Views
 
                 if (await DisplayAlert($"Сброс настроек", "Настройки Xxms будут сброшены на заводские", "Ладно", "Отмена"))
                 {
-                    Cache.database.DeleteAll<Options.Setting>();        // Cache.database.DropTable<Options.Setting>();
+                    // Cache.database.DeleteAll<Options.Setting>();
+
+                    Cache.database.DropTable<Options.Setting>();
 
                     Cache.CacheClear<Options.Setting>();
 

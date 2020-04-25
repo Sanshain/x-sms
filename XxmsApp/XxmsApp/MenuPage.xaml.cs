@@ -30,6 +30,7 @@ namespace XxmsApp
                     "Настройки",
                     "Read sms",
                     "О нас",
+                    "GetInfo"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
             };
@@ -114,6 +115,13 @@ namespace XxmsApp
 
                     break;
 
+                case "GetInfo":
+
+                    var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
+                    // info = DependencyService.Get<Api.IMessages>();
+                    info.GetSimInfo();
+
+                    break;
 
                 default:
 
