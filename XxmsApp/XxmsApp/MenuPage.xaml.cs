@@ -18,7 +18,10 @@ namespace XxmsApp
 	{
         // Dicionary<string, Action>
 
-		public MenuPage ()
+        const string SIM_CARDS = "Сим-карты";
+
+
+        public MenuPage ()
 		{
             
             var menuContainer = new StackLayout { };
@@ -30,7 +33,7 @@ namespace XxmsApp
                     "Настройки",
                     "Read sms",
                     "О нас",
-                    "GetInfo"
+                    SIM_CARDS
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
             };
@@ -115,17 +118,20 @@ namespace XxmsApp
 
                     break;
 
-                case "GetInfo":
+                case SIM_CARDS:
 
                     var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
                     // info = DependencyService.Get<Api.IMessages>();
-                    info.GetSimInfo();
+                    foreach (var sim in info.GetSimsInfo())
+                    {
+                        DisplayAlert(sim.IccId, sim.Name + ": слот - " + sim.Slot + $" номер - {sim.Id}", "ok");
+                    }
 
-                    break;
+                    goto default;
 
                 default:
 
-                    bool r = await DisplayAlert("Start read?", e.SelectedItem.ToString(), "Ok", "No");
+                    // bool r = await DisplayAlert("Start read?", e.SelectedItem.ToString(), "Ok", "No");
 
                     ((ListView)sender).SelectedItem = null; 
 

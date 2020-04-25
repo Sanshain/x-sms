@@ -105,7 +105,7 @@ namespace XxmsApp.Api.Droid
             SmsManager.Default.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
         }
 
-        public List<Sim> GetSimInfo()
+        public IEnumerable<Sim> GetSimsInfo()
         {
             var ls = new List<Sim>();
 
@@ -120,39 +120,9 @@ namespace XxmsApp.Api.Droid
                 string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
                 string IccId = simInfo.IccId;                // 897010287534043278ff
 
-                ls.Add(new Sim(slot, id, sim1, IccId));
+                yield return new Sim(slot, id, sim1, IccId);
             }
 
-
-            if (localSubscriptionManager.ActiveSubscriptionInfoCount > 1)                            // READ_PHONE_STATE permission
-            {
-                var localList = localSubscriptionManager.ActiveSubscriptionInfoList;
-                SubscriptionInfo simInfo = (SubscriptionInfo)localList[0];
-                SubscriptionInfo simInfo1 = (SubscriptionInfo)localList[1];
-
-                var number = simInfo.Number;        // is null
-                var carrier = simInfo.CarrierName;  // same as DisplayName
-
-                
-                int slot = simInfo.SimSlotIndex;             // 1
-                int id = simInfo.SubscriptionId;             // 6                
-                string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
-                string IccId = simInfo.IccId;                // 897010287534043278ff
-                ls.Add(new Sim(slot, id, sim1, IccId));
-
-                String sim2 = simInfo1.DisplayName;
-
-            }
-            else
-            {
-                TelephonyManager tManager = (TelephonyManager)context.GetSystemService(Context.TelephonyService);
-                // String pNumber = tManager.Line1Number;                                          // is string.Empty
-                String networkOperatorName = tManager.NetworkOperatorName;                      // Get carrier name (Network Operator Name)                
-            }
-
-
-
-            return ls;
         }
 
 
