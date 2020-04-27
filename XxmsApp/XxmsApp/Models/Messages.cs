@@ -110,40 +110,37 @@ namespace XxmsApp.Model
         const string Unknown = "Неизвестно";
 
         /// <summary>
-        /// по simId сохраняет IccId в бд
+        /// 
         /// </summary>
-        [Ignore]
-        public string Sim
+        /// <param name="value">SubscriptionId</param>
+        public void SetSim(string value)
         {
-            get
+
+            if (int.TryParse(value, out int simId))                                         
             {
-                var sim = Message.Sims.SingleOrDefault(s => s.IccId == _sim);
-                return sim?.Slot.ToString() ?? Unknown;
-            }
-            set
-            {
-                if (int.TryParse(value, out int simId))                                            // SubscriptionId
+                SimOsId = simId.ToString();
+
+                var sim = Message.Sims.SingleOrDefault(s => s.SubId == simId);
+
+                if (sim != null)
                 {
-                    var sim = Message.Sims.SingleOrDefault(s => s.SubId == simId);
-                    if (sim != null)
-                    {
-                        _sim = sim.IccId;
-                        SimId = sim.SubId.ToString();
-                    }
-                    else _sim = Unknown;
+                    SimIccID = sim.IccId;
                 }
-                else _sim = Unknown;
+           
             }
+            
         }
 
-        public string SimId { get; set; } = Unknown;
 
+        public string SimOsId { get; set; } = Unknown;
+        public string SimIccID { get; set; } = Unknown;
 
+        public string SlotSimId => Message.Sims.SingleOrDefault(s => s.IccId == SimIccID)?.Slot.ToString() ?? Unknown;
         public string SimName
         {
             get
             {
-                if (int.TryParse(this.SimId, out int subId))
+                if (int.TryParse(this.SimOsId, out int subId))
                 {
                     var sim = Message.Sims.SingleOrDefault(s => s.SubId == subId);                   // или IccId
 
@@ -167,7 +164,8 @@ namespace XxmsApp.Model
             get
             {
                 return
-                    "Sim: " + this.Sim + ", " +
+                    "Sim: " + this.SlotSimId + ", " +
+                    "Sim: " + this.SimName + ", " +
                     "Status:" + this.Status.ToString() + ", " +
                     "ErrorCode:" + this.ErrorCode.ToString() + ", " +
                     "IsRead:" + this.IsRead.ToString() + ", ";
@@ -175,6 +173,7 @@ namespace XxmsApp.Model
         }
 
 
+        bool? valid = null;
         /// <summary>
         /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
         /// [Для входящих смс это значит спам, для исходящих - ошибка отправки]
@@ -191,21 +190,15 @@ namespace XxmsApp.Model
                 }
             }
         }
+
+
+
         [ManyToOne] public Contacts Contact { get; set; }
 
+        public string Label => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
 
-
-
-        bool? valid = null;
-        private string _sim = string.Empty;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-
-        public string Label                                        // [SQLite.Ignore]
-        {
-            get => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
-        }
 
 
         public bool IsActual => true;
@@ -248,7 +241,7 @@ namespace XxmsApp
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
         public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);        
-        public string Sim => Messages?.LastOrDefault()?.Sim ?? string.Empty;
+        public string Sim => Messages?.LastOrDefault()?.SlotSimId ?? string.Empty;
 
 
         // public string Count => $"({Messages?.Count.ToString()})";
