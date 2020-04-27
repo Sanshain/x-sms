@@ -75,6 +75,7 @@ namespace XxmsApp.Piece
             View = view;
         }
 
+
         protected override void OnBindingContextChanged()
         {
             base.OnBindingContextChanged();
