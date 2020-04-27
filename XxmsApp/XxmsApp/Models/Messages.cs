@@ -108,27 +108,54 @@ namespace XxmsApp.Model
 
 
         const string Unknown = "Неизвестно";
-        public string SimCard
+
+        /// <summary>
+        /// по simId сохраняет IccId в бд
+        /// </summary>
+        [Ignore]
+        public string Sim
         {
-            get => string.IsNullOrEmpty(_sim) ? "1" : _sim;
+            get
+            {
+                var sim = Message.Sims.SingleOrDefault(s => s.IccId == _sim);
+                return sim?.Slot.ToString() ?? Unknown;
+            }
             set
             {
-                if (int.TryParse(value, out int subId))                                            // SubscriptionId
+                if (int.TryParse(value, out int simId))                                            // SubscriptionId
                 {
-                    var sim = Message.Sims.SingleOrDefault(s => s.SubId == subId);
+                    var sim = Message.Sims.SingleOrDefault(s => s.SubId == simId);
                     if (sim != null)
                     {
-                        // if (sim.Slot == 0) _sim = "1"; else
-
-                        _sim = (sim.Slot + 1).ToString();
-                        return;
+                        _sim = sim.IccId;
+                        SimId = sim.SubId.ToString();
                     }
-
+                    else _sim = Unknown;
                 }
                 else _sim = Unknown;
-
             }
         }
+
+        public string SimId { get; set; } = Unknown;
+
+
+        public string SimName
+        {
+            get
+            {
+                if (int.TryParse(this.SimId, out int subId))
+                {
+                    var sim = Message.Sims.SingleOrDefault(s => s.SubId == subId);                   // или IccId
+
+                    return sim?.Name.ToString() ?? Unknown;
+                }
+
+                return Unknown;
+            }
+        }
+
+
+
         public int Status { get; set; } = 0;                                    // 0 - получено, -1 - нет уведомления о получении
         public int ErrorCode { get; set; } = 0;                                 // 0 - отправлено
         public int? IsRead { get; set; } = null;                                // 1|[2|3]
@@ -140,7 +167,7 @@ namespace XxmsApp.Model
             get
             {
                 return
-                    "Sim: " + this.SimCard + ", " +
+                    "Sim: " + this.Sim + ", " +
                     "Status:" + this.Status.ToString() + ", " +
                     "ErrorCode:" + this.ErrorCode.ToString() + ", " +
                     "IsRead:" + this.IsRead.ToString() + ", ";
@@ -221,7 +248,7 @@ namespace XxmsApp
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
         public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);        
-        public string Sim => Messages?.LastOrDefault()?.SimCard ?? string.Empty;
+        public string Sim => Messages?.LastOrDefault()?.Sim ?? string.Empty;
 
 
         // public string Count => $"({Messages?.Count.ToString()})";
