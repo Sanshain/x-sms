@@ -41,12 +41,7 @@ namespace XxmsApp.Api.Droid
 
             contentResolver = XxmsApp.Droid.MainActivity.InstanceResolver;
 
-            // List<string> xms = new List<string>();
-
-            // var fields = new string[] { "_id", "address", "body", "type", "read", "sim_id", "status", "error_code", "date" };
-
-            ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms"), null, null, null, null);
-            // ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms/inbox"), null, null, null, null); //on "ORDER BY _id DESC" - timeout exception error
+            ICursor qs = contentResolver.Query(Android.Net.Uri.Parse("content://sms"), null, null, null, null);            
 
             List<XxmsApp.Model.Message> messages = new List<Model.Message>();
 
@@ -57,7 +52,6 @@ namespace XxmsApp.Api.Droid
                 XxmsApp.Model.Message msg = new Model.Message
                 {
                     Id = qs.GetInt(qs.GetColumnIndex("_id")),
-                    // Time = DateTime.FromBinary(qs.GetLong(qs.GetColumnIndex("date"))),
                     Address = qs.GetString(qs.GetColumnIndex("address")),
                     Value = qs.GetString(qs.GetColumnIndex("body")),
                     Incoming = income == 1 ? true : false,
@@ -120,8 +114,13 @@ namespace XxmsApp.Api.Droid
                 int id = simInfo.SubscriptionId;             // 6                
                 string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
                 string IccId = simInfo.IccId;                // 897010287534043278ff
+                Color backColor = Color.FromRgba(            // 
+                    simInfo.IconTint.R, 
+                    simInfo.IconTint.G, 
+                    simInfo.IconTint.B, 
+                    simInfo.IconTint.A);
 
-                yield return new Sim(slot, id, sim1, IccId);
+                yield return new Sim(slot, id, sim1, IccId, backColor);
             }
 
         }

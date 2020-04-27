@@ -74,7 +74,7 @@ namespace XxmsApp.Model
 
         public static Sim[] Sims { get; private set; }
         static Message()
-        {
+        {            
             var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
             Sims = info.GetSimsInfo().ToArray();
         }
@@ -107,7 +107,7 @@ namespace XxmsApp.Model
         public bool Incoming { get; set; } = true;
 
 
-        const string Unknown = "Неизвестно";
+        const string Unknown = "?";
 
         /// <summary>
         /// 
@@ -135,6 +135,7 @@ namespace XxmsApp.Model
         public string SimOsId { get; set; } = Unknown;
         public string SimIccID { get; set; } = Unknown;
 
+        public Color SimColor =>  Message.Sims.SingleOrDefault(s => s.IccId == SimIccID)?.BackColor ?? Color.Default;
         public string SlotSimId => Message.Sims.SingleOrDefault(s => s.IccId == SimIccID)?.Slot.ToString() ?? Unknown;
         public string SimName
         {
@@ -242,6 +243,7 @@ namespace XxmsApp
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
         public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);        
         public string Sim => Messages?.LastOrDefault()?.SlotSimId ?? string.Empty;
+        public Color SimBackColor => Messages?.LastOrDefault()?.SimColor ?? Color.Default;
 
 
         // public string Count => $"({Messages?.Count.ToString()})";
