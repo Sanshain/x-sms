@@ -6,17 +6,19 @@ namespace XxmsApp.Api
 {
 
     public class Sim
-    {        
+    {
+
+        internal static string Empty = "Неизвестно";
 
         public Sim(int slot, int numId, string name, string iccId)
         {
             Slot = slot;
-            Id = numId;
+            SubId = numId;
             Name = name;
             IccId = iccId;
         }
         public int Slot { get; private set; }
-        public int Id { get; private set; }
+        public int SubId { get; private set; }
         public string Name { get; private set; }
         public string IccId { get; private set; }
 

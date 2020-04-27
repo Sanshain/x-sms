@@ -62,7 +62,7 @@ namespace XxmsApp.Api.Droid
                     Value = qs.GetString(qs.GetColumnIndex("body")),
                     Incoming = income == 1 ? true : false,
                     IsRead = qs.GetShort(qs.GetColumnIndex("read")),
-                    Sim = (byte)qs.GetShort(qs.GetColumnIndex("sim_id")),
+                    SimCard = qs.GetString(qs.GetColumnIndex("sim_id")),
                     Status = qs.GetInt(qs.GetColumnIndex("status")),
                     ErrorCode = qs.GetInt(qs.GetColumnIndex("error_code"))
 

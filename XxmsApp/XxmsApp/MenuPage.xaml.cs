@@ -104,13 +104,20 @@ namespace XxmsApp
                     var di = DependencyService.Get <XxmsApp.Api.IMessages>();
                     di.ShowNotification("Test", "content");
 
+                    
+
+
+                    var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
+                    var layout = page.Content as AbsoluteLayout;
+                    layout.Children[0] = new MainList();
+                    AbsoluteLayout.SetLayoutBounds(layout.Children[0], new Rectangle(0, 0, 1, 0.9));
+                    AbsoluteLayout.SetLayoutFlags(layout.Children[0], AbsoluteLayoutFlags.SizeProportional);
+
                     DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
 
                     // sw.Elapsed.ToString()
 
-                    ((ListView)sender).SelectedItem = null;
-
-                    break;
+                    goto default;
 
                 case "Настройки":
 
@@ -124,7 +131,7 @@ namespace XxmsApp
                     // info = DependencyService.Get<Api.IMessages>();
                     foreach (var sim in info.GetSimsInfo())
                     {
-                        DisplayAlert(sim.IccId, sim.Name + ": слот - " + sim.Slot + $" номер - {sim.Id}", "ok");
+                        DisplayAlert(sim.IccId, sim.Name + ": слот - " + sim.Slot + $" номер - {sim.SubId}", "ok");
                     }
 
                     goto default;
@@ -133,7 +140,9 @@ namespace XxmsApp
 
                     // bool r = await DisplayAlert("Start read?", e.SelectedItem.ToString(), "Ok", "No");
 
-                    ((ListView)sender).SelectedItem = null; 
+                    ((ListView)sender).SelectedItem = null;
+
+                    (this.Parent as MasterDetailPage).IsPresented = false;
 
                     break;
                 

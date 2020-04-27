@@ -68,19 +68,27 @@ namespace XxmsApp.Model
 
 
     [Table("Messages")]
-    [Serializable]    
+    [Serializable]
     public class Message : IModel, INotifyPropertyChanged
     {
-        
+
+        public static Sim[] Sims { get; private set; }
+        static Message()
+        {
+            var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
+            Sims = info.GetSimsInfo().ToArray();
+        }
+
 
         public Message() { }
+
         /// <summary>
-        /// Constructor for outgoing sms
+        /// Constructor for outgoing sms [конструктор для исходящих смс]
         /// </summary>
-        /// <param name="receiver"></param>
-        /// <param name="value"></param>
-        /// <param name="incoming"></param>
-        public Message(string receiver, string value,bool incoming = true)
+        /// <param name="receiver">receiver [получатель]</param>
+        /// <param name="value">value [значение]</param>
+        /// <param name="incoming">type of message [тип сообщения]</param>
+        public Message(string receiver, string value, bool incoming = true)
         {
             Time = DateTime.Now;
             Address = receiver;
@@ -88,8 +96,6 @@ namespace XxmsApp.Model
             Incoming = incoming;
             IsValid = false;
         }
-
-
 
 
         [PrimaryKey, AutoIncrement, Column("_Number")]
@@ -100,17 +106,41 @@ namespace XxmsApp.Model
         public string Value { get; set; }
         public bool Incoming { get; set; } = true;
 
-        public byte Sim { get; set; } = 0;
+
+        const string Unknown = "Неизвестно";
+        public string SimCard
+        {
+            get => string.IsNullOrEmpty(_sim) ? "1" : _sim;
+            set
+            {
+                if (int.TryParse(value, out int subId))                                            // SubscriptionId
+                {
+                    var sim = Message.Sims.SingleOrDefault(s => s.SubId == subId);
+                    if (sim != null)
+                    {
+                        // if (sim.Slot == 0) _sim = "1"; else
+
+                        _sim = (sim.Slot + 1).ToString();
+                        return;
+                    }
+
+                }
+                else _sim = Unknown;
+
+            }
+        }
         public int Status { get; set; } = 0;                                    // 0 - получено, -1 - нет уведомления о получении
         public int ErrorCode { get; set; } = 0;                                 // 0 - отправлено
         public int? IsRead { get; set; } = null;                                // 1|[2|3]
+
+
 
         public string States
         {
             get
             {
                 return
-                    "Sim: " + this.Sim + ", " +
+                    "Sim: " + this.SimCard + ", " +
                     "Status:" + this.Status.ToString() + ", " +
                     "ErrorCode:" + this.ErrorCode.ToString() + ", " +
                     "IsRead:" + this.IsRead.ToString() + ", ";
@@ -120,6 +150,7 @@ namespace XxmsApp.Model
 
         /// <summary>
         /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
+        /// [Для входящих смс это значит спам, для исходящих - ошибка отправки]
         /// </summary>
         bool? IsValid
         {
@@ -139,9 +170,11 @@ namespace XxmsApp.Model
 
 
         bool? valid = null;
+        private string _sim = string.Empty;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
-        
+
         public string Label                                        // [SQLite.Ignore]
         {
             get => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
@@ -151,7 +184,7 @@ namespace XxmsApp.Model
         public bool IsActual => true;
         public IModel CreateAs(object obj)
         {
-            return obj as Message;            
+            return obj as Message;
         }
 
         // public Boolean Outbound { get; set; } = false;
@@ -187,7 +220,8 @@ namespace XxmsApp
 
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
-        public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);
+        public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);        
+        public string Sim => Messages?.LastOrDefault()?.SimCard ?? string.Empty;
 
 
         // public string Count => $"({Messages?.Count.ToString()})";

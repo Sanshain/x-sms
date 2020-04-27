@@ -23,6 +23,7 @@ namespace XxmsApp.Piece
         Label TimeLabel = null;
         Label ValueLabel = null;
         Label CapacityLabel = null;
+        Label SimLabel = null;
         Image StateImage = null;
 
         public DialogCell()
@@ -36,6 +37,7 @@ namespace XxmsApp.Piece
             TimeLabel = new Label { FontSize = TimeSize };  //, TextColor = Color.Gray
             ValueLabel = new Label { FontSize = 14, Margin = new Thickness(0, 10) };
             CapacityLabel = new Label { FontSize = 12, TextColor = Color.LightSlateGray, Margin = new Thickness(0, 10) };
+            SimLabel = new Label { FontSize = 12, TextColor = Color.LightSlateGray };
             StateImage = new Image
             {
                 Source = ImageSource.FromFile("ok.png") as FileImageSource,
@@ -51,7 +53,8 @@ namespace XxmsApp.Piece
                 Constraint.RelativeToParent((par) => par.Width)
             );
 
-            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length * charLen, p => 25);//*/
+            // view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length  * charLen, p => 25);//*/            
+            view.Children.AddAsRelative(SimLabel, p => p.Width - 50, p => 25);//*/
             view.Children.AddAsRelative(StateImage, p => p.Width - 9 * charLen, p => 25);                           //*/
 
             View = view;
@@ -65,6 +68,7 @@ namespace XxmsApp.Piece
             TimeLabel.SetBinding(Label.TextProperty, "Time");
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
+            SimLabel.SetBinding(Label.TextProperty, "Sim");//*/
             StateImage.SetBinding(Image.IsVisibleProperty, "LastIsIncoming");
 
         }
@@ -138,6 +142,7 @@ namespace XxmsApp.Piece
                     break;
             }
         }
+
 
         protected ObservableCollection<Message> DataLoad(int limit = 0)
         {
