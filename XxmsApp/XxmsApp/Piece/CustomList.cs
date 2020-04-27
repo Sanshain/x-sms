@@ -38,16 +38,17 @@ namespace XxmsApp.Piece
             TimeLabel = new Label { FontSize = TimeSize };  //, TextColor = Color.Gray
             ValueLabel = new Label { FontSize = 14, Margin = new Thickness(0, 10) };            
             CapacityLabel = new Label { FontSize = 12, TextColor = Color.LightSlateGray, Margin = new Thickness(0, 10) };
-            SimLabel = new Label { FontSize = 12, TextColor = Color.White };
+            SimLabel = new Label { FontSize = 12, TextColor = Color.Gray, Margin = new Thickness(2) };
             SimView = new BoxView { HeightRequest = 20, WidthRequest = 10};
             Frame simFrame = new Frame
             {
                 CornerRadius = 3,
                 IsClippedToBounds = true,
-                Content = SimView,
+                Content = SimLabel,
                 HeightRequest = 20,
                 WidthRequest = 10,
                 Padding = new Thickness(0),
+                OutlineColor = Color.Red
                 
             };
             StateImage = new Image
@@ -58,7 +59,7 @@ namespace XxmsApp.Piece
                 Margin = new Thickness(0, 10),                
             };
 
-            view.Children.Add(PhoneLabel, Constraint.Constant(10), Constraint.Constant(0));
+            view.Children.Add(PhoneLabel, Constraint.Constant(20), Constraint.Constant(0));
             view.Children.Add(TimeLabel,
                 Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
             view.Children.Add(ValueLabel, Constraint.Constant(25), Constraint.Constant(25),
@@ -67,9 +68,9 @@ namespace XxmsApp.Piece
 
             view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length  * charLen - 5, p => 25);//*/            
             
-            view.Children.AddAsRelative(simFrame, p => p.Width - 62, p => 35);//*/
-            view.Children.AddAsRelative(SimLabel, p => p.Width - 60, p => 35);//*/
-            view.Children.AddAsRelative(StateImage, p => p.Width - 9 * charLen, p => 25);                           //*/
+            view.Children.AddAsRelative(simFrame, p => 5, p => 10);//*/
+            // view.Children.AddAsRelative(SimLabel, p => p.Width - 60, p => 35);//*/
+            view.Children.AddAsRelative(StateImage, p => 5, p => 25);                           //*/
 
             View = view;
         }
@@ -83,7 +84,8 @@ namespace XxmsApp.Piece
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
             SimLabel.SetBinding(Label.TextProperty, "Sim");//*/
-            SimView.SetBinding(BoxView.BackgroundColorProperty, "SimBackColor");//*/
+            // SimLabel.SetBinding(Label.TextColorProperty, "SimBackColor");//*/
+
             StateImage.SetBinding(Image.IsVisibleProperty, "LastIsIncoming");
 
         }
