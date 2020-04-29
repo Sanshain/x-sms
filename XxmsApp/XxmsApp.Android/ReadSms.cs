@@ -55,8 +55,8 @@ namespace XxmsApp.Api.Droid
                     Address = qs.GetString(qs.GetColumnIndex("address")),
                     Value = qs.GetString(qs.GetColumnIndex("body")),
                     Incoming = income == 1 ? true : false,
-                    IsRead = qs.GetShort(qs.GetColumnIndex("read")),
-                    Status = qs.GetInt(qs.GetColumnIndex("status")),
+                    IsRead = Convert.ToBoolean(qs.GetShort(qs.GetColumnIndex("read"))),     // 1 - прочитано, 0 - не прочитано
+                    Delivered = !Convert.ToBoolean(qs.GetShort(qs.GetColumnIndex("status"))),
                     ErrorCode = qs.GetInt(qs.GetColumnIndex("error_code"))
 
                     // Protocol = qs.GetString(qs.GetColumnIndex("protocol"))               // 0 - входящее, null - исходящее

@@ -25,20 +25,16 @@ namespace XxmsApp.Api
     // [BroadcastReceiver(Enabled = true, Exported = true)]
     
     [BroadcastReceiver(Enabled = true, Label = "SMS Receiver")]
-    [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]           // "android.provider.Telephony.SMS_RECEIVED"
+    [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]               // "android.provider.Telephony.SMS_RECEIVED"
     public class IncomingSms : BroadcastReceiver
     {
         
         public override void OnReceive(Context context, Intent intent)
         {
             
-            Device.BeginInvokeOnMainThread(() =>
-                Toast.MakeText(context, "New one message", ToastLength.Long).Show()
-            );//*/
+            Device.BeginInvokeOnMainThread(() => Toast.MakeText(context, "New one message", ToastLength.Long).Show());
 
-            if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction) return;
-
-            // and Telephony.Sms.Intents.SmsDeliverAction ?? for delevered?
+            if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction) return;           // and Telephony.Sms.Intents.SmsDeliverAction ?? for delevered?            
 
             SmsMessage[] messages = Telephony.Sms.Intents.GetMessagesFromIntent(intent);
 

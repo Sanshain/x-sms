@@ -17,6 +17,15 @@ namespace XxmsApp.Model
 {
 
 
+    public enum MessageState : byte
+    {
+        IncomeAndRead,
+        Unread,
+        Unsent,
+        Sent,
+        Delivered
+    }
+
 
     public class IncomingConverter : IValueConverter
     {
@@ -66,11 +75,50 @@ namespace XxmsApp.Model
         }
     }
 
+    public class MessageStateConverter : IValueConverter
+    {
+        static Dictionary<MessageState, Color> values = new Dictionary<MessageState, Color>()
+        {
+            {MessageState.Unread, Color.Blue },            
+            {MessageState.Unsent, Color.OrangeRed },
+            {MessageState.Sent, Color.Orange },
+            {MessageState.Delivered, Color.LightGreen },
+            {MessageState.IncomeAndRead, Color.Default }
+        };
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType == typeof(Color))
+            {
+                return values[(MessageState)value];
+            }
+            else if (targetType == typeof(ImageSource))
+            {
+                switch ((MessageState)value)
+                {
+                    case MessageState.Delivered: return ImageSource.FromFile("ok.png") as FileImageSource;
+                    case MessageState.Unsent: return ImageSource.FromFile("cancel.png") as FileImageSource;
+                }
+
+                return null;
+            }
+
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException(this.GetType().Name + " just for OneWay binding ");
+        }
+    }
 
     [Table("Messages")]
     [Serializable]
     public class Message : IModel, INotifyPropertyChanged
     {
+
+        const string UnknownSim = "?";
+        bool? valid = null;
 
         public static Sim[] Sims { get; private set; }
         static Message()
@@ -78,6 +126,7 @@ namespace XxmsApp.Model
             var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
             Sims = info.GetSimsInfo().ToArray();
         }
+
 
 
         public Message() { }
@@ -97,17 +146,38 @@ namespace XxmsApp.Model
             IsValid = false;
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;        
+
 
         [PrimaryKey, AutoIncrement, Column("_Number")]
         public int Id { get; set; }
-
         public DateTime Time { get; set; }
         public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
         public bool Incoming { get; set; } = true;
 
+        public string SimOsId { get; set; } = UnknownSim;
+        public string SimIccID { get; set; } = UnknownSim;
 
-        const string Unknown = "?";
+        [ManyToOne] public Contacts Contact { get; set; }
+        
+        /// <summary>
+        /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
+        /// [Для входящих смс это значит спам, для исходящих - ошибка отправки]
+        /// </summary>
+        bool? IsValid
+        {
+            get => valid;
+            set
+            {
+                if (!this.Incoming)
+                {
+                    valid = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsValid"));
+                }
+            }
+        }
+
 
         /// <summary>
         /// 
@@ -130,13 +200,8 @@ namespace XxmsApp.Model
             }
             
         }
-
-
-        public string SimOsId { get; set; } = Unknown;
-        public string SimIccID { get; set; } = Unknown;
-
         public Color SimColor =>  Message.Sims.SingleOrDefault(s => s.IccId == SimIccID)?.BackColor ?? Color.Default;
-        public string SlotSimId => Message.Sims.SingleOrDefault(s => s.IccId == SimIccID)?.Slot.ToString() ?? Unknown;
+        public string SlotSimId => Message.Sims.SingleOrDefault(s => s.IccId == SimIccID)?.Slot.ToString() ?? UnknownSim;
         public string SimName
         {
             get
@@ -145,18 +210,37 @@ namespace XxmsApp.Model
                 {
                     var sim = Message.Sims.SingleOrDefault(s => s.SubId == subId);                   // или IccId
 
-                    return sim?.Name.ToString() ?? Unknown;
+                    return sim?.Name.ToString() ?? UnknownSim;
                 }
 
-                return Unknown;
+                return UnknownSim;
             }
         }
 
+        public string Label => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
 
 
-        public int Status { get; set; } = 0;                                    // 0 - получено, -1 - нет уведомления о получении
+
+        public bool? Delivered { get; set; } = null;                            // 0 - получено, -1 - нет уведомления о получении
         public int ErrorCode { get; set; } = 0;                                 // 0 - отправлено
-        public int? IsRead { get; set; } = null;                                // 1|[2|3]
+        public bool IsRead { get; set; }                                        // 1 - прочитано, 0 - не прочитано
+
+        public MessageState State
+        {
+            get
+            {
+                if (this.Incoming && !this.IsRead) return MessageState.Unread;
+                else if (!this.Incoming)
+                {
+                    if (this.Delivered.HasValue && this.Delivered.Value) return MessageState.Delivered;
+                    else if (this.ErrorCode == 0) return MessageState.Sent;
+                    else return MessageState.Unsent;
+                }
+
+                return MessageState.IncomeAndRead;
+            }
+        }
+
 
 
 
@@ -167,39 +251,25 @@ namespace XxmsApp.Model
                 return
                     "Sim: " + this.SlotSimId + ", " +
                     "Sim: " + this.SimName + ", " +
-                    "Status:" + this.Status.ToString() + ", " +
+                    "Status:" + this.Delivered.ToString() + ", " +
                     "ErrorCode:" + this.ErrorCode.ToString() + ", " +
                     "IsRead:" + this.IsRead.ToString() + ", ";
             }
         }
 
 
-        bool? valid = null;
-        /// <summary>
-        /// For incomming it means SPAM, for outgoing - unsented (неотправленные)
-        /// [Для входящих смс это значит спам, для исходящих - ошибка отправки]
-        /// </summary>
-        bool? IsValid
-        {
-            get => valid;
-            set
-            {
-                if (!this.Incoming)
-                {
-                    valid = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsValid"));
-                }
-            }
-        }
 
 
 
-        [ManyToOne] public Contacts Contact { get; set; }
-
-        public string Label => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+
+
+
+
+
+
+        
 
 
         public bool IsActual => true;
@@ -241,7 +311,12 @@ namespace XxmsApp
 
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
         public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
-        public bool LastIsIncoming => !(Messages?.LastOrDefault()?.Incoming ?? true);        
+
+
+        public bool LastIsOutGoing => !(Messages?.LastOrDefault()?.Incoming ?? true);      
+        public MessageState LastMsgState => Messages?.LastOrDefault()?.State ?? MessageState.IncomeAndRead;      
+
+
         public string Sim => Messages?.LastOrDefault()?.SlotSimId ?? string.Empty;
         public Color SimBackColor => Messages?.LastOrDefault()?.SimColor ?? Color.Default;
 

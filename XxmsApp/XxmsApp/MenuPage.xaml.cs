@@ -103,9 +103,7 @@ namespace XxmsApp
 
                     var di = DependencyService.Get <XxmsApp.Api.IMessages>();
                     di.ShowNotification("Test", "content");
-
                     
-
 
                     var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
                     var layout = page.Content as AbsoluteLayout;

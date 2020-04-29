@@ -26,6 +26,7 @@ namespace XxmsApp.Piece
         Label SimLabel = null;
         BoxView SimView = null;
         Image StateImage = null;
+        Frame StateFrame = null;
 
         public DialogCell()
         {
@@ -58,18 +59,21 @@ namespace XxmsApp.Piece
                 WidthRequest = charLen * 2,
                 Margin = new Thickness(0, 10),                
             };
+            StateFrame = new Frame
+            {
+                HeightRequest = 10,
+                WidthRequest = 10,
+                CornerRadius = 5,
+                // BackgroundColor = Color.Transparent
+            };
 
             view.Children.Add(PhoneLabel, Constraint.Constant(20), Constraint.Constant(0));
-            view.Children.Add(TimeLabel,
-                Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
+            view.Children.Add(TimeLabel, Constraint.RelativeToParent((par) => par.Width - timeWidth - 10));
             view.Children.Add(ValueLabel, Constraint.Constant(25), Constraint.Constant(25),
                 Constraint.RelativeToParent((par) => par.Width)
             );
-
-            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length  * charLen - 5, p => 25);//*/            
-            
-            view.Children.AddAsRelative(simFrame, p => 5, p => 10);//*/
-            // view.Children.AddAsRelative(SimLabel, p => p.Width - 60, p => 35);//*/
+            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length  * charLen - 5, p => 25);//*/                        
+            view.Children.AddAsRelative(simFrame, p => 5, p => 5);              // view.Children.AddAsRelative(SimLabel, p => p.Width - 60, p => 35);//*/
             view.Children.AddAsRelative(StateImage, p => 5, p => 25);                           //*/
 
             View = view;
@@ -85,9 +89,13 @@ namespace XxmsApp.Piece
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
             SimLabel.SetBinding(Label.TextProperty, "Sim");//*/
+
+
             // SimLabel.SetBinding(Label.TextColorProperty, "SimBackColor");//*/
 
-            StateImage.SetBinding(Image.IsVisibleProperty, "LastIsIncoming");
+            StateFrame.SetBinding(Frame.BackgroundColorProperty, "LastMsgState", BindingMode.OneWay, new MessageStateConverter());
+            StateImage.SetBinding(Image.IsVisibleProperty, "LastIsOutGoing");
+            // StateImage.SetBinding(Image.SourceProperty, "LastMsgState");
 
         }
     }
