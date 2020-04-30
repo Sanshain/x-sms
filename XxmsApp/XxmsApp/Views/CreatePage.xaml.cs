@@ -289,20 +289,24 @@ namespace XxmsApp.Views
         /// <param name="e"></param>
         async private void Send_Clicked(object sender, EventArgs e)
         {
-            var entryHeight = Device.GetNamedSize(NamedSize.Default, typeof(Entry));
 
+            SimChoice();
+           
             var text = messageEditor.Text;
             var receiver = adresseeEntry.Text;
 
-            var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
+            /*
+            var entryHeight = Device.GetNamedSize(NamedSize.Default, typeof(Entry));
 
+            var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
 
             var b = await DisplayAlert(
                 msgFields.Height.ToString(),
                  ((sender as Button).Parent.Parent as StackLayout).Height.ToString(),
                 Application.Current.MainPage.Height.ToString() + " : " + pageHeight.ToString(),
-                entryHeight.ToString() + ":" + msgFields.Children[0].Height + ":" + (sender as Button).Height);
+                entryHeight.ToString() + ":" + msgFields.Children[0].Height + ":" + (sender as Button).Height);//*/
 
+            var b = await DisplayAlert("Сообщение", "Вы уверены, что хотите отправить сообщение?", "Да", "Нет");
 
             if (b == false)
             {
@@ -323,5 +327,24 @@ namespace XxmsApp.Views
             }
         }
 
+        private void SimChoice(Action onChoice = null)
+        {
+            if (Model.Message.Sims.Length > 1)
+            {
+
+                var simPicker = new Picker {
+                    Title = "Sim",
+                    IsVisible = false,
+                    ItemsSource = Model.Message.Sims,                                   // ItemDisplayBinding = new Binding("Name")
+                };
+
+                simPicker.SelectedIndexChanged += (object s, EventArgs ev) => onChoice?.Invoke();
+
+                bottom.Children.Add(simPicker);
+
+                simPicker.Focus();
+
+            }
+        }
     }
 }

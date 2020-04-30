@@ -33,15 +33,21 @@ namespace XxmsApp.Api
                 BackColor = col;
             }
 
-
             // invert fo text =>  return Color.FromArgb(c.A, 0xFF - c.R, 0xFF - c.G, 0xFF - c.B);
         }
         public int Slot { get; private set; }
+        /// <summary>
+        /// SubscriptionId
+        /// </summary>
         public int SubId { get; private set; }
         public string Name { get; private set; }
         public string IccId { get; private set; }
         public Color BackColor { get; private set; }
 
+        public override string ToString()
+        {
+            return this.Name + $" (слот № {this.Slot + 1})";
+        }
     }
 
 
