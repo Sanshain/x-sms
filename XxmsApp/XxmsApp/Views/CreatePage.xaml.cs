@@ -138,6 +138,7 @@ namespace XxmsApp.Views
 
         private void AdresseeEntry_TextChanged(object sender, TextChangedEventArgs e)
         {
+            
             drdnList.ItemsSource = (Application.Current as App)._contacts.Where(c =>
             {
                 return 
@@ -146,6 +147,7 @@ namespace XxmsApp.Views
 
             }).ToList();
 
+            
             if ((drdnList.ItemsSource as List<Model.Contacts>).Count >= 1)
             {
                 if ((drdnList.ItemsSource as List<Model.Contacts>).Count == 1)
@@ -159,10 +161,16 @@ namespace XxmsApp.Views
             {
                 // drdnList.IsVisible = false;
 
-                if (msgFields.Children[1] != messageFrame) msgFields.Children[1] = messageFrame;
+                if (adresseeEntry.IsFocused && msgFields.Children[1] != messageFrame)
+                {
+                    msgFields.Children[1] = messageFrame;
+                }
+                    
             }
+            //*/
 
             if (!string.IsNullOrWhiteSpace((sender as Entry).Text)) (frameSend.Content as Button).IsEnabled = true;
+            
 
         }
 
@@ -176,7 +184,10 @@ namespace XxmsApp.Views
                 // adresseeEntry.BindingContext = contact;
 
                 msgFields.Children[1] = messageFrame;
-                if (Convert.ToBoolean(Properties.Resources.AutoFocus)) (messageFrame.Content as Editor).Focus();
+                if (Convert.ToBoolean(Properties.Resources.AutoFocus))
+                {
+                    (messageFrame.Content as Editor).Focus();
+                }
 
                 focused = true;
 
@@ -206,7 +217,7 @@ namespace XxmsApp.Views
         bool focused = true;
         private void MessageEditor_Focused(object sender, FocusEventArgs e)
         {
-
+            
             if (sender == adresseeEntry && focused)
             {
                 // var stopwatch = new System.Diagnostics.Stopwatch();  stopwatch.Start();
@@ -232,7 +243,7 @@ namespace XxmsApp.Views
 
                         adresseeEntry.Focus();
 
-                    }, TaskScheduler.FromCurrentSynchronizationContext());//*/
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
 
 
                 };
@@ -240,8 +251,9 @@ namespace XxmsApp.Views
 
                 // stopwatch.Stop(); ((bottom.Children[0] as Frame).Content as Button).Text = stopwatch.Elapsed.ToString();
 
-            }
+            }//*/
 
+            
             if (Device.RuntimePlatform == Device.iOS)                               /// if its not Android, set `Focused`
             {
                 Device.StartTimer(TimeSpan.FromSeconds(1), () =>

@@ -76,7 +76,7 @@ namespace XxmsApp.Views
                 var msg = e.NewItems[0] as Message;
 
                 var msgApi = DependencyService.Get<Api.IMessages>();
-                msgApi.Send(msg.Address, msg.Value);
+                msgApi.Send(msg.Address, msg.Value, null);
 
             }
         }

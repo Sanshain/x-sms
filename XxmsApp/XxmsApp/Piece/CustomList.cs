@@ -72,7 +72,7 @@ namespace XxmsApp.Piece
             Func<RelativeLayout, double> StateFramePosition = delegate (RelativeLayout p)
             {
                 var off = CapacityLabel.Text.Length * charLen;
-                return p.Width - (off < 40 ? 50 : CapacityLabel.Text.Length * charLen + 15);
+                return p.Width - (off < 35 ? 50 : CapacityLabel.Text.Length * charLen + 15);
             };
 
             view.Children.Add(PhoneLabel, Constraint.Constant(20), Constraint.Constant(0));

@@ -54,7 +54,7 @@ namespace XxmsApp.Api
     {
         // List<string> Read();
         List<XxmsApp.Model.Message> Read();
-        bool Send(string adressee, string content);
+        bool Send(string adressee, string content, int? sim = null);
         void Send(XxmsApp.Model.Message msg);
         IEnumerable<Sim> GetSimsInfo();
 
