@@ -21,6 +21,9 @@ namespace XxmsApp.Views
         Button sender_button;
         Dialog dialog;
 
+
+        
+
         public MessagesPage(object source)
         {
             var root = new RelativeLayout(){ };

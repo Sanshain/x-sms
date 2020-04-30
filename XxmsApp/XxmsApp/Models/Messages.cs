@@ -301,6 +301,10 @@ namespace XxmsApp
 
     public class Dialog
     {
+
+        // [OneToMany] public Contacts Contact { get; set; }
+        [PrimaryKey] public string Address { get; set; }
+
         string count = string.Empty;
 
         ObservableCollection<Message> messages = new ObservableCollection<Message>();
@@ -341,11 +345,33 @@ namespace XxmsApp
             return Messages;
         }
 
-        public string Address { get; set; }
+        
 
         public override string ToString()
         {
             return this.Address;
+        }
+
+
+        public static Dialog GetOrCreate(string adressee, Message newMsg = null)
+        {
+
+            var msgs = Cache.Read<Message>().OrderBy(m => m.Id).ToList();
+
+            var source = new ObservableCollection<Message>(msgs).GroupBy(m => m.Address).Select(g => new Dialog
+            {
+                Address = g.Key,
+                Messages = new ObservableCollection<Message>(g)
+            });
+
+            var dialog = source.SingleOrDefault(d => d.Address == adressee) ?? new Dialog
+            {
+                Address = adressee,
+                Messages = new ObservableCollection<Message>()
+            };            
+
+            if (newMsg != null) dialog.Messages.Add(newMsg);
+            return dialog;
         }
 
     }

@@ -46,7 +46,7 @@ namespace XxmsApp.Api
 
         public override string ToString()
         {
-            return this.Name + $" (слот № {this.Slot + 1})";
+            return $" Слот № {this.Slot + 1} ({this.Name})";
         }
     }
 

@@ -289,23 +289,33 @@ namespace XxmsApp.Views
         /// <param name="e"></param>
         async private void Send_Clicked(object sender, EventArgs e)
         {
+            string text = messageEditor.Text, receiver = adresseeEntry.Text;
 
-            SimChoice();
+            if (Model.Message.Sims.Length > 1)
+                SimChoice(async (index) => await SendMessage(text, receiver, Model.Message.Sims[index].SubId));
+            else            
+                await SendMessage(text, receiver);
+            
+        }
+
+
+        private void SimChoice(Action<int> onChoice = null)
+        {            
            
-            var text = messageEditor.Text;
-            var receiver = adresseeEntry.Text;
+            var simPicker = new Picker {
+                Title = "Sim",
+                IsVisible = false,
+                ItemsSource = Model.Message.Sims,                                   // ItemDisplayBinding = new Binding("Name")
+            };
 
-            /*
-            var entryHeight = Device.GetNamedSize(NamedSize.Default, typeof(Entry));
+            simPicker.SelectedIndexChanged += (object s, EventArgs ev) => onChoice?.Invoke(simPicker.SelectedIndex);
+            bottom.Children.Add(simPicker);
+            simPicker.Focus();
+            
+        }
 
-            var pageHeight = ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Height;
-
-            var b = await DisplayAlert(
-                msgFields.Height.ToString(),
-                 ((sender as Button).Parent.Parent as StackLayout).Height.ToString(),
-                Application.Current.MainPage.Height.ToString() + " : " + pageHeight.ToString(),
-                entryHeight.ToString() + ":" + msgFields.Children[0].Height + ":" + (sender as Button).Height);//*/
-
+        private async Task SendMessage(string text, string receiver, int? sim = null)
+        {
             var b = await DisplayAlert("Сообщение", "Вы уверены, что хотите отправить сообщение?", "Да", "Нет");
 
             if (b == false)
@@ -319,32 +329,18 @@ namespace XxmsApp.Views
             else
             {
                 var msgApi = DependencyService.Get<Api.IMessages>();
-                msgApi.Send(receiver, text);
+                // msgApi.Send(receiver, text, sim);
 
-                DisplayAlert("Info", "Сообщение отправлено", "Ok");
+                await DisplayAlert("Info", "Сообщение отправлено", "Ok");
 
                 messageEditor.Text = "";
+
+                Navigation.PopAsync(true);
+
+                // Navigation.RemovePage(this);
+                // Navigation.PushAsync(new MessagesPage(Dialog.GetOrCreate(receiver, new Model.Message(receiver, text, sim))));
             }
         }
 
-        private void SimChoice(Action onChoice = null)
-        {
-            if (Model.Message.Sims.Length > 1)
-            {
-
-                var simPicker = new Picker {
-                    Title = "Sim",
-                    IsVisible = false,
-                    ItemsSource = Model.Message.Sims,                                   // ItemDisplayBinding = new Binding("Name")
-                };
-
-                simPicker.SelectedIndexChanged += (object s, EventArgs ev) => onChoice?.Invoke();
-
-                bottom.Children.Add(simPicker);
-
-                simPicker.Focus();
-
-            }
-        }
     }
 }
