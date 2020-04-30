@@ -16,7 +16,7 @@ namespace XxmsApp
         private ListView listView = null;
         private View bottomView = null;
 
-        private IEnumerable<T> itemSource = null;
+        private IList<T> itemSource = null;
 
         public SearchPanel(ContentPage page, View subView = null, ListView lstView = null)
         {
@@ -102,7 +102,7 @@ namespace XxmsApp
 
         private void WSearchText(string searchedText)
         {
-            if (itemSource == null) itemSource = listView.ItemsSource as IEnumerable<T>;
+            if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
 
             listView.ItemsSource = itemSource.Where(item => {
 

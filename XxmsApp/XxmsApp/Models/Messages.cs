@@ -251,9 +251,10 @@ namespace XxmsApp.Model
                 return
                     "Sim: " + this.SlotSimId + ", " +
                     "Sim: " + this.SimName + ", " +
-                    "Delivered:" + this.Delivered.ToString() + ", " +
+                    "State: " + this.State;
+                    /* "Delivered:" + this.Delivered.ToString() + ", " +
                     "ErrorCode:" + this.ErrorCode.ToString() + ", " +
-                    "IsRead:" + this.IsRead.ToString() + ", ";
+                    "IsRead:" + this.IsRead.ToString() + ", ";//*/
             }
         }
 
