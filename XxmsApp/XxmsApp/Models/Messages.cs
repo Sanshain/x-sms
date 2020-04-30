@@ -79,11 +79,11 @@ namespace XxmsApp.Model
     {
         static Dictionary<MessageState, Color> values = new Dictionary<MessageState, Color>()
         {
-            {MessageState.Unread, Color.Blue },            
+            {MessageState.Unread, Color.DeepSkyBlue },            
             {MessageState.Unsent, Color.OrangeRed },
-            {MessageState.Sent, Color.Orange },
-            {MessageState.Delivered, Color.LightGreen },
-            {MessageState.IncomeAndRead, Color.Default }
+            {MessageState.Sent, Color.LimeGreen },                           // Gold | DarkSeaGreen | LimeGreen | DarkOliveGreen
+            {MessageState.Delivered, Color.Silver },                         // DarkGoldenrod | LimeGreen
+            {MessageState.IncomeAndRead, Color.Transparent }
         };
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -221,9 +221,9 @@ namespace XxmsApp.Model
 
 
 
-        public bool? Delivered { get; set; } = null;                            // 0 - получено, -1 - нет уведомления о получении
+        public bool? Delivered { get; set; } = null;                            // 0 - получено, -1 - нет уведомления о получении, null - входящее
         public int ErrorCode { get; set; } = 0;                                 // 0 - отправлено
-        public bool IsRead { get; set; }                                        // 1 - прочитано, 0 - не прочитано
+        public bool IsRead { get; set; }                                        // 1 - прочитано, 0 - не прочитано, null - исходящее
 
         public MessageState State
         {
@@ -251,7 +251,7 @@ namespace XxmsApp.Model
                 return
                     "Sim: " + this.SlotSimId + ", " +
                     "Sim: " + this.SimName + ", " +
-                    "Status:" + this.Delivered.ToString() + ", " +
+                    "Delivered:" + this.Delivered.ToString() + ", " +
                     "ErrorCode:" + this.ErrorCode.ToString() + ", " +
                     "IsRead:" + this.IsRead.ToString() + ", ";
             }

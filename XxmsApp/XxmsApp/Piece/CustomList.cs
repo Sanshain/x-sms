@@ -64,7 +64,15 @@ namespace XxmsApp.Piece
                 HeightRequest = 10,
                 WidthRequest = 10,
                 CornerRadius = 5,
+                HasShadow = false,
+                Padding = new Thickness(0)
                 // BackgroundColor = Color.Transparent
+            };
+
+            Func<RelativeLayout, double> StateFramePosition = delegate (RelativeLayout p)
+            {
+                var off = CapacityLabel.Text.Length * charLen;
+                return p.Width - (off < 40 ? 50 : CapacityLabel.Text.Length * charLen + 15);
             };
 
             view.Children.Add(PhoneLabel, Constraint.Constant(20), Constraint.Constant(0));
@@ -72,9 +80,10 @@ namespace XxmsApp.Piece
             view.Children.Add(ValueLabel, Constraint.Constant(25), Constraint.Constant(25),
                 Constraint.RelativeToParent((par) => par.Width)
             );
-            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length  * charLen - 5, p => 25);//*/                        
+            view.Children.AddAsRelative(CapacityLabel, p => p.Width - CapacityLabel.Text.Length  * charLen, p => 25);
             view.Children.AddAsRelative(simFrame, p => 5, p => 5);              // view.Children.AddAsRelative(SimLabel, p => p.Width - 60, p => 35);//*/
-            view.Children.AddAsRelative(StateImage, p => 5, p => 25);                           //*/
+            // view.Children.AddAsRelative(StateImage, p => 5, p => 30);                   
+            view.Children.AddAsRelative(StateFrame, StateFramePosition, p => 39);    
 
             View = view;
         }
