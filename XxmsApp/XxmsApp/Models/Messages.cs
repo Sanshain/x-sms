@@ -137,13 +137,18 @@ namespace XxmsApp.Model
         /// <param name="receiver">receiver [получатель]</param>
         /// <param name="value">value [значение]</param>
         /// <param name="incoming">type of message [тип сообщения]</param>
-        public Message(string receiver, string value, bool incoming = true)
+        public Message(string receiver, string value, int? simId = null, bool incoming = false)
         {
-            Time = DateTime.Now;
+            Time = DateTime.Now;            
+
             Address = receiver;
             Value = value;
-            Incoming = incoming;
-            IsValid = false;
+            IsValid = Incoming = incoming;
+
+            if (simId.HasValue)
+            {
+                SetSim(simId.Value.ToString());
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;        
@@ -156,6 +161,9 @@ namespace XxmsApp.Model
         public string Value { get; set; }
         public bool Incoming { get; set; } = true;
 
+        /// <summary>
+        /// Simcard SubscribtionId
+        /// </summary>
         public string SimOsId { get; set; } = UnknownSim;
         public string SimIccID { get; set; } = UnknownSim;
 
@@ -180,7 +188,7 @@ namespace XxmsApp.Model
 
 
         /// <summary>
-        /// 
+        /// Set sim IccID to sms by sim SubscriptionId
         /// </summary>
         /// <param name="value">SubscriptionId</param>
         public void SetSim(string value)

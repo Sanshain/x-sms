@@ -62,7 +62,7 @@ namespace XxmsApp.Api.Droid
                     // Protocol = qs.GetString(qs.GetColumnIndex("protocol"))               // 0 - входящее, null - исходящее
                 };
 
-                msg.SetSim(qs.GetString(qs.GetColumnIndex("sim_id")));
+                msg.SetSim(qs.GetString(qs.GetColumnIndex("sim_id")));                      // SubscriptionId
 
                 var time = qs.GetLong(qs.GetColumnIndex("date"));
                 msg.Time = new DateTime(1970, 1, 1).AddMilliseconds(time);
@@ -87,17 +87,35 @@ namespace XxmsApp.Api.Droid
             return messages;
         }
 
-        public bool Send(string adressee, string content)
+        /// <summary>
+        /// Send sms
+        /// </summary>
+        /// <param name="adressee"></param>
+        /// <param name="content"></param>
+        /// <param name="simId"></param>
+        /// <returns></returns>
+        public bool Send(string adressee, string content, int? simId = null)
         {
 
-            SmsManager.Default.SendTextMessage(adressee, null, content, PendInSent, PendInDelivered);
+            SmsManager sim = null;
 
-            return true;
+            if (simId.HasValue)
+            {
+                sim = SmsManager.GetSmsManagerForSubscriptionId(simId.Value);                
+            }
+            else sim = SmsManager.Default;
+
+            sim?.SendTextMessage(adressee, null, content, PendInSent, PendInDelivered);            
+
+            return sim != null;
         }
 
         public void Send(XxmsApp.Model.Message msg)
         {
-            SmsManager.Default.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
+            var sim = int.TryParse(msg.SimOsId, out int subId) ? SmsManager.GetSmsManagerForSubscriptionId(subId) : SmsManager.Default;
+
+            sim.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
+
         }
 
         public IEnumerable<Sim> GetSimsInfo()
