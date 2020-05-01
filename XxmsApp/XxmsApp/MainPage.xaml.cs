@@ -64,7 +64,7 @@ namespace XxmsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    var lst = (dialogs.ItemsSource as List<Dialog>).SelectMany(m => m.Messages).ToList();
+                    var lst = (dialogs.ItemsSource as List<Dialog>).SelectMany(m => m.Messages).ToList(); // bug (under observation)
 
                     /*
                     foreach (var item in lst.Where(m => m.Status == Api.MessageState.Unsent))

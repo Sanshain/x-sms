@@ -37,11 +37,11 @@ namespace XxmsApp
 
                 if (SearchLayout != null)
                 {
-                    var searchEntry = SearchLayout.Children.FirstOrDefault() as Entry;
+                    var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
 
                     if (SearchLayout.IsVisible = !SearchLayout.IsVisible)
                     {
-                        searchEntry?.Focus();
+                        searchFrame?.Content?.Focus();
                     }
 
                 }
@@ -102,6 +102,20 @@ namespace XxmsApp
 
         private void WSearchText(string searchedText)
         {
+
+            if (listView.Parent is AbsoluteLayout && searchedText.Length > 0)
+            {
+                // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
+
+                var animation = new Animation(v =>
+                {                    
+                    AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9));
+
+                }, 0, 55);
+                
+                animation.Commit(listView, "SearchLayoutAppearance", 40, 1000, Easing.Linear, (v, c) => { }, () => false);//*/
+            }
+
             if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
 
             listView.ItemsSource = itemSource.Where(item => {
@@ -128,28 +142,28 @@ namespace XxmsApp
 
 
 
-        private void SearchEntry_Focused(object sender, FocusEventArgs ev)
+        private void SearchEntry_Focused(object sender, FocusEventArgs e)
         {
-            if (ev.IsFocused)
+            if (e.IsFocused)
             {
                 if (!(itemSource is null || listView.ItemsSource == itemSource))
                 {
                     listView.ItemsSource = itemSource;
                 }
 
-
+                /*
                 Device.StartTimer(TimeSpan.FromSeconds(1), () =>
                 {
                     Device.BeginInvokeOnMainThread(() =>
                     {
-                        if (!ev.IsFocused) return;
+                        if (!e.IsFocused) return;
 
                         if (listView.Parent is AbsoluteLayout) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 50, 1, 0.9));
                     });
 
                     return false;
                 });
-
+                //*/
                 
 
                 (sender as Entry).Text = "";
@@ -158,19 +172,25 @@ namespace XxmsApp
             }
             else
             {
-                SearchLayout.IsVisible = false;
+                var offTime = 150;
 
-
-                if (listView.Parent is AbsoluteLayout)
+                Device.StartTimer(TimeSpan.FromMilliseconds(offTime), () =>
                 {
-                    AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
-                }
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        SearchLayout.IsVisible = false;
 
-                Device.StartTimer(TimeSpan.FromMilliseconds(150), () =>
-                {
-                    Device.BeginInvokeOnMainThread(() => bottomView.IsVisible = true); return false;
+                        if (listView.Parent is AbsoluteLayout)
+                        {
+                            AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                        }
+
+                    }); return false;
 
                 });
+
+                Utils.CallAfter(offTime + 150, () => bottomView.IsVisible = true);
+
             }
 
             var filename = (SearchLayout.IsVisible ? "d" : "i") + "_search.png";
@@ -178,5 +198,7 @@ namespace XxmsApp
         }
 
     }
+
+    
 
 }

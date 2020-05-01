@@ -10,7 +10,15 @@ namespace XxmsApp
     public static class Utils
     {
 
+        public static void CallAfter(int ms, Action act)
+        {
+            Device.StartTimer(TimeSpan.FromMilliseconds(ms), () =>
+            {
+                Device.BeginInvokeOnMainThread(act);
 
+                return false;
+            });
+        }
 
         //public static Constraint Let(this double arg) => Constraint.Constant(arg);
         public static Constraint Let(this double? arg) => arg != null ? Constraint.Constant(arg.Value) : null;
