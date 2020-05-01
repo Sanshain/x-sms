@@ -119,28 +119,30 @@ namespace XxmsApp.Piece
         /// Для списка сообщений
         /// </summary>
         public MainList () : base(ListViewCachingStrategy.RecycleElementAndDataTemplate)
-		{
-            // this.DataLoad(30);            
+        {        
 
-            
-
-            if (this.DialogViewType)                                        // by default
-            {
-                ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog {
-                    Address = g.Key,
-                    Messages = new ObservableCollection<Message>(g.Reverse())
-                } ).ToList();
-
-            } else ItemsSource = this.DataLoad(30);                         // else    
-                        
+            DataInitialize();
 
             HasUnevenRows = true;
-            // ItemTemplate = this.DataView();                          // в DialogCell из-за вычисления отступа скорее всего тормоза
             ItemTemplate = new DataTemplate(typeof(DialogCell));            // this.DataView();
 
             this.ItemSelected += CustomList_ItemSelected;
             source.CollectionChanged += Source_CollectionChanged;
 
+        }
+
+        internal void DataInitialize()
+        {
+            if (this.DialogViewType)                                        // by default
+            {
+                ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog
+                {
+                    Address = g.Key,
+                    Messages = new ObservableCollection<Message>(g.Reverse())
+                }).ToList();
+
+            }
+            else ItemsSource = this.DataLoad(30);                         // else    
         }
 
         private async void CustomList_ItemSelected(object sender, SelectedItemChangedEventArgs e)

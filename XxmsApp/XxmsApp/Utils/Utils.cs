@@ -16,7 +16,7 @@ namespace XxmsApp
         private ListView listView = null;
         private View bottomView = null;
 
-        private IEnumerable<T> itemSource = null;
+        private IList<T> itemSource = null;
 
         public SearchPanel(ContentPage page, View subView = null, ListView lstView = null)
         {
@@ -57,13 +57,13 @@ namespace XxmsApp
             SearchLayout = new StackLayout
             {
                 Orientation = StackOrientation.Horizontal,
+                Opacity = 0.9
             };
             Entry searchEntry = new Entry
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Placeholder = "Введите текст для поиска",                                       //  "Enter text for search"
                 BackgroundColor = Color.LightGray,
-                Opacity = 0.9
             };
 
             searchEntry.Completed += (object s, EventArgs ev) =>
@@ -102,7 +102,7 @@ namespace XxmsApp
 
         private void WSearchText(string searchedText)
         {
-            if (itemSource == null) itemSource = listView.ItemsSource as IEnumerable<T>;
+            if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
 
             listView.ItemsSource = itemSource.Where(item => {
 
@@ -161,7 +161,10 @@ namespace XxmsApp
                 SearchLayout.IsVisible = false;
 
 
-                if (listView.Parent is AbsoluteLayout) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                if (listView.Parent is AbsoluteLayout)
+                {
+                    AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                }
 
                 Device.StartTimer(TimeSpan.FromMilliseconds(150), () =>
                 {

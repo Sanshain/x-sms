@@ -107,7 +107,7 @@ namespace XxmsApp
 
                     var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
                     var layout = page.Content as AbsoluteLayout;
-                    layout.Children[0] = new MainList();
+                    (layout.Children[0] as MainList).DataInitialize();                              // layout.Children[0] = new MainList();
                     AbsoluteLayout.SetLayoutBounds(layout.Children[0], new Rectangle(0, 0, 1, 0.9));
                     AbsoluteLayout.SetLayoutFlags(layout.Children[0], AbsoluteLayoutFlags.SizeProportional);
 
