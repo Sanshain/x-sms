@@ -20,6 +20,21 @@ namespace XxmsApp
             });
         }
 
+
+        public static Animation Apply(
+            this Animation animation, 
+            IAnimatable owner, 
+            string name,
+            uint rate = 16, uint length = 250, 
+            Easing easing = null, 
+            Action<double, bool> onFinish = null,
+            Func<bool> repeat = null)
+        {
+            animation.Commit(owner, name, rate, length, easing, onFinish, repeat);
+
+            return animation;
+        }
+
         //public static Constraint Let(this double arg) => Constraint.Constant(arg);
         public static Constraint Let(this double? arg) => arg != null ? Constraint.Constant(arg.Value) : null;
         public static Constraint Let(this Func<RelativeLayout, double> func)// => Constraint.RelativeToParent(func);

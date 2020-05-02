@@ -9,12 +9,18 @@ namespace XxmsApp
 
     public class SearchPanel<T>
     {
+        const string SHOW_ANIMATION = "searchFrameAppearAnimation";
+        const string HIDE_ANIMATION = "searchFrameHideAnimation";
+        const string VIEW_OUT_ANIMATION = "SearchLayoutAppearAnimation";
+        const string VIEW_IN_ANIMATION = "SearchLayoutHideAnimation";
 
         public ToolbarItem SearchButton { get; private set; } = null;
         public StackLayout SearchLayout { get; private set; } = null;
 
         private ListView listView = null;
         private View bottomView = null;
+        private bool animeted = true;
+        private double PageWidth;
 
         private IList<T> itemSource = null;
 
@@ -32,22 +38,53 @@ namespace XxmsApp
                 Priority = 0
             });
 
+            PageWidth = page.Width;
+
             SearchButton.Clicked += (object sender, EventArgs e) =>
             {
+                
 
                 if (SearchLayout != null)
                 {
-                    var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
+
+                    // if (SearchLayout.AnimationIsRunning(SHOW_ANIMATION) || SearchLayout.AnimationIsRunning(HIDE_ANIMATION)) return;
+
+
+                    if (SearchLayout.AnimationIsRunning(SHOW_ANIMATION))
+                    {
+                        SearchLayout.AbortAnimation(SHOW_ANIMATION);
+                        SearchLayout.AbortAnimation(VIEW_OUT_ANIMATION);
+                    }
+                    if (SearchLayout.AnimationIsRunning(HIDE_ANIMATION))
+                    {
+                        SearchLayout.AbortAnimation(HIDE_ANIMATION);
+                        SearchLayout.AbortAnimation(VIEW_IN_ANIMATION);
+                    }
+
+                        var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
 
                     if (SearchLayout.IsVisible = !SearchLayout.IsVisible)
                     {
-                        searchFrame?.Content?.Focus();
+                        
+                        if (animeted)
+                        {
+                            
+
+                            void FinishAction() => searchFrame?.Content?.Focus();
+                            // Action FinishAction = () => searchFrame?.Content?.Focus();
+
+                            SmoothAppearance(page.Width, FinishAction);
+                        }
+                        else searchFrame?.Content?.Focus();
+
                     }
 
                 }
                 else SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
 
             };
+
+            
 
         }
 
@@ -67,7 +104,7 @@ namespace XxmsApp
             };
 
             searchEntry.Completed += (object s, EventArgs ev) =>
-            {               
+            {
                 SearchLayout.IsVisible = false;
             };
 
@@ -78,11 +115,11 @@ namespace XxmsApp
 
             searchEntry.Focused += SearchEntry_Focused;
             searchEntry.Unfocused += SearchEntry_Focused;
-            
+
             var searchFrame = new Frame
             {
                 Content = searchEntry,
-                Padding = new Thickness (0),
+                Padding = new Thickness(0),
                 Margin = new Thickness(3),
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 /*HasShadow = true,
@@ -93,10 +130,74 @@ namespace XxmsApp
 
             SearchLayout.Children.Add(searchFrame);
             rootLayout.Children.Add(SearchLayout, new Rectangle(0, 0, pageWidth, 50), AbsoluteLayoutFlags.None);
-
-            searchEntry.Focus();
+            
+            if (animeted) SmoothAppearance(pageWidth, () => searchEntry.Focus());
+            else
+                searchEntry.Focus();
 
             return SearchLayout;
+        }
+
+        private void SmoothAppearance(double pageWidth, Action onFinish = null)
+        {
+
+            uint overTime = 500;
+            uint step = overTime / 25;
+
+            
+            
+            var searchFrameAppearAnimation = new Animation(v =>
+                {
+                    AbsoluteLayout.SetLayoutBounds(SearchLayout, new Rectangle(0, 0, pageWidth, v));
+
+                }, 0, 50);            
+
+            searchFrameAppearAnimation.Commit(SearchLayout, SHOW_ANIMATION, step, overTime, Easing.Linear, (v, c) => {
+
+                    onFinish?.Invoke();
+
+                }, () => false
+            );
+
+
+            var SearchLayoutAppearAnimation = new Animation
+            (
+                v => AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9)), 0, 55
+            )
+            .Apply(listView, VIEW_OUT_ANIMATION, step, overTime, Easing.Linear, null, () => false);
+
+            
+
+        }
+
+
+        private void SmoothHide(uint overTime = 500, Action onFinish = null)
+        {
+
+            double pageWidth = SearchLayout.Width;
+            uint step = overTime / 25;
+
+            var searchFrameAppearAnimation = new Animation(v =>
+            {
+                AbsoluteLayout.SetLayoutBounds(SearchLayout, new Rectangle(0, 0, pageWidth, v));
+            }, 50, 0);
+
+            searchFrameAppearAnimation.Commit(
+                SearchLayout, HIDE_ANIMATION, step, overTime, Easing.Linear, (v, c) => {
+
+                    onFinish?.Invoke();
+
+                }, () => false
+            );
+
+            var SearchLayoutAppearAnimation = new Animation(v =>
+            {
+                AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9));
+
+            }, 55, 0);
+
+            SearchLayoutAppearAnimation.Commit(listView, VIEW_IN_ANIMATION, step, overTime, Easing.Linear, null, () => false);//*/
+
         }
 
 
@@ -107,13 +208,6 @@ namespace XxmsApp
             {
                 // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
 
-                var animation = new Animation(v =>
-                {                    
-                    AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9));
-
-                }, 0, 55);
-                
-                animation.Commit(listView, "SearchLayoutAppearance", 40, 1000, Easing.Linear, (v, c) => { }, () => false);//*/
             }
 
             if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
@@ -178,11 +272,19 @@ namespace XxmsApp
                 {
                     Device.BeginInvokeOnMainThread(() =>
                     {
-                        SearchLayout.IsVisible = false;
 
-                        if (listView.Parent is AbsoluteLayout)
+                        if (animeted)
                         {
-                            AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                            SmoothHide(500, () => SearchLayout.IsVisible = false);
+                        }
+                        else
+                        {
+                            SearchLayout.IsVisible = false;
+
+                            if (listView.Parent is AbsoluteLayout)
+                            {
+                                AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                            }
                         }
 
                     }); return false;
