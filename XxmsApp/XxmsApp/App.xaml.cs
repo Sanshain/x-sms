@@ -9,6 +9,11 @@ using Xamarin.Forms;
 namespace XxmsApp
 {
 
+    public class NavPage : NavigationPage
+    {
+        public NavPage(ContentPage root) : base(root) { }
+    }
+
 
     public partial class App : Application
     {

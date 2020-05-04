@@ -92,7 +92,6 @@ namespace XxmsApp.Droid
 
 
 
-
         XmessagesServiceConnection serviceConnection;
 
         public void UpdateUiForBoundService()

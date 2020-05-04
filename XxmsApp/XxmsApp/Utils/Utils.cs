@@ -6,6 +6,35 @@ using Xamarin.Forms;
 
 namespace XxmsApp
 {
+    [Flags]
+    public enum SearchPanelState : byte
+    {
+        Hidden,
+        Visible,
+        InSearch
+    }
+
+    public class SearchToolbarButton : ToolbarItem
+    {
+
+        public static Dictionary<SearchPanelState, string> Icons = new Dictionary<SearchPanelState, string>
+        {
+            { SearchPanelState.Hidden, "i_search.png" },
+            { SearchPanelState.Visible, "c_search.png" },
+            { SearchPanelState.Hidden | SearchPanelState.InSearch, "r_search.png" },                                   // { SearchPanelState.InSearch, "i_search.png" }            
+        };
+        
+        public SearchToolbarButton() : base()
+        {
+            Order = ToolbarItemOrder.Primary;
+            Icon = new FileImageSource { File = Icons[State] };
+            Priority = 0;
+        }
+
+        public AbsoluteLayout ContentLayout { get; set; }
+        public SearchPanelState State { get; set; } = SearchPanelState.Hidden;
+
+    }
 
     public class SearchPanel<T>
     {
@@ -14,13 +43,16 @@ namespace XxmsApp
         const string VIEW_OUT_ANIMATION = "SearchLayoutAppearAnimation";
         const string VIEW_IN_ANIMATION = "SearchLayoutHideAnimation";
 
-        public ToolbarItem SearchButton { get; private set; } = null;
+        public SearchToolbarButton SearchButton { get; private set; } = null;
         public StackLayout SearchLayout { get; private set; } = null;
 
+        public bool IsVisible { get; set; }
         private ListView listView = null;
         private View bottomView = null;
         private bool animeted = true;
         private double PageWidth;
+
+        private const uint animateLong = 250;
 
         private IList<T> itemSource = null;
 
@@ -30,63 +62,101 @@ namespace XxmsApp
             
             bottomView = subView ?? rootLayout.Children.Last();
             listView = lstView ?? (ListView)rootLayout.Children.First() as ListView;
-
-            page.ToolbarItems.Add(SearchButton = new ToolbarItem
+            
+            page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
             {
-                Order = ToolbarItemOrder.Primary,
-                Icon = new FileImageSource { File = "i_search.png" },
-                Priority = 0
-            });
+                ContentLayout = rootLayout
+            });  
 
             PageWidth = page.Width;
 
-            SearchButton.Clicked += (object sender, EventArgs e) =>
-            {
-                
+            SearchButton.Clicked += (object sender, EventArgs e) => SearchButton_Clicked(rootLayout);
 
-                if (SearchLayout != null)
+        }
+
+
+        private void SearchButton_Clicked(AbsoluteLayout rootLayout)
+        {
+
+            ContentPage page = rootLayout.Parent as ContentPage;
+
+            if (SearchLayout != null)
+            {
+
+                var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
+
+                if (SearchButton.Icon.File.StartsWith("r"))
                 {
 
-                    // if (SearchLayout.AnimationIsRunning(SHOW_ANIMATION) || SearchLayout.AnimationIsRunning(HIDE_ANIMATION)) return;
+                    (rootLayout.Parent as ContentPage).Title = "Диалоги";
+                    SearchButton.Icon = ImageSource.FromFile("i_search.png") as FileImageSource;
 
 
-                    if (SearchLayout.AnimationIsRunning(SHOW_ANIMATION))
+                    // var senderHideAnimation = new Animation(v => SearchButton.Icon.) 
+
+                    // анимация scale для listView
+                    var animate_in = new Animation(v => listView.Scale = v, 1, 0.9);
+                    listView.Animate("list_in", animate_in, finished: (v, b) =>
                     {
-                        SearchLayout.AbortAnimation(SHOW_ANIMATION);
-                        SearchLayout.AbortAnimation(VIEW_OUT_ANIMATION);
-                    }
-                    if (SearchLayout.AnimationIsRunning(HIDE_ANIMATION))
-                    {
-                        SearchLayout.AbortAnimation(HIDE_ANIMATION);
-                        SearchLayout.AbortAnimation(VIEW_IN_ANIMATION);
-                    }
+                        var animate_out = new Animation(_v => listView.Scale = _v, 0.9, 1);
+                        listView.Animate("list_out", animate_out, finished: (_v, _b) => { });
+                        (searchFrame.Content as Entry).Text = "";
+                    });
 
-                        var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
+                }
+                else
+                {
+                    this.PreventAnimation();
 
                     if (SearchLayout.IsVisible = !SearchLayout.IsVisible)
                     {
-                        
+
                         if (animeted)
                         {
-                            
-
-                            void FinishAction() => searchFrame?.Content?.Focus();
-                            // Action FinishAction = () => searchFrame?.Content?.Focus();
-
+                            void FinishAction() => searchFrame?.Content?.Focus();       // Action FinishAction = () => searchFrame?.Content?.Focus();
                             SmoothAppearance(page.Width, FinishAction);
                         }
                         else searchFrame?.Content?.Focus();
-
                     }
-
                 }
-                else SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
 
-            };
 
-            
+            }
+            else SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
+
+            SetSearchIcon();
+
 
         }
+
+
+        private void PreventAnimation()
+        {
+            // if (SearchLayout.AnimationIsRunning(SHOW_ANIMATION) || SearchLayout.AnimationIsRunning(HIDE_ANIMATION)) return;
+
+            if (SearchLayout.AnimationIsRunning(SHOW_ANIMATION))
+            {
+                SearchLayout.AbortAnimation(SHOW_ANIMATION);
+                SearchLayout.AbortAnimation(VIEW_OUT_ANIMATION);
+            }
+            if (SearchLayout.AnimationIsRunning(HIDE_ANIMATION))
+            {
+                SearchLayout.AbortAnimation(HIDE_ANIMATION);
+                SearchLayout.AbortAnimation(VIEW_IN_ANIMATION);
+            }
+        }
+
+        private void SetSearchIcon(bool? mark = null)
+        {
+
+            /*
+            bool choice = mark.HasValue ? mark.Value : SearchLayout.IsVisible;
+            var filename = (choice ? "d" : "i") + "_search.png";                              
+            SearchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;//*/
+
+            // SearchButton.Icon = new FileImageSource { File = SearchToolbarButton.Icons[SearchButton.State] };
+        }
+
 
 
         private StackLayout SearchLayoutCreation(AbsoluteLayout rootLayout, double pageWidth)
@@ -105,7 +175,7 @@ namespace XxmsApp
 
             searchEntry.Completed += (object s, EventArgs ev) =>
             {
-                SearchLayout.IsVisible = false;
+                // SearchLayout.IsVisible = false;
             };
 
             searchEntry.TextChanged += (object s, TextChangedEventArgs ev) =>
@@ -141,7 +211,7 @@ namespace XxmsApp
         private void SmoothAppearance(double pageWidth, Action onFinish = null)
         {
 
-            uint overTime = 500;
+            uint overTime = animateLong;
             uint step = overTime / 25;
 
             
@@ -207,7 +277,6 @@ namespace XxmsApp
             if (listView.Parent is AbsoluteLayout && searchedText.Length > 0)
             {
                 // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
-
             }
 
             if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
@@ -259,8 +328,6 @@ namespace XxmsApp
                 });
                 //*/
                 
-
-                (sender as Entry).Text = "";
                 bottomView.IsVisible = false;
                 
             }
@@ -275,7 +342,10 @@ namespace XxmsApp
 
                         if (animeted)
                         {
-                            SmoothHide(500, () => SearchLayout.IsVisible = false);
+                            SmoothHide(animateLong, () =>
+                            {
+                                SearchLayout.IsVisible = false;
+                            });
                         }
                         else
                         {
@@ -295,8 +365,17 @@ namespace XxmsApp
 
             }
 
-            var filename = (SearchLayout.IsVisible ? "d" : "i") + "_search.png";
-            SearchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;
+            
+
+            if (!string.IsNullOrEmpty((sender as Entry).Text))
+            {
+                SearchButton.Icon = ImageSource.FromFile("r_search.png") as FileImageSource;
+                ((App.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Title = 
+                    $"Диалоги {(sender as Entry).Text}";
+            }
+            else SetSearchIcon(e.IsFocused);
+
+
         }
 
     }
