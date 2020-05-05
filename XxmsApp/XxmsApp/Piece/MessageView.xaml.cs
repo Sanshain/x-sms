@@ -16,6 +16,7 @@ namespace XxmsApp.Piece
 	{
 		public MessageView (Message msg)
 		{
+
 			InitializeComponent();
 
             var rltv = new StackLayout

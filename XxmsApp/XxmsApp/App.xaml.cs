@@ -29,12 +29,13 @@ namespace XxmsApp
             
             DBUpdates();
 
+
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },
-                Detail = new NavigationPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black }
-            });
-            
+                Detail = new NavPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black } // 
+            });//*/
+
             MessagingCenter.Subscribe<App, List<XxmsApp.Model.Message>>(
                 this,                                                       // кто подписывается на сообщения
                 "MessageReceived",                                              // название сообщения

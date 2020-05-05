@@ -30,6 +30,8 @@ namespace XxmsApp.Piece
 
         public DialogCell()
         {
+            
+
             double timeWidth = Utils.CalcString(DateTime.Now.ToString());
 
             var view = new RelativeLayout();

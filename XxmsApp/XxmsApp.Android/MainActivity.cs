@@ -52,7 +52,15 @@ namespace XxmsApp.Droid
 
             var application = new App();
 
-            LoadApplication(application);
+            try
+            {
+                LoadApplication(application);
+            }
+            catch(Exception ex)
+            {
+                var exc = ex;
+            }
+            
 
             CreateMessageStateListener();
 

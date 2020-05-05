@@ -4,8 +4,12 @@ using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 
+using XxmsApp.Piece;
+using XxmsApp.Piece;
+
 namespace XxmsApp
 {
+
     [Flags]
     public enum SearchPanelState : byte
     {
@@ -23,7 +27,7 @@ namespace XxmsApp
             { SearchPanelState.Visible, "c_search.png" },
             { SearchPanelState.Hidden | SearchPanelState.InSearch, "r_search.png" },                                   // { SearchPanelState.InSearch, "i_search.png" }            
         };
-        
+
         public SearchToolbarButton() : base()
         {
             Order = ToolbarItemOrder.Primary;
@@ -31,10 +35,30 @@ namespace XxmsApp
             Priority = 0;
         }
 
+
+        public Action ItemClicked = delegate { };
         public AbsoluteLayout ContentLayout { get; set; }
+        public StackLayout SearchLayout { get; set; } = null;
         public SearchPanelState State { get; set; } = SearchPanelState.Hidden;
 
+
+
+        internal void StateUpdate(bool onHide = false)
+        {
+            var text = ((SearchLayout.Children.First() as Frame).Content as Entry).Text;
+
+            if (SearchLayout.IsVisible && !onHide) this.State = SearchPanelState.Visible;
+            else
+            {                
+                this.State = SearchPanelState.Hidden;
+            }
+                
+            if (!string.IsNullOrEmpty(text)) this.State |= SearchPanelState.InSearch;
+        }
+
     }
+    
+
 
     public class SearchPanel<T>
     {
@@ -45,6 +69,7 @@ namespace XxmsApp
 
         public SearchToolbarButton SearchButton { get; private set; } = null;
         public StackLayout SearchLayout { get; private set; } = null;
+        Entry searchEntry = null;
 
         public bool IsVisible { get; set; }
         private ListView listView = null;
@@ -58,6 +83,7 @@ namespace XxmsApp
 
         public SearchPanel(ContentPage page, View subView = null, ListView lstView = null)
         {
+            
             AbsoluteLayout rootLayout = page.Content as AbsoluteLayout;
             
             bottomView = subView ?? rootLayout.Children.Last();
@@ -65,12 +91,13 @@ namespace XxmsApp
             
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
             {
-                ContentLayout = rootLayout
+                ContentLayout = rootLayout,
+                ItemClicked = () => SearchButton_Clicked(rootLayout)
             });  
 
             PageWidth = page.Width;
 
-            SearchButton.Clicked += (object sender, EventArgs e) => SearchButton_Clicked(rootLayout);
+            // SearchButton.Clicked += (object sender, EventArgs e) => SearchButton_Clicked(rootLayout);
 
         }
 
@@ -85,14 +112,10 @@ namespace XxmsApp
 
                 var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
 
-                if (SearchButton.Icon.File.StartsWith("r"))
+                if (SearchButton.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))
                 {
 
                     (rootLayout.Parent as ContentPage).Title = "Диалоги";
-                    SearchButton.Icon = ImageSource.FromFile("i_search.png") as FileImageSource;
-
-
-                    // var senderHideAnimation = new Animation(v => SearchButton.Icon.) 
 
                     // анимация scale для listView
                     var animate_in = new Animation(v => listView.Scale = v, 1, 0.9);
@@ -104,13 +127,12 @@ namespace XxmsApp
                     });
 
                 }
-                else
+                else if (SearchButton.State == SearchPanelState.Hidden)
                 {
                     this.PreventAnimation();
 
-                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible)
+                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible) // SearchLayout.IsVisible == true
                     {
-
                         if (animeted)
                         {
                             void FinishAction() => searchFrame?.Content?.Focus();       // Action FinishAction = () => searchFrame?.Content?.Focus();
@@ -120,14 +142,13 @@ namespace XxmsApp
                     }
                 }
 
-
             }
-            else SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
+            else SearchButton.SearchLayout = SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
 
-            SetSearchIcon();
-
+            SearchButton.StateUpdate();
 
         }
+
 
 
         private void PreventAnimation()
@@ -139,24 +160,13 @@ namespace XxmsApp
                 SearchLayout.AbortAnimation(SHOW_ANIMATION);
                 SearchLayout.AbortAnimation(VIEW_OUT_ANIMATION);
             }
+
             if (SearchLayout.AnimationIsRunning(HIDE_ANIMATION))
             {
                 SearchLayout.AbortAnimation(HIDE_ANIMATION);
                 SearchLayout.AbortAnimation(VIEW_IN_ANIMATION);
             }
         }
-
-        private void SetSearchIcon(bool? mark = null)
-        {
-
-            /*
-            bool choice = mark.HasValue ? mark.Value : SearchLayout.IsVisible;
-            var filename = (choice ? "d" : "i") + "_search.png";                              
-            SearchButton.Icon = ImageSource.FromFile(filename) as FileImageSource;//*/
-
-            // SearchButton.Icon = new FileImageSource { File = SearchToolbarButton.Icons[SearchButton.State] };
-        }
-
 
 
         private StackLayout SearchLayoutCreation(AbsoluteLayout rootLayout, double pageWidth)
@@ -166,23 +176,15 @@ namespace XxmsApp
                 Orientation = StackOrientation.Horizontal,
                 Opacity = 0.9
             };
-            Entry searchEntry = new Entry
+            searchEntry = new Entry
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 Placeholder = "Введите текст для поиска",                                       //  "Enter text for search"
                 BackgroundColor = Color.LightGray,
             };
 
-            searchEntry.Completed += (object s, EventArgs ev) =>
-            {
-                // SearchLayout.IsVisible = false;
-            };
-
-            searchEntry.TextChanged += (object s, TextChangedEventArgs ev) =>
-            {
-                this.WSearchText(searchEntry.Text);
-            };
-
+            searchEntry.Completed += (object s, EventArgs ev) => { };
+            searchEntry.TextChanged += (object s, TextChangedEventArgs ev) => this.WSearchText(searchEntry.Text);
             searchEntry.Focused += SearchEntry_Focused;
             searchEntry.Unfocused += SearchEntry_Focused;
 
@@ -202,8 +204,7 @@ namespace XxmsApp
             rootLayout.Children.Add(SearchLayout, new Rectangle(0, 0, pageWidth, 50), AbsoluteLayoutFlags.None);
             
             if (animeted) SmoothAppearance(pageWidth, () => searchEntry.Focus());
-            else
-                searchEntry.Focus();
+            else searchEntry.Focus();
 
             return SearchLayout;
         }
@@ -214,8 +215,7 @@ namespace XxmsApp
             uint overTime = animateLong;
             uint step = overTime / 25;
 
-            
-            
+                       
             var searchFrameAppearAnimation = new Animation(v =>
                 {
                     AbsoluteLayout.SetLayoutBounds(SearchLayout, new Rectangle(0, 0, pageWidth, v));
@@ -235,9 +235,7 @@ namespace XxmsApp
                 v => AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9)), 0, 55
             )
             .Apply(listView, VIEW_OUT_ANIMATION, step, overTime, Easing.Linear, null, () => false);
-
-            
-
+           
         }
 
 
@@ -274,10 +272,8 @@ namespace XxmsApp
         private void WSearchText(string searchedText)
         {
 
-            if (listView.Parent is AbsoluteLayout && searchedText.Length > 0)
-            {
-                // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
-            }
+            // if (searchedText.Length > 0) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
+
 
             if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
 
@@ -288,76 +284,39 @@ namespace XxmsApp
                     var r = item.ToString().ToLower().Contains(searchedText.ToLower());
                     return r;
                 }
-                catch(Exception ex)
-                {
-                    Console.Write(ex.Message);
-                }
+                catch(Exception ex) { Console.Write(ex.Message); }
+
                 return false;
                 
             });
         }
 
 
-        public static SearchPanel<T> Initialize(ContentPage page, View subBtn = null)
-        {
-            return new SearchPanel<T>(page, subBtn);
-        }
-
+        public static SearchPanel<T> Initialize(ContentPage page, View subBtn = null) => new SearchPanel<T>(page, subBtn);
 
 
         private void SearchEntry_Focused(object sender, FocusEventArgs e)
         {
-            if (e.IsFocused)
+            if (e.IsFocused)    
             {
-                if (!(itemSource is null || listView.ItemsSource == itemSource))
-                {
-                    listView.ItemsSource = itemSource;
-                }
+                // для чего это условие?:                
+                // if (itemSource != null && listView.ItemsSource != itemSource) listView.ItemsSource = itemSource;  
 
-                /*
-                Device.StartTimer(TimeSpan.FromSeconds(1), () =>
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        if (!e.IsFocused) return;
-
-                        if (listView.Parent is AbsoluteLayout) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 50, 1, 0.9));
-                    });
-
-                    return false;
-                });
-                //*/
-                
-                bottomView.IsVisible = false;
-                
+                bottomView.IsVisible = false;                
             }
-            else
+            else // close all
             {
                 var offTime = 150;
 
-                Device.StartTimer(TimeSpan.FromMilliseconds(offTime), () =>
-                {
-                    Device.BeginInvokeOnMainThread(() =>
+                Utils.CallAfter(offTime, () => {
+
+                    if (animeted) SmoothHide(animateLong, () => SearchLayout.IsVisible = false);
+                    else
                     {
+                        SearchLayout.IsVisible = false;
 
-                        if (animeted)
-                        {
-                            SmoothHide(animateLong, () =>
-                            {
-                                SearchLayout.IsVisible = false;
-                            });
-                        }
-                        else
-                        {
-                            SearchLayout.IsVisible = false;
-
-                            if (listView.Parent is AbsoluteLayout)
-                            {
-                                AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
-                            }
-                        }
-
-                    }); return false;
+                        if (listView.Parent is AbsoluteLayout) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                    }
 
                 });
 
@@ -365,16 +324,7 @@ namespace XxmsApp
 
             }
 
-            
-
-            if (!string.IsNullOrEmpty((sender as Entry).Text))
-            {
-                SearchButton.Icon = ImageSource.FromFile("r_search.png") as FileImageSource;
-                ((App.Current.MainPage as MasterDetailPage).Detail as NavigationPage).RootPage.Title = 
-                    $"Диалоги {(sender as Entry).Text}";
-            }
-            else SetSearchIcon(e.IsFocused);
-
+            SearchButton.StateUpdate();
 
         }
 
