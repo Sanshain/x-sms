@@ -82,7 +82,7 @@ namespace XxmsApp.Views.Droid
                 
                 var btn = ((Element as NavigationPage).RootPage.ToolbarItems.First() as SearchToolbarButton);
 
-                
+
 
                 /*
                 objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);
@@ -100,8 +100,15 @@ namespace XxmsApp.Views.Droid
                     a.Start();
                 };//*/
 
+                
+                bool clicked = false;
+                if (btn.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))
+                {
+                    btn.ItemClicked();                  // occurs click event on X.Forms project
+                    clicked = true;
+                }//*/
 
-                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);
+                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", 0.3f);
 
                 ObjectAnimator scaleDownX = ObjectAnimator.OfFloat(item, "ScaleX", 0.7f);
                 ObjectAnimator scaleDownY = ObjectAnimator.OfFloat(item, "ScaleY", 0.7f);                
@@ -116,14 +123,8 @@ namespace XxmsApp.Views.Droid
                     // btn.Icon = new FileImageSource { File = SearchToolbarButton.Icons[btn.State] };                    
 
 
-                    btn.ItemClicked();
-                    /*
-                    bool clicked = false;
-                    if (btn.State.HasFlag(SearchPanelState.Hidden))
-                    {
-                        btn.ItemClicked();                  // occurs click event on X.Forms project
-                        clicked = true;
-                    }//*/
+                    if (clicked == false) btn.ItemClicked();
+
 
                     var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
                     var d = item.Context.GetDrawable(image);

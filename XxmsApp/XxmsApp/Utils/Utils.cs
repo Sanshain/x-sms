@@ -50,8 +50,6 @@ namespace XxmsApp
         {
             var text = (((SearchLayout.Children.First() as Frame).Content as Frame).Content as Entry).Text;
 
-            this.StateByFocus = onHide;
-
             if (SearchLayout.IsVisible && !onHide) this.State = SearchPanelState.Visible;
             else
             {                
@@ -118,24 +116,18 @@ namespace XxmsApp
             if (SearchLayout != null)
             {
 
-                if (SearchLayout.IsVisible) return;
-
-                var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
-
+                if (SearchLayout.IsVisible) return;                                                     // Also impoertant as State attribute                
                 if (SearchButton.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))        // Clean
                 {
                    
-
                     (rootLayout.Parent as ContentPage).Title = "Диалоги";
                     searchEntry.Text = "";
-
-                    // анимация scale для listView
-                    var animate_in = new Animation(v => listView.Scale = v, 1, 0.9);
+                    
+                    var animate_in = new Animation(v => listView.Scale = v, 1, 0.9);                   // анимация scale для listView
                     listView.Animate("list_in", animate_in, finished: (v, b) =>
                     {
                         var animate_out = new Animation(_v => listView.Scale = _v, 0.9, 1);
-                        listView.Animate("list_out", animate_out, finished: (_v, _b) => { });
-                        
+                        listView.Animate("list_out", animate_out, finished: (_v, _b) => { });                        
                     });
                     
                 }
@@ -143,11 +135,13 @@ namespace XxmsApp
                 {
                     this.PreventAnimation();
 
-                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible)                 //  true
+                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible)  //  true
                     {
+                        var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
+
                         if (animeted)
                         {
-                            void FinishAction() => searchFrame?.Content?.Focus();       // Action FinishAction = () => searchFrame?.Content?.Focus();
+                            void FinishAction() => searchEntry?.Focus();       // Action FinishAction = () => searchFrame?.Content?.Focus();
                             SmoothAppearance(page.Width, FinishAction);
                         }
                         else searchFrame?.Content?.Focus();
@@ -250,7 +244,7 @@ namespace XxmsApp
             uint overTime = animateLong;
             uint step = overTime / 25;
 
-            onFinish = null;
+            // onFinish = null;
 
             SearchLayout.Scale = 0.9;
 
@@ -263,7 +257,10 @@ namespace XxmsApp
 
                 }, 0, 50
             )
-            .Apply(SearchLayout, SHOW_ANIMATION, step, overTime / 2, Easing.Linear, (v, c) => onFinish?.Invoke(), () => false);
+            .Apply(SearchLayout, SHOW_ANIMATION, step, overTime / 2, Easing.Linear, (v, c) =>
+            {
+                onFinish?.Invoke();
+            }, () => false);
 
 
 
@@ -341,10 +338,10 @@ namespace XxmsApp
 
         public static SearchPanel<T> Initialize(ContentPage page, View subBtn = null) => new SearchPanel<T>(page, subBtn);
 
+        public bool StateByUnFocused = false; // SearchButton.StateByFocus using instead
 
         private void SearchEntry_Focused(object sender, FocusEventArgs e)
         {
-            bool hideIntent = false;
 
             if (e.IsFocused)
             {
@@ -354,20 +351,19 @@ namespace XxmsApp
                 bottomView.IsVisible = false;
 
                 // I can do it by click:
-                SearchButton.StateUpdate(hideIntent);
+                SearchButton.StateUpdate();
             }
             else // close all
             {
                 var offTime = 150;
-
-
+               
                 SearchButton.State = SearchPanelState.Hidden;
                 if (string.IsNullOrEmpty(searchEntry.Text) == false)
                 {
                     SearchButton.State |= SearchPanelState.InSearch;
-                }//*/
-                
+                }
 
+                StateByUnFocused = true;
                 Utils.CallAfter(offTime, () => {
 
                     // SearchButton.StateUpdate(hideIntent);                  
@@ -375,7 +371,8 @@ namespace XxmsApp
                     if (animeted) SmoothHide(animateLong, () =>
                         {                            
                             SearchLayout.IsVisible = false;
-                            SearchButton.Icon = new FileImageSource { File = SearchToolbarButton.Icons[SearchButton.State] };                            
+                            SearchButton.Icon = new FileImageSource { File = SearchToolbarButton.Icons[SearchButton.State] };
+                            StateByUnFocused = false;
                         });
                     else
                     {
@@ -390,8 +387,6 @@ namespace XxmsApp
                 });
 
                 Utils.CallAfter(offTime + 150, () => bottomView.IsVisible = true);
-
-                hideIntent = true;
 
             }
 
