@@ -62,7 +62,15 @@ namespace XxmsApp.Views.Droid
         {
             var item = e.Child;                                 // ActionMenuPresenter            
             item.Click += Item_Click;
+            item.FocusChange += Item_FocusChange;
+        }
 
+        private void Item_FocusChange(object sender, FocusChangeEventArgs e)
+        {
+            if (e.HasFocus)
+            {
+
+            }
         }
 
         private void Item_Click(object sender, EventArgs e)
@@ -70,27 +78,67 @@ namespace XxmsApp.Views.Droid
             
             if (sender is ActionMenuItemView item)
             {
+                var duration = 125;
+                
+                var btn = ((Element as NavigationPage).RootPage.ToolbarItems.First() as SearchToolbarButton);
 
-                var element = (Element as NavigationPage).RootPage;
-                var btn = (element.ToolbarItems.First() as SearchToolbarButton);
+                
 
-                btn.ItemClicked();
-
-                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);               
-                objectAnimator.SetDuration(300);
+                /*
+                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);
+                objectAnimator.SetDuration(duration);
                 objectAnimator.Start();
                 objectAnimator.AnimationEnd += (object s, EventArgs ev) =>
                 {
-
-                    // btn.Icon = new FileImageSource { File = SearchToolbarButton.Icons[btn.State] };
 
                     var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
                     var d = item.Context.GetDrawable(image);
                     item.SetIcon(d);
 
                     var a = ObjectAnimator.OfFloat(item, "Alpha", 1);   // item.Alpha == 0 ? 1 : 0
-                    a.SetDuration(1000);
+                    a.SetDuration(duration);
                     a.Start();
+                };//*/
+
+
+                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);
+
+                ObjectAnimator scaleDownX = ObjectAnimator.OfFloat(item, "ScaleX", 0.7f);
+                ObjectAnimator scaleDownY = ObjectAnimator.OfFloat(item, "ScaleY", 0.7f);                
+                scaleDownX.SetDuration(duration);
+                scaleDownY.SetDuration(duration);
+                AnimatorSet scaleDown = new AnimatorSet();
+                scaleDown.Play(scaleDownX).With(scaleDownY).With(objectAnimator);
+                scaleDown.Start();
+                
+                scaleDown.AnimationEnd += (object s, EventArgs ev) =>
+                {
+                    // btn.Icon = new FileImageSource { File = SearchToolbarButton.Icons[btn.State] };                    
+
+
+                    btn.ItemClicked();
+                    /*
+                    bool clicked = false;
+                    if (btn.State.HasFlag(SearchPanelState.Hidden))
+                    {
+                        btn.ItemClicked();                  // occurs click event on X.Forms project
+                        clicked = true;
+                    }//*/
+
+                    var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
+                    var d = item.Context.GetDrawable(image);
+                    item.SetIcon(d);
+
+                    var a = ObjectAnimator.OfFloat(item, "Alpha", 1);   // item.Alpha == 0 ? 1 : 0
+                    ObjectAnimator scaleDownX1 = ObjectAnimator.OfFloat(item, "ScaleX", 1);
+                    ObjectAnimator scaleDownY1 = ObjectAnimator.OfFloat(item, "ScaleY", 1);
+                    scaleDownX1.SetDuration(duration * 2);
+                    scaleDownY1.SetDuration(duration * 2);
+                    AnimatorSet scaleDown1 = new AnimatorSet();
+                    scaleDown1.Play(scaleDownX1).With(scaleDownY1).With(a);
+                    scaleDown1.Start();
+                    scaleDown1.AnimationEnd += delegate { };
+
                 };
             }
         }

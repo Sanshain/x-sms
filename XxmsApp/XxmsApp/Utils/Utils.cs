@@ -13,9 +13,9 @@ namespace XxmsApp
     [Flags]
     public enum SearchPanelState : byte
     {
-        Hidden,
-        Visible,
-        InSearch
+        Hidden = 1,
+        Visible = 2,
+        InSearch = 4
     }
 
     public class SearchToolbarButton : ToolbarItem
@@ -26,7 +26,10 @@ namespace XxmsApp
             { SearchPanelState.Hidden, "i_search.png" },
             { SearchPanelState.Visible, "c_search.png" },
             { SearchPanelState.Hidden | SearchPanelState.InSearch, "r_search.png" },                                   // { SearchPanelState.InSearch, "i_search.png" }            
+            { SearchPanelState.Visible | SearchPanelState.InSearch, "d_search.png" }, 
         };
+
+        public bool StateByFocus = false;
 
         public SearchToolbarButton() : base()
         {
@@ -45,15 +48,20 @@ namespace XxmsApp
 
         internal void StateUpdate(bool onHide = false)
         {
-            var text = ((SearchLayout.Children.First() as Frame).Content as Entry).Text;
+            var text = (((SearchLayout.Children.First() as Frame).Content as Frame).Content as Entry).Text;
+
+            this.StateByFocus = onHide;
 
             if (SearchLayout.IsVisible && !onHide) this.State = SearchPanelState.Visible;
             else
             {                
                 this.State = SearchPanelState.Hidden;
             }
-                
-            if (!string.IsNullOrEmpty(text)) this.State |= SearchPanelState.InSearch;
+
+            if (!string.IsNullOrEmpty(text))
+            {
+                this.State = this.State | SearchPanelState.InSearch;
+            }
         }
 
     }
@@ -88,6 +96,7 @@ namespace XxmsApp
             
             bottomView = subView ?? rootLayout.Children.Last();
             listView = lstView ?? (ListView)rootLayout.Children.First() as ListView;
+
             
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
             {
@@ -95,8 +104,7 @@ namespace XxmsApp
                 ItemClicked = () => SearchButton_Clicked(rootLayout)
             });  
 
-            PageWidth = page.Width;
-
+            PageWidth = page.Width;            
             // SearchButton.Clicked += (object sender, EventArgs e) => SearchButton_Clicked(rootLayout);
 
         }
@@ -110,12 +118,16 @@ namespace XxmsApp
             if (SearchLayout != null)
             {
 
+                if (SearchLayout.IsVisible) return;
+
                 var searchFrame = SearchLayout.Children.FirstOrDefault() as Frame;
 
-                if (SearchButton.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))
+                if (SearchButton.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))        // Clean
                 {
+                   
 
                     (rootLayout.Parent as ContentPage).Title = "Диалоги";
+                    searchEntry.Text = "";
 
                     // анимация scale для listView
                     var animate_in = new Animation(v => listView.Scale = v, 1, 0.9);
@@ -123,15 +135,15 @@ namespace XxmsApp
                     {
                         var animate_out = new Animation(_v => listView.Scale = _v, 0.9, 1);
                         listView.Animate("list_out", animate_out, finished: (_v, _b) => { });
-                        (searchFrame.Content as Entry).Text = "";
+                        
                     });
-
+                    
                 }
-                else if (SearchButton.State == SearchPanelState.Hidden)
+                else if (SearchButton.State == SearchPanelState.Hidden)                                 // Show cleaned
                 {
                     this.PreventAnimation();
 
-                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible) // SearchLayout.IsVisible == true
+                    if (SearchLayout.IsVisible = !SearchLayout.IsVisible)                 //  true
                     {
                         if (animeted)
                         {
@@ -139,13 +151,24 @@ namespace XxmsApp
                             SmoothAppearance(page.Width, FinishAction);
                         }
                         else searchFrame?.Content?.Focus();
-                    }
+
+                        // (rootLayout.Parent as ContentPage).Title = "Диалоги";
+                        // searchEntry.Text = "";
+                    }                    
+
                 }
 
-            }
-            else SearchButton.SearchLayout = SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
+                SearchButton.StateUpdate();
 
-            SearchButton.StateUpdate();
+            }
+            else
+            {
+                SearchButton.SearchLayout = SearchLayout = SearchLayoutCreation(rootLayout, page.Width);
+
+                SearchButton.StateUpdate();
+            }
+
+            
 
         }
 
@@ -192,7 +215,7 @@ namespace XxmsApp
             {
                 Content = searchEntry,
                 Padding = new Thickness(0),
-                Margin = new Thickness(3),
+                Margin = new Thickness(2),
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 /*HasShadow = true,
                 OutlineColor = Color.Red,             // material design //*/
@@ -200,9 +223,21 @@ namespace XxmsApp
                 IsClippedToBounds = true             // border-radius //*/
             };
 
-            SearchLayout.Children.Add(searchFrame);
+            var FrameContainer = new Frame
+            {
+                BackgroundColor = Color.Blue,
+                Padding = new Thickness(0),
+                Content = searchFrame,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                CornerRadius = 12,
+                IsClippedToBounds = true 
+            };
+
+            SearchLayout.Children.Add(FrameContainer);
             rootLayout.Children.Add(SearchLayout, new Rectangle(0, 0, pageWidth, 50), AbsoluteLayoutFlags.None);
-            
+
+            itemSource = listView.ItemsSource as IList<T>;
+
             if (animeted) SmoothAppearance(pageWidth, () => searchEntry.Focus());
             else searchEntry.Focus();
 
@@ -215,27 +250,33 @@ namespace XxmsApp
             uint overTime = animateLong;
             uint step = overTime / 25;
 
-                       
-            var searchFrameAppearAnimation = new Animation(v =>
+            onFinish = null;
+
+            SearchLayout.Scale = 0.9;
+
+
+            var searchFrameAppearAnimation =
+                new Animation(v =>
                 {
                     AbsoluteLayout.SetLayoutBounds(SearchLayout, new Rectangle(0, 0, pageWidth, v));
+                    // SearchLayout.Scale = 0.2 * v / 55 + 0.8;
 
-                }, 0, 50);            
+                }, 0, 50
+            )
+            .Apply(SearchLayout, SHOW_ANIMATION, step, overTime / 2, Easing.Linear, (v, c) => onFinish?.Invoke(), () => false);
 
-            searchFrameAppearAnimation.Commit(SearchLayout, SHOW_ANIMATION, step, overTime, Easing.Linear, (v, c) => {
-
-                    onFinish?.Invoke();
-
-                }, () => false
-            );
 
 
             var SearchLayoutAppearAnimation = new Animation
             (
-                v => AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9)), 0, 55
+                v => {
+
+                    // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9));
+
+                }, 0, 55
             )
             .Apply(listView, VIEW_OUT_ANIMATION, step, overTime, Easing.Linear, null, () => false);
-           
+                       
         }
 
 
@@ -258,24 +299,30 @@ namespace XxmsApp
                 }, () => false
             );
 
-            var SearchLayoutAppearAnimation = new Animation(v =>
+
+            if (AbsoluteLayout.GetLayoutBounds(listView).Top != 0)
             {
-                AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9));
+                var SearchLayoutAppearAnimation = new Animation(v =>
+                {
+                    AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, v, 1, 0.9));
 
-            }, 55, 0);
+                }, 55, 0);
 
-            SearchLayoutAppearAnimation.Commit(listView, VIEW_IN_ANIMATION, step, overTime, Easing.Linear, null, () => false);//*/
-
+                SearchLayoutAppearAnimation.Commit(listView, VIEW_IN_ANIMATION, step, overTime, Easing.Linear, null, () => false);//*/
+            }
+            
         }
 
 
         private void WSearchText(string searchedText)
         {
 
-            // if (searchedText.Length > 0) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
-
-
-            if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
+            if (string.IsNullOrEmpty(searchedText)) (SearchButton.ContentLayout.Parent as ContentPage).Title = "Диалоги";
+            else
+            {
+                AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
+                (SearchButton.ContentLayout.Parent as ContentPage).Title = $"Диалоги ({searchEntry.Text})";
+            }
 
             listView.ItemsSource = itemSource.Where(item => {
 
@@ -297,39 +344,78 @@ namespace XxmsApp
 
         private void SearchEntry_Focused(object sender, FocusEventArgs e)
         {
-            if (e.IsFocused)    
+            bool hideIntent = false;
+
+            if (e.IsFocused)
             {
                 // для чего это условие?:                
                 // if (itemSource != null && listView.ItemsSource != itemSource) listView.ItemsSource = itemSource;  
 
-                bottomView.IsVisible = false;                
+                bottomView.IsVisible = false;
+
+                // I can do it by click:
+                SearchButton.StateUpdate(hideIntent);
             }
             else // close all
             {
                 var offTime = 150;
 
+
+                SearchButton.State = SearchPanelState.Hidden;
+                if (string.IsNullOrEmpty(searchEntry.Text) == false)
+                {
+                    SearchButton.State |= SearchPanelState.InSearch;
+                }//*/
+                
+
                 Utils.CallAfter(offTime, () => {
 
-                    if (animeted) SmoothHide(animateLong, () => SearchLayout.IsVisible = false);
+                    // SearchButton.StateUpdate(hideIntent);                  
+
+                    if (animeted) SmoothHide(animateLong, () =>
+                        {                            
+                            SearchLayout.IsVisible = false;
+                            SearchButton.Icon = new FileImageSource { File = SearchToolbarButton.Icons[SearchButton.State] };                            
+                        });
                     else
                     {
                         SearchLayout.IsVisible = false;
 
-                        if (listView.Parent is AbsoluteLayout) AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                        if (listView.Parent is AbsoluteLayout)
+                        {
+                            AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 0, 1, 0.9));
+                        }
                     }
 
                 });
 
                 Utils.CallAfter(offTime + 150, () => bottomView.IsVisible = true);
 
+                hideIntent = true;
+
             }
 
-            SearchButton.StateUpdate();
+            
 
+
+            /*
+            if (SearchButton.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))
+            {
+
+                (SearchButton.ContentLayout.Parent as ContentPage).Title = "Диалоги";
+                searchEntry.Text = "";
+
+                var animate_in = new Animation(v => listView.Scale = v, 1, 0.9);        // анимация scale для listView
+                listView.Animate("list_in", animate_in, finished: (v, b) =>
+                {
+                    var animate_out = new Animation(_v => listView.Scale = _v, 0.9, 1);
+                    listView.Animate("list_out", animate_out, finished: (_v, _b) => { });
+                });
+            }
+            //*/
         }
 
     }
 
-    
 
 }
