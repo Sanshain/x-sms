@@ -259,7 +259,9 @@ namespace XxmsApp
             )
             .Apply(SearchLayout, SHOW_ANIMATION, step, overTime / 2, Easing.Linear, (v, c) =>
             {
+            
                 onFinish?.Invoke();
+
             }, () => false);
 
 
@@ -296,6 +298,8 @@ namespace XxmsApp
                 }, () => false
             );
 
+            AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
+            listView.Header = null;
 
             if (AbsoluteLayout.GetLayoutBounds(listView).Top != 0)
             {
@@ -317,8 +321,10 @@ namespace XxmsApp
             if (string.IsNullOrEmpty(searchedText)) (SearchButton.ContentLayout.Parent as ContentPage).Title = "Диалоги";
             else
             {
-                AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
+                // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
+                listView.Header = new BoxView { HeightRequest = 55 };
                 (SearchButton.ContentLayout.Parent as ContentPage).Title = $"Диалоги ({searchEntry.Text})";
+                
             }
 
             listView.ItemsSource = itemSource.Where(item => {
