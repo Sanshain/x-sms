@@ -75,6 +75,8 @@ namespace XxmsApp
 
         public SearchToolbarButton SearchButton { get; private set; } = null;
         public StackLayout SearchLayout { get; private set; } = null;
+        public Image SearchInMessages;
+        private int SearchImageTop = 5;
         Entry searchEntry = null;
 
         public bool IsVisible { get; set; }
@@ -102,7 +104,8 @@ namespace XxmsApp
                 ItemClicked = () => SearchButton_Clicked(rootLayout)
             });  
 
-            PageWidth = page.Width;            
+            PageWidth = page.Width;
+            
             // SearchButton.Clicked += (object sender, EventArgs e) => SearchButton_Clicked(rootLayout);
 
         }
@@ -227,15 +230,90 @@ namespace XxmsApp
                 IsClippedToBounds = true 
             };
 
+
+
+
             SearchLayout.Children.Add(FrameContainer);
             rootLayout.Children.Add(SearchLayout, new Rectangle(0, 0, pageWidth, 50), AbsoluteLayoutFlags.None);
 
+
+            SearchInMessages = new Image
+            {
+                BackgroundColor = Color.Transparent,
+                Source = new FileImageSource { File = "deep_search.png" },                
+                // Opacity = 0
+            };
+            var InsideMessagesFinder = new TapGestureRecognizer();
+            InsideMessagesFinder.Tapped += (s,e) => InsideMessagesFinder_Tapped(s,e);
+            SearchInMessages.GestureRecognizers.Add(InsideMessagesFinder);
+            rootLayout.Children.Add(SearchInMessages, new Rectangle(rootLayout.Width - 65, 5, 35, 35));
+
+
             itemSource = listView.ItemsSource as IList<T>;
 
-            if (animeted) SmoothAppearance(pageWidth, () => searchEntry.Focus());
+            if (animeted) SmoothAppearance(pageWidth, () => { EmptyLabelCreation(); searchEntry.Focus();});
             else searchEntry.Focus();
 
             return SearchLayout;
+        }
+
+
+        private void EmptyLabelCreation()
+        {
+            lblFailed = new Label
+            {
+                Text = "Ничего не найдено :(",
+                Opacity = 0.7,
+                Scale = 1
+            };
+
+            SearchButton.ContentLayout.Children.Add(
+                lblFailed,
+                new Rectangle(0.5, 0.5, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize),
+                AbsoluteLayoutFlags.PositionProportional
+            );//*/
+        }
+
+        private int InsideMessagesFinder_Tapped(object sender, EventArgs e)
+        {
+            // (rootLayout.Parent as ContentPage).DisplayAlert("Focused", true.ToString(), "ok");
+
+            if (string.IsNullOrWhiteSpace(searchEntry.Text)) return -1;
+
+            List<T> dialogs = new List<T>();
+
+            if (SearchInMessages.Scale == 1)
+            {
+
+                dialogs = itemSource.Where(dial =>
+                {
+                    return (dial as Dialog).Messages.Any(m => m.Value.ToLower().Contains(searchEntry.Text.ToLower()));
+                }).ToList();
+
+                SearchInMessages.ScaleTo(0.7f);
+            }
+            else
+            {
+                dialogs = itemSource.Where(dial =>
+                {
+                    return (dial as Dialog).Address?.ToLower().Contains(searchEntry.Text.ToLower()) ?? false;
+                }).ToList();
+
+                SearchInMessages.ScaleTo(1);
+            }
+
+            listView.ItemsSource = dialogs;
+
+            if (Container != null) Container.IsVisible = false;
+
+            return dialogs.Count;
+
+            /*
+            SearchInMessages.Animate("down", new Animation(v => SearchInMessages.Scale = v, 1, 0.7f), finished: (v, b) =>
+            {
+                SearchInMessages.ScaleTo(1);
+            });//*/
+
         }
 
         private void SmoothAppearance(double pageWidth, Action onFinish = null)
@@ -244,7 +322,12 @@ namespace XxmsApp
             uint overTime = animateLong;
             uint step = overTime / 25;
 
-            // onFinish = null;
+            SearchInMessages.Animate("3", new Animation(o =>
+            {
+                AbsoluteLayout.SetLayoutBounds(SearchInMessages, new Rectangle(SearchButton.ContentLayout.Width - 65, o, 35, 35));
+            }, -45, 5), length: overTime / 2);
+
+            // onFinish = null;//*/
 
             SearchLayout.Scale = 0.9;
 
@@ -259,7 +342,9 @@ namespace XxmsApp
             )
             .Apply(SearchLayout, SHOW_ANIMATION, step, overTime / 2, Easing.Linear, (v, c) =>
             {
-            
+
+                // SearchInMessages.Animate("1", new Animation(o => SearchInMessages.Opacity = o, 0, 1));
+
                 onFinish?.Invoke();
 
             }, () => false);
@@ -282,8 +367,15 @@ namespace XxmsApp
         private void SmoothHide(uint overTime = 500, Action onFinish = null)
         {
 
+            
+
             double pageWidth = SearchLayout.Width;
             uint step = overTime / 25;
+
+            SearchInMessages.Animate("2", new Animation(o =>
+            {
+                AbsoluteLayout.SetLayoutBounds(SearchInMessages, new Rectangle(SearchButton.ContentLayout.Width - 65, o, 35, 35));
+            }, 5, -45));
 
             var searchFrameAppearAnimation = new Animation(v =>
             {
@@ -314,7 +406,8 @@ namespace XxmsApp
             
         }
 
-
+        Frame Container;
+        Label lblFailed;
         private void WSearchText(string searchedText)
         {
 
@@ -322,25 +415,101 @@ namespace XxmsApp
             else
             {
                 // AbsoluteLayout.SetLayoutBounds(listView, new Rectangle(0, 55, 1, 0.9));
-                listView.Header = new BoxView { HeightRequest = 55 };
+                listView.Header = new Frame
+                {
+                    HeightRequest = 55,
+                    Content = new Label(),
+                    Padding = new Thickness(SearchButton.ContentLayout.Width - 100, 0, 0, 0)
+                };
                 (SearchButton.ContentLayout.Parent as ContentPage).Title = $"Диалоги ({searchEntry.Text})";
-                
+
             }
 
-            listView.ItemsSource = itemSource.Where(item => {
+            listView.ItemsSource = itemSource.Where(item =>
+            {
 
                 try
                 {
                     var r = item.ToString().ToLower().Contains(searchedText.ToLower());
                     return r;
                 }
-                catch(Exception ex) { Console.Write(ex.Message); }
+                catch (Exception ex) { Console.Write(ex.Message); }
 
                 return false;
-                
-            });
+
+            }).ToList();
+
+
+            ShowHintBtnOnEmpty();
+
         }
 
+        private void ShowHintBtnOnEmpty()
+        {
+            if (lblFailed != null) lblFailed.IsVisible = false;            
+
+            if ((listView.ItemsSource as IList<T>).Count == 0 && string.IsNullOrEmpty(searchEntry.Text) == false)
+            {                
+
+                // делаем видимой кнопку с предложением начать поиск внутри сообщений
+
+                if (Container == null)  //  SearchButton.ContentLayout.Children.Contains(Container) == false
+                {
+                    
+                    var buttonSearchInMessages = new Button
+                    {
+                        MinimumWidthRequest = SearchButton.ContentLayout.Width / 2 * 1.5,
+                        MinimumHeightRequest = 70,
+                        Text = "Искать в сообщениях",
+                        Opacity = 0.8,
+                        Margin = new Thickness(-5),
+                        TextColor = Color.DarkSlateGray
+                    };
+                    SearchButton.ContentLayout.Children.Add(Container = new Frame{
+                        Content = new Frame
+                        {                            
+                            Content = buttonSearchInMessages,
+                            CornerRadius = 10,
+                            Padding = new Thickness(-1),
+                            Margin = new Thickness(3),
+                            BackgroundColor = Color.White
+                        },
+                        Scale = 0,                        
+                        CornerRadius = 10,
+                        IsClippedToBounds = true,
+                        HasShadow = true,
+                        Padding = new Thickness(-1),
+                        Margin = new Thickness(0),
+                        BackgroundColor = Color.Black
+                    },
+                        new Rectangle(0.5, 0.5, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize),
+                        AbsoluteLayoutFlags.PositionProportional
+                    );
+
+                    buttonSearchInMessages.Clicked += (object sender, EventArgs e) =>
+                    {
+                        int cnt = InsideMessagesFinder_Tapped(sender, e);                        
+
+                        Container.Scale = 0;
+                        Container.IsVisible = false;
+
+                        if (cnt == 0)
+                        {
+                            lblFailed.IsVisible = true;
+                            lblFailed.Scale = 1;
+                            lblFailed?.ScaleTo(1);
+                        }
+
+                    };
+
+                }                
+
+                Container.IsVisible = true;
+                Container.ScaleTo(1);
+
+            }
+            else if (Container != null) Container.IsVisible = false;
+        }
 
         public static SearchPanel<T> Initialize(ContentPage page, View subBtn = null) => new SearchPanel<T>(page, subBtn);
 
