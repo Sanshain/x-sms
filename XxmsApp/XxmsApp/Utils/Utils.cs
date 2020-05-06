@@ -222,7 +222,7 @@ namespace XxmsApp
 
             var FrameContainer = new Frame
             {
-                BackgroundColor = Color.Blue,
+                BackgroundColor = Color.Black,
                 Padding = new Thickness(0),
                 Content = searchFrame,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -418,8 +418,8 @@ namespace XxmsApp
                 listView.Header = new Frame
                 {
                     HeightRequest = 55,
-                    Content = new Label(),
-                    Padding = new Thickness(SearchButton.ContentLayout.Width - 100, 0, 0, 0)
+                    Content = new Label { Text = $"({itemSource.Count})" },
+                    Padding = new Thickness(SearchButton.ContentLayout.Width - 85, 12, 0, 0)
                 };
                 (SearchButton.ContentLayout.Parent as ContentPage).Title = $"Диалоги ({searchEntry.Text})";
 
@@ -480,7 +480,7 @@ namespace XxmsApp
                         HasShadow = true,
                         Padding = new Thickness(-1),
                         Margin = new Thickness(0),
-                        BackgroundColor = Color.Black
+                        BackgroundColor = Color.LightCyan
                     },
                         new Rectangle(0.5, 0.5, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize),
                         AbsoluteLayoutFlags.PositionProportional
@@ -502,8 +502,9 @@ namespace XxmsApp
 
                     };
 
-                }                
+                }
 
+                if (Container.IsVisible == false) Container.Scale = 0;
                 Container.IsVisible = true;
                 Container.ScaleTo(1);
 
