@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dependencies.cs" />
+    <Compile Include="Dependencies\Utilities.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="ReadSms.cs" />
     <Compile Include="Renderer\CustomRenderer.cs" />

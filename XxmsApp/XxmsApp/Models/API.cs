@@ -62,3 +62,11 @@ namespace XxmsApp.Api
     }
 
 }
+
+namespace XxmsApp.Api.Utilites
+{
+    public interface IUtilites
+    {
+        void Vibrate(int ms);
+    }
+}

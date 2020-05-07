@@ -22,6 +22,7 @@ namespace XxmsApp
             var rootLayout = Initialize() as AbsoluteLayout;
 
             SearchPanel<Dialog>.Initialize(this);
+            
 
             // SearchPanelInitialize(rootLayout);
 
@@ -86,6 +87,14 @@ namespace XxmsApp
         {
             var parent = (this.Parent as NavigationPage);
             parent.Popped += MainPage_PoppedToRoot;
+
+            
+        }
+
+        public Func<bool> OnBackPressed = null;
+        protected override bool OnBackButtonPressed()
+        {
+            return OnBackPressed?.Invoke() ?? base.OnBackButtonPressed();
         }
 
         private void Btn_Clicked(object sender, EventArgs e)
