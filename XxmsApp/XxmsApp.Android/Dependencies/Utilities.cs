@@ -13,10 +13,10 @@ using XxmsApp.Api;
 using Xamarin.Forms;
 
 
-[assembly: Dependency(typeof(XxmsApp.Api.Utilites.IUtilites))]
+// [assembly: Dependency(typeof(XxmsApp.Api.Utilites.IUtilites))]
 namespace XxmsApp.Api.Utilites
 {
-    public class Utilites : IUtilites
+    public class Utilites // : IUtilites
     {
         public Utilites() : base() { }
 
@@ -24,7 +24,7 @@ namespace XxmsApp.Api.Utilites
         {
             var context = Android.App.Application.Context;
             Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
-            vibrator.Vibrate(ms);
+            vibrator.Vibrate(150);
         }
     }
 

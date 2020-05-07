@@ -216,8 +216,8 @@ namespace XxmsApp
                 {
                     searchEntry.Text = "";
                     
-                    // var di = DependencyService.Get<Api.Utilites.IUtilites>(DependencyFetchTarget.NewInstance);
-                    // di.Vibrate(400);
+                    var di = DependencyService.Get<Api.IMessages>();
+                    di.Vibrate(50);
 
                     return true;
                 }
@@ -533,22 +533,10 @@ namespace XxmsApp
 
 
                         // await Container.ScaleTo(0.9f);
+                        // Container.IsVisible = false;                       
 
-                        // Container.IsVisible = false;
-                        
                         if (SearchInMessages.Scale == 1) buttonSearchInMessages.Text = "Искать в адресах";
-                        else
-                            buttonSearchInMessages.Text = "Искать в сообщениях";
-
-                        FormattedString searchedText = new FormattedString();
-                        searchedText.Spans.Add(new Span { Text = "По " });
-                        searchedText.Spans.Add(new Span
-                        {
-                            Text = searchEntry.Text.Substring(0, Math.Min(searchEntry.Text.Length - 1, 12)),
-                            FontAttributes = FontAttributes.Bold
-                        });
-                        searchedText.Spans.Add(new Span { Text = " ничего не найдено :-(!" });
-                        lblFailed.FormattedText = searchedText;
+                        else buttonSearchInMessages.Text = "Искать в сообщениях";
 
                         // var searchedText = searchEntry.Text.Substring(0, Math.Min(searchEntry.Text.Length - 1, 12));
                         // lblFailed.Text = $"По `{searchedText}` ничего не найдено :(";
@@ -572,7 +560,7 @@ namespace XxmsApp
                     lblFailed.Scale = 0;
                     lblFailed?.ScaleTo(1);                    
                 }
-                lblFailed.Text = "Ничего не найдено :-(";
+                
             }
             else if (Container != null)
             {
