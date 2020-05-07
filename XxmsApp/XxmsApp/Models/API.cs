@@ -53,6 +53,8 @@ namespace XxmsApp.Api
 
     public delegate void OnReceived(IEnumerable<XxmsApp.Model.Message> message);
 
+
+
     /// <summary>
     /// Read sms
     /// </summary>
@@ -65,6 +67,8 @@ namespace XxmsApp.Api
         IEnumerable<Sim> GetSimsInfo();
 
         void ShowNotification(string title, string content);
+
+        void Vibrate(int ms);
     }
 
 }

@@ -22,6 +22,7 @@ namespace XxmsApp
             var rootLayout = Initialize() as AbsoluteLayout;
 
             SearchPanel<Dialog>.Initialize(this);
+            
 
             // SearchPanelInitialize(rootLayout);
 
@@ -64,7 +65,7 @@ namespace XxmsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    var lst = (dialogs.ItemsSource as List<Dialog>).SelectMany(m => m.Messages).ToList();
+                    var lst = (dialogs.ItemsSource as List<Dialog>).SelectMany(m => m.Messages).ToList(); // bug (under observation)
 
                     /*
                     foreach (var item in lst.Where(m => m.Status == Api.MessageState.Unsent))
@@ -86,6 +87,14 @@ namespace XxmsApp
         {
             var parent = (this.Parent as NavigationPage);
             parent.Popped += MainPage_PoppedToRoot;
+
+            
+        }
+
+        public Func<bool> OnBackPressed = null;
+        protected override bool OnBackButtonPressed()
+        {
+            return OnBackPressed?.Invoke() ?? base.OnBackButtonPressed();
         }
 
         private void Btn_Clicked(object sender, EventArgs e)

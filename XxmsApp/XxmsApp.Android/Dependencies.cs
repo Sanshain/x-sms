@@ -21,9 +21,8 @@ using Android.Support.V4.App;
 namespace XxmsApp.Api
 {
 
-   
     // [BroadcastReceiver(Enabled = true, Exported = true)]
-    
+
     [BroadcastReceiver(Enabled = true, Label = "SMS Receiver")]
     [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]               // "android.provider.Telephony.SMS_RECEIVED"
     public class IncomingSms : BroadcastReceiver
@@ -102,4 +101,7 @@ namespace XxmsApp.Api
         }
 
     }
+
+
+
 }

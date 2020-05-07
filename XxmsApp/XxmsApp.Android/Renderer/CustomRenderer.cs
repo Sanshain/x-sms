@@ -1,39 +1,150 @@
-﻿/*
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 
 using Android.App;
-using Android.Content;
-using Android.OS;
+using Android.Content.PM;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using XxmsApp.Views.Android;
+using Android.OS;
+using System.Linq;
+
+
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using XxmsApp.Views;
+using Android.Content;
+using Android.Graphics;
+using static Android.Support.V7.Widget.ActionMenuView;
+using Android.Support.V7.View.Menu;
+using Android.Support.V7.Widget;
+using Android.Animation;
 
-[assembly: ExportRenderer(typeof(CustomEditor), typeof(CustomEditorRenderer))]
-namespace XxmsApp.Views.Android
+using XxmsApp;
+
+
+
+using XxmsApp.Views.Droid;
+
+
+[assembly: ExportRenderer(typeof(NavPage), typeof(NavPageRenderer))]
+namespace XxmsApp.Views.Droid
 {
-    class CustomEditorRenderer : EntryRenderer
+
+    public class NavPageRenderer : Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
     {
-        public CustomEditorRenderer(Context context) : base(context)
+
+        ObjectAnimator objectAnimator;
+        
+        public NavPageRenderer(Context context) : base(context) { }
+
+        public override void OnViewAdded(Android.Views.View child)
         {
+            base.OnViewAdded(child);            
 
-        }
-
-        protected override void OnElementChanged(ElementChangedEventArgs<Entry> e)
-        {
-            base.OnElementChanged(e);
-
-            if (Control != null)
-            {
-                Control.SetBackgroundColor(global::Android.Graphics.Color.LightGreen);
+            if (child is Android.Support.V7.Widget.Toolbar)
+            {                
+                var toolBar = child as Android.Support.V7.Widget.Toolbar;
+                toolBar.ChildViewAdded += ToolBar_ChildViewAdded;
             }
         }
+
+        private void ToolBar_ChildViewAdded(object sender, ChildViewAddedEventArgs e)
+        {
+            if (e.Child is Android.Support.V7.Widget.ActionMenuView)
+            {
+                var mnuWrapper = (e.Child as Android.Support.V7.Widget.ActionMenuView);
+                mnuWrapper.ChildViewAdded += MnuWrapper_ChildViewAdded;
+
+                // mnuWrapper.SetBackgroundColor(global::Android.Graphics.Color.Orange);
+            }
+        }        
+
+        private void MnuWrapper_ChildViewAdded(object sender, ChildViewAddedEventArgs e)
+        {
+            var item = e.Child;                                 // ActionMenuPresenter            
+            item.Click += Item_Click;
+            item.FocusChange += Item_FocusChange;
+        }
+
+        private void Item_FocusChange(object sender, FocusChangeEventArgs e)
+        {
+            if (e.HasFocus)
+            {
+
+            }
+        }
+
+        private void Item_Click(object sender, EventArgs e)
+        {            
+            
+            if (sender is ActionMenuItemView item)
+            {
+                var duration = 125;
+                
+                var btn = ((Element as NavigationPage).RootPage.ToolbarItems.First() as SearchToolbarButton);
+
+
+
+                /*
+                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);
+                objectAnimator.SetDuration(duration);
+                objectAnimator.Start();
+                objectAnimator.AnimationEnd += (object s, EventArgs ev) =>
+                {
+
+                    var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
+                    var d = item.Context.GetDrawable(image);
+                    item.SetIcon(d);
+
+                    var a = ObjectAnimator.OfFloat(item, "Alpha", 1);   // item.Alpha == 0 ? 1 : 0
+                    a.SetDuration(duration);
+                    a.Start();
+                };//*/
+
+                
+                bool clicked = false;
+                if (btn.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))
+                {
+                    btn.ItemClicked();                  // occurs click event on X.Forms project
+                    clicked = true;
+                }//*/
+
+                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", 0.3f);
+
+                ObjectAnimator scaleDownX = ObjectAnimator.OfFloat(item, "ScaleX", 0.7f);
+                ObjectAnimator scaleDownY = ObjectAnimator.OfFloat(item, "ScaleY", 0.7f);                
+                scaleDownX.SetDuration(duration);
+                scaleDownY.SetDuration(duration);
+                AnimatorSet scaleDown = new AnimatorSet();
+                scaleDown.Play(scaleDownX).With(scaleDownY).With(objectAnimator);
+                scaleDown.Start();
+                
+                scaleDown.AnimationEnd += (object s, EventArgs ev) =>
+                {
+                    // btn.Icon = new FileImageSource { File = SearchToolbarButton.Icons[btn.State] };                    
+
+
+                    if (clicked == false) btn.ItemClicked();
+
+
+                    var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
+                    var d = item.Context.GetDrawable(image);
+                    item.SetIcon(d);
+
+                    var a = ObjectAnimator.OfFloat(item, "Alpha", 1);   // item.Alpha == 0 ? 1 : 0
+                    ObjectAnimator scaleDownX1 = ObjectAnimator.OfFloat(item, "ScaleX", 1);
+                    ObjectAnimator scaleDownY1 = ObjectAnimator.OfFloat(item, "ScaleY", 1);
+                    scaleDownX1.SetDuration(duration * 2);
+                    scaleDownY1.SetDuration(duration * 2);
+                    AnimatorSet scaleDown1 = new AnimatorSet();
+                    scaleDown1.Play(scaleDownX1).With(scaleDownY1).With(a);
+                    scaleDown1.Start();
+                    scaleDown1.AnimationEnd += delegate { };
+
+                };
+            }
+        }
+
     }
+
 }
 //*/

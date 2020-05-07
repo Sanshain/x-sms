@@ -144,8 +144,16 @@ namespace XxmsApp.Api.Droid
         }
 
 
+        public void Vibrate(int ms)
+        {
+            var context = Android.App.Application.Context;
+            Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
+            vibrator.Vibrate(ms);
+        }
 
-        [Obsolete]
+
+
+        [Obsolete("for crossplatform, but not not finished")]
         public void ShowNotification(string title, string content)
         {
             var context = Android.App.Application.Context;
