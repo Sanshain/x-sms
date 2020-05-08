@@ -95,7 +95,7 @@ namespace XxmsApp.Piece
         {
             base.OnBindingContextChanged();
             
-            PhoneLabel.SetBinding(Label.TextProperty, "Address");
+            PhoneLabel.SetBinding(Label.TextProperty, "Contact");       // Address
             TimeLabel.SetBinding(Label.TextProperty, "Time");
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/

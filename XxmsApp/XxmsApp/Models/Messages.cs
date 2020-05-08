@@ -295,6 +295,7 @@ namespace XxmsApp
     public class Dialog
     {
         string count = string.Empty;
+        static Dictionary<Dialog, string> contacts = new Dictionary<Dialog, string>();
 
         ObservableCollection<Message> messages = new ObservableCollection<Message>();
         public ObservableCollection<Message> Messages
@@ -311,16 +312,13 @@ namespace XxmsApp
         }
 
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
-        public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";
-
+        public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";        
 
         public bool LastIsOutGoing => !(Messages?.LastOrDefault()?.Incoming ?? true);      
         public MessageState LastMsgState => Messages?.LastOrDefault()?.State ?? MessageState.IncomeAndRead;      
 
-
         public string Sim => Messages?.LastOrDefault()?.SlotSimId ?? string.Empty;
         public Color SimBackColor => Messages?.LastOrDefault()?.SimColor ?? Color.Default;
-
 
         // public string Count => $"({Messages?.Count.ToString()})";
         public string Count => count;
@@ -335,10 +333,24 @@ namespace XxmsApp
         }
 
         public string Address { get; set; }
+        public string Contact {
+            get
+            {
+                if (contacts.TryGetValue(this, out string contact)) return contact;
+                else
+                {
+                    var name = Cache.Read<Contacts>().FirstOrDefault(c => c.Phone == this.Address)?.Name ?? this.Address;
+                    contacts.Add(this, name);
+                    return name;
+                }
+            }
+        }
 
         public override string ToString()
         {
-            return this.Address;
+            // var contact = this.Contact;            
+            // return string.IsNullOrEmpty(contact) ? this.Address : contact;
+            return this.Contact;
         }
 
     }
