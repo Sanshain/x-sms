@@ -261,18 +261,6 @@ namespace XxmsApp.Model
 
 
 
-
-
-
-
-
-
-
-
-
-        
-
-
         public bool IsActual => true;
         public IModel CreateAs(object obj)
         {
@@ -297,7 +285,7 @@ namespace XxmsApp
         string count = string.Empty;
         static Dictionary<Dialog, string> contacts = new Dictionary<Dialog, string>();
 
-        ObservableCollection<Message> messages = new ObservableCollection<Message>();
+        ObservableCollection<Message> messages = new ObservableCollection<Message>(); // ObservableCollection<Message>
         public ObservableCollection<Message> Messages
         {
             get
@@ -312,7 +300,17 @@ namespace XxmsApp
         }
 
         public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
-        public string Label => Messages?.LastOrDefault()?.Label ?? "Nothing";        
+        public string Label
+        {
+            get
+            {
+                if (Filter != null)
+                {
+                    return Messages?.LastOrDefault(Filter)?.Label ?? "Nothing";
+                }
+                else return Messages?.LastOrDefault()?.Label ?? "Nothing";
+            }
+        }
 
         public bool LastIsOutGoing => !(Messages?.LastOrDefault()?.Incoming ?? true);      
         public MessageState LastMsgState => Messages?.LastOrDefault()?.State ?? MessageState.IncomeAndRead;      
@@ -352,6 +350,9 @@ namespace XxmsApp
             // return string.IsNullOrEmpty(contact) ? this.Address : contact;
             return this.Contact;
         }
+
+        public Func<Message, bool> Filter { private get; set; } = null;
+
 
     }
 }

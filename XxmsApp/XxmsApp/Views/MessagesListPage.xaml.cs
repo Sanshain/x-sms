@@ -48,7 +48,7 @@ namespace XxmsApp.Views
                 dialog = source as Dialog;
 
 
-                this.Title = "Сообщения c " + dialog.Address;
+                this.Title = "Сообщения c " + dialog.Contact;               // dialog.Address
 
                 /*
                 var bind = new Binding()
@@ -65,6 +65,10 @@ namespace XxmsApp.Views
 
                 // messagesList.ItemsSource = dialog.Messages;
             }
+
+
+            DlgSearchPanel.Initialize(this);
+
 
         }
 
