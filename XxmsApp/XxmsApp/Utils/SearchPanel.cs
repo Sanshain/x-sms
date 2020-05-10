@@ -249,7 +249,7 @@ namespace XxmsApp
 
             
 
-            itemSource = listView.ItemsSource as IList<T>;
+            if (itemSource == null) itemSource = listView.ItemsSource as IList<T>;
 
             if (animeted) SmoothAppearance(pageWidth, () => { EmptyLabelCreation(); searchEntry.Focus(); });
             else searchEntry.Focus();
@@ -269,6 +269,11 @@ namespace XxmsApp
 
                 // I can do it by click:
                 SearchButton.StateUpdate();
+
+                if (SearchLayout.Opacity < 0.4 && SearchLayout.Opacity > 0.2)
+                {
+                    SmoothAppearance(PageWidth);
+                }
             }
             else // close all
             {
@@ -332,6 +337,8 @@ namespace XxmsApp
         private readonly string defaultTitle = string.Empty;
         protected override string DefaultTitle => defaultTitle;
 
+        private Dialog source;
+
         public static MsgSearchPanel Initialize(ContentPage page, View subBtn = null) => new MsgSearchPanel(page, subBtn);
 
         public MsgSearchPanel(ContentPage page, View subView = null, ListView lsView = null) 
@@ -340,7 +347,32 @@ namespace XxmsApp
             var st = rootLayout.Children.ToArray();
             bottomView = subView ?? rootLayout.Children.Last();
             listView = lsView ?? (ListView)rootLayout.Children.First() as ListView;
-            defaultTitle = page.Title;
+            
+
+            source = (page as Views.MessagesPage).dialog;
+            if (string.IsNullOrEmpty(source.Query)) defaultTitle = page.Title;
+            else
+            {
+                ((App.Current.MainPage as MasterDetailPage).Detail as NavPage).Title = "13";
+                page.Title = defaultTitle = page.Title.Split(' ').Last() + $"({source.Query})";        
+                
+                ((App.Current.MainPage as MasterDetailPage).Detail as NavPage).BarTextColor = Color.Orange;
+               
+                page.Disappearing += (sender, e) =>
+                {
+                    ((App.Current.MainPage as MasterDetailPage).Detail as NavPage).BarTextColor = Color.White;
+                };
+                itemSource = listView.ItemsSource as IList<Model.Message>;
+
+                /*
+                var item = itemSource.Last(m => m.Value.ToLower().Contains(source.Query.ToLower()));
+                listView.ScrollTo(item, ScrollToPosition.Start, false);
+                listView.SelectedItem = item;//*/
+
+                listView.ItemsSource = itemSource.Where(source.Filter).ToList();
+
+            }
+
 
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
             {
@@ -353,7 +385,6 @@ namespace XxmsApp
         }
 
 
-
         protected override void ShowHintBtnOnEmpty() { }
 
         protected override void WSearchText(string text)
@@ -362,14 +393,16 @@ namespace XxmsApp
             if (string.IsNullOrEmpty(text))
             {
                 listView.ItemsSource = itemSource;
+                (SearchButton.ContentLayout.Parent as ContentPage).Title = DefaultTitle;
             }
-            else listView.ItemsSource = itemSource.Where(m => m.Value.Contains(text.ToLower())).ToList();           
-            
-
-            if ((SearchButton.ContentLayout.Parent.Parent as NavPage).BarTextColor == Color.Default)            
-
+            else
+            {
+                listView.ItemsSource = itemSource.Where(m => m.Value.Contains(text.ToLower())).ToList();
                 (SearchButton.ContentLayout.Parent as ContentPage).Title = DefaultTitle.Split(' ').Last() + $"({text})";
+            }
             
+            // if ((SearchButton.ContentLayout.Parent.Parent as NavPage).BarTextColor == Color.Default
+            // || (SearchButton.ContentLayout.Parent.Parent as NavPage).BarTextColor == Color.White)
 
         }
 
@@ -437,16 +470,20 @@ namespace XxmsApp
         async protected override void SmoothHide(uint overTime = 500, Action onFinish = null)
         {
 
-            await SearchLayout.FadeTo(0);            
-            RelativeLayout.SetYConstraint(listView, Constraint.Constant(0));
-            
+            if ((SearchButton.ContentLayout.Parent.Parent as NavPage).BarTextColor != Color.Orange)
+            {
+                await SearchLayout.FadeTo(0);
+                RelativeLayout.SetYConstraint(listView, Constraint.Constant(0));
 
-            onFinish?.Invoke();                                                 // // SearchLayout.IsVisible = false;
-            /* Utils.CallAfter(250, () => {                
-                listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).Last(), ScrollToPosition.End, true);
-            } );//*/
+
+                onFinish?.Invoke();                                                 // // SearchLayout.IsVisible = false;
+                /* Utils.CallAfter(250, () => {                
+                    listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).Last(), ScrollToPosition.End, true);
+                } );//*/
+            }
+            else SearchLayout.FadeTo(0.3);
+
         }
-
 
     }
 
@@ -785,7 +822,7 @@ namespace XxmsApp
 
                 dialogs = itemSource.Where(dial =>
                 {
-                    (dial as Dialog).Filter = m => m.Value.ToLower().Contains(searchEntry.Text.ToLower());
+                    (dial as Dialog).Query = searchEntry.Text;
                     return (dial as Dialog).Messages.Any(m => m.Value.ToLower().Contains(searchEntry.Text.ToLower()));
                 }).ToList();//*/
 
@@ -807,7 +844,7 @@ namespace XxmsApp
             {
                 dialogs = itemSource.Where(dial =>
                 {
-                    (dial as Dialog).Filter = null;
+                    (dial as Dialog).Query = null;
                     return (dial as Dialog).Contact?.ToLower().Contains(searchEntry.Text.ToLower()) ?? false;
                 }).ToList();
 

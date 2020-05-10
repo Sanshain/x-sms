@@ -19,7 +19,7 @@ namespace XxmsApp.Views
         int scrollHeight;
         ListView messagesList;
         Button sender_button;
-        Dialog dialog;
+        internal readonly Dialog dialog;
 
         public MessagesPage(object source)
         {

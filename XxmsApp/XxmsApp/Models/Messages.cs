@@ -351,8 +351,18 @@ namespace XxmsApp
             return this.Contact;
         }
 
-        public Func<Message, bool> Filter { private get; set; } = null;
-
+        public string Query { get; set; } = string.Empty;
+        public Func<Message, bool> Filter
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Query))
+                {
+                    return m => m.Value.ToLower().Contains(this.Query.ToLower());
+                }
+                else return null;
+            }
+        }
 
     }
 }
