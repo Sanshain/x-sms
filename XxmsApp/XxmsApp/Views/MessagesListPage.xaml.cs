@@ -19,7 +19,7 @@ namespace XxmsApp.Views
         int scrollHeight;
         ListView messagesList;
         Button sender_button;
-        Dialog dialog;
+        internal readonly Dialog dialog;
 
 
         
@@ -51,7 +51,7 @@ namespace XxmsApp.Views
                 dialog = source as Dialog;
 
 
-                this.Title = "Сообщения c " + dialog.Address;
+                this.Title = "Сообщения c " + dialog.Contact;               // dialog.Address
 
                 /*
                 var bind = new Binding()
@@ -68,6 +68,10 @@ namespace XxmsApp.Views
 
                 // messagesList.ItemsSource = dialog.Messages;
             }
+
+
+            MsgSearchPanel.Initialize(this);
+
 
         }
 
