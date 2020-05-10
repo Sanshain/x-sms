@@ -392,17 +392,17 @@ namespace XxmsApp
             var animations = new Animation();
             animations.Add(0, 1, new Animation(v => listView.Opacity = v, 1, 0));
             animations.Add(0, 1, new Animation(v => listView.Scale = v, 1, 0.5));
-            animations.Apply(listView, VIEW_OUT_ANIMATION, step, animateLong, Easing.Linear, async (v, c) =>
+            animations.Apply(listView, VIEW_IN_ANIMATION, step, animateLong, Easing.Linear, async (v, c) =>
             {
                 RelativeLayout.SetYConstraint(listView, Constraint.Constant(50));
                 listView.HeightRequest += 50;
 
                 new Animation(d => SearchLayout.Scale = d, 1, 0.9)
                     .WithConcurrent(new Animation(d => SearchLayout.Opacity = d, 0, 0.9))
-                    .Apply(SearchLayout, "Appearance", 16, 500, null, (d,b) =>
+                    .Apply(SearchLayout, SHOW_ANIMATION, 16, 500, null, (d,b) =>
                     {
                         onFinish?.Invoke();
-
+                        
                         Utils.CallAfter(500, () =>
                         {
                             listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).Last(), ScrollToPosition.End, false);
@@ -410,51 +410,10 @@ namespace XxmsApp
                             listView.FadeTo(1, 500);
                         });
 
-                    });
-                // await SearchLayout.FadeTo(0.9, animateLong * 2);       
-
+                    });               
                 
             });
-
-
-            return;
-
-            var animation = new Animation();
-            animation.Add(0, 0.5, new Animation(v => listView.Opacity = v, 0, 1));
-            animation.Add(0.5, 0.5, new Animation(v => RelativeLayout.SetYConstraint(listView, Constraint.Constant(v)), 0, 50));
-
-            animation.Apply(listView, VIEW_OUT_ANIMATION, step, animateLong*10, Easing.Linear, (v, c) =>
-            {
-                
-            });            
-
-            new Animation(
-                v => RelativeLayout.SetYConstraint(listView, Constraint.Constant(v)), 0, 50)
-                .WithConcurrent(new Animation(v => listView.Scale = v, 1, 0.6))
-                .Apply(listView, VIEW_OUT_ANIMATION, step, animateLong, Easing.Linear, async (v, c) =>
-                {
-
-                    
-                    // await listView.ScaleTo(0.6);
-                    await listView.FadeTo(0);
-
-                    onFinish?.Invoke();
-                    
-
-                    Utils.CallAfter(750, () =>
-                    {
-
-
-                        listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).First(), ScrollToPosition.Start, false);
-
-                        listView.ScaleTo(1);
-                        listView.FadeTo(0.9);
-
-                    });
-
-                }, () => false);
-
-            
+           
 
             // defaultConstraint = RelativeLayout.GetHeightConstraint(listView);            
 
@@ -472,17 +431,11 @@ namespace XxmsApp
             await SearchLayout.FadeTo(0);
             SearchLayout.IsVisible = false;
             RelativeLayout.SetYConstraint(listView, Constraint.Constant(0));
+            
 
-            Utils.CallAfter(500, () =>
-            {
-                listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).Last(), ScrollToPosition.End, false);
-
-                listView.Scale = 1;
-                listView.Opacity = 1;
-            });
-
-
-
+            /* Utils.CallAfter(250, () => {                
+                listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).Last(), ScrollToPosition.End, true);
+            } );//*/
         }
 
 
