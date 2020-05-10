@@ -67,7 +67,7 @@ namespace XxmsApp.Views
             }
 
 
-            DlgSearchPanel.Initialize(this);
+            MsgSearchPanel.Initialize(this);
 
 
         }

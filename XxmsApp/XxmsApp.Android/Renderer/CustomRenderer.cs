@@ -79,37 +79,26 @@ namespace XxmsApp.Views.Droid
             if (sender is ActionMenuItemView item)
             {
                 var duration = 125;
-                
-                var btn = ((Element as NavigationPage).RootPage.ToolbarItems.First() as SearchToolbarButton);
-
-
+                bool clicked = false;
 
                 /*
-                objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", item.Alpha == 0 ? 1 : 0);
-                objectAnimator.SetDuration(duration);
-                objectAnimator.Start();
-                objectAnimator.AnimationEnd += (object s, EventArgs ev) =>
-                {
+                var navpgItms = (Element as NavigationPage).ToolbarItems.ToArray();
+                var s1 = (Element as NavigationPage).RootPage.ToolbarItems.ToArray();
+                var r = (Element as NavigationPage).CurrentPage.ToolbarItems.ToArray();
+                bool b = s1.FirstOrDefault() == r.FirstOrDefault();
+                //*/
 
-                    var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
-                    var d = item.Context.GetDrawable(image);
-                    item.SetIcon(d);
 
-                    var a = ObjectAnimator.OfFloat(item, "Alpha", 1);   // item.Alpha == 0 ? 1 : 0
-                    a.SetDuration(duration);
-                    a.Start();
-                };//*/
-
+                var navPage = Element as NavigationPage;
+                var btn = navPage.CurrentPage.ToolbarItems.First() as SearchToolbarButton;          // RootPage
                 
-                bool clicked = false;
-                if (btn.State == (SearchPanelState.Hidden | SearchPanelState.InSearch))
+                if (btn.State == (SearchPanelState.Hidden | SearchPanelState.InSearch) || navPage.CurrentPage != navPage.RootPage)
                 {
-                    btn.ItemClicked();                  // occurs click event on X.Forms project
+                    btn.ItemClicked();                                                              // occurs click event on X.Forms project
                     clicked = true;
                 }//*/
 
                 objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", 0.3f);
-
                 ObjectAnimator scaleDownX = ObjectAnimator.OfFloat(item, "ScaleX", 0.7f);
                 ObjectAnimator scaleDownY = ObjectAnimator.OfFloat(item, "ScaleY", 0.7f);                
                 scaleDownX.SetDuration(duration);
