@@ -329,7 +329,8 @@ namespace XxmsApp
 
     public class MsgSearchPanel : SearchPanel<Model.Message>
     {
-        protected override string DefaultTitle => "";
+        private readonly string defaultTitle = string.Empty;
+        protected override string DefaultTitle => defaultTitle;
 
         public static MsgSearchPanel Initialize(ContentPage page, View subBtn = null) => new MsgSearchPanel(page, subBtn);
 
@@ -339,18 +340,15 @@ namespace XxmsApp
             var st = rootLayout.Children.ToArray();
             bottomView = subView ?? rootLayout.Children.Last();
             listView = lsView ?? (ListView)rootLayout.Children.First() as ListView;
+            defaultTitle = page.Title;
 
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
             {
                 ContentLayout = rootLayout,
                 ItemClicked = () => SearchButton_Clicked(rootLayout),
-                Icon = new FileImageSource() { File = "d_search.png" }
+                // Icon = new FileImageSource() { File = "d_search.png" }
             });
-
-            SearchButton.Clicked += (object sender, EventArgs e) =>
-            {
-                page.DisplayAlert("1", "2", "ok");
-            };
+            
             PageWidth = page.Width;
         }
 
@@ -360,12 +358,23 @@ namespace XxmsApp
 
         protected override void WSearchText(string text)
         {
-            // throw new NotImplementedException();
+
+            if (string.IsNullOrEmpty(text))
+            {
+                listView.ItemsSource = itemSource;
+            }
+            else listView.ItemsSource = itemSource.Where(m => m.Value.Contains(text.ToLower())).ToList();           
+            
+
+            if ((SearchButton.ContentLayout.Parent.Parent as NavPage).BarTextColor == Color.Default)            
+
+                (SearchButton.ContentLayout.Parent as ContentPage).Title = DefaultTitle.Split(' ').Last() + $"({text})";
+            
+
         }
 
-        Constraint defaultConstraint = null;
-        
-        async protected override void SmoothAppearance(double pageWidth, Action onFinish = null)
+
+        protected override void SmoothAppearance(double pageWidth, Action onFinish = null)
         {
 
             uint step = animateLong / 25;
@@ -392,7 +401,7 @@ namespace XxmsApp
             var animations = new Animation();
             animations.Add(0, 1, new Animation(v => listView.Opacity = v, 1, 0));
             animations.Add(0, 1, new Animation(v => listView.Scale = v, 1, 0.5));
-            animations.Apply(listView, VIEW_IN_ANIMATION, step, animateLong, Easing.Linear, async (v, c) =>
+            animations.Apply(listView, VIEW_IN_ANIMATION, step, animateLong, Easing.Linear, (v, c) =>
             {
                 RelativeLayout.SetYConstraint(listView, Constraint.Constant(50));
                 listView.HeightRequest += 50;
@@ -428,11 +437,11 @@ namespace XxmsApp
         async protected override void SmoothHide(uint overTime = 500, Action onFinish = null)
         {
 
-            await SearchLayout.FadeTo(0);
-            SearchLayout.IsVisible = false;
+            await SearchLayout.FadeTo(0);            
             RelativeLayout.SetYConstraint(listView, Constraint.Constant(0));
             
 
+            onFinish?.Invoke();                                                 // // SearchLayout.IsVisible = false;
             /* Utils.CallAfter(250, () => {                
                 listView.ScrollTo((listView.ItemsSource as IList<Model.Message>).Last(), ScrollToPosition.End, true);
             } );//*/

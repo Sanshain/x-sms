@@ -217,7 +217,7 @@ namespace XxmsApp.Model
             }
         }
 
-        public string Label => this.Value.Substring(0, Math.Min(this.Value.Length, 30)) + "...";
+        public string Label => this.Value.Substring(0, Math.Min(this.Value.Length, 30)).Replace(Environment.NewLine, " ") + "...";
 
 
 
