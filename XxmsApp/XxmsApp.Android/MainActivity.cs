@@ -69,6 +69,7 @@ namespace XxmsApp.Droid
             // .UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
 
             InstanceResolver = this.ContentResolver;
+            
         }
 
         private void CreateMessageStateListener()
@@ -98,7 +99,34 @@ namespace XxmsApp.Droid
 
         }
 
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            switch (requestCode)
+            {
+                case 1:
 
+                    if (data == null)  return;
+                    if (resultCode == Result.Ok)
+                    {
+                        Android.Net.Uri chosenImageUri = data.Data;
+                        string path = chosenImageUri.Path;
+                    }
+                    
+                    // String name = data.GetStringExtra("name");
+
+                    break;
+
+                default:
+
+                    break;
+            }
+
+        }
+
+
+
+        #region Service
 
         XmessagesServiceConnection serviceConnection;
 
@@ -115,10 +143,12 @@ namespace XxmsApp.Droid
             Toast.MakeText(Android.App.Application.Context, "Unbound service of " + txt, ToastLength.Long).Show();
 
             // new AlertDialog.Builder()
-            
+
         }
 
-        public string ServiceText { get; set; }
+        public string ServiceText { get; set; } 
+
+        #endregion
 
     }
 

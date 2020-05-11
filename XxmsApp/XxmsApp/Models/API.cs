@@ -69,6 +69,12 @@ namespace XxmsApp.Api
         void ShowNotification(string title, string content);
 
         void Vibrate(int ms);
+        void Play();
+    }
+
+    public interface IRington
+    {        
+        void Play();
     }
 
 }

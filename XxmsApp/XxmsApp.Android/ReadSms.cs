@@ -16,8 +16,9 @@ using Xamarin.Forms;
 using XxmsApp.Model;
 
 using Android.Support.V7.App;
+using Java.IO;
 
-[assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]
+[assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages)), Dependency(typeof(XxmsApp.Api.IRington))]
 namespace XxmsApp.Api.Droid
 {
 
@@ -148,8 +149,68 @@ namespace XxmsApp.Api.Droid
         {
             var context = Android.App.Application.Context;
             Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
-            vibrator.Vibrate(ms);
+            vibrator.Vibrate(ms);            
         }
+
+        public void Play()
+        {
+
+            File dir = new File(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).Path);           
+            File f = new File(dir.ToString());
+            File[] list = f.ListFiles(); // Получаю null, хотя файлы и папки там есть
+
+            /*
+            var ringtoneMgr = new Android.Media.RingtoneManager(context);
+            var connecttion = ringtoneMgr.Cursor;//*/
+
+
+            var context = Android.App.Application.Context;
+            var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.All);
+            Android.Media.Ringtone r = Android.Media.RingtoneManager.GetRingtone(context, sUri);
+            r.Play();
+
+
+            const int REQ_PICK_AUDIO = 1;
+
+            // Intent params tried:
+            // Intent.ActionPick | Intent.ActionGetContent | Android.Media.RingtoneManager.ActionRingtonePicker
+            // Android.Provider.Settings.ActionSoundSettings
+
+            // Android.Provider.MediaStore.Audio.Media.InternalContentUri | ExternalContentUri
+            // Android.Provider.Settings.System.DefaultRingtoneUri
+
+            /* на 1 (выбор)
+            Intent photoPickerIntent = new Intent(Android.Media.RingtoneManager.ActionRingtonePicker);
+            photoPickerIntent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneType, (int)Android.Media.RingtoneType.Notification);
+            photoPickerIntent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneTitle, "Выбор мелодии");
+            photoPickerIntent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneExistingUri, 
+                Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification));
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(photoPickerIntent, REQ_PICK_AUDIO);//*/
+
+            /*
+            Intent photoPickerIntent = new Intent(Intent.ActionGetContent);  
+            photoPickerIntent.SetType("audio/*");
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(photoPickerIntent, REQ_PICK_AUDIO);//*/
+
+            /*
+            var uri = Android.Provider.MediaStore.Audio.Media.InternalContentUri;
+            var path = uri.Path;            
+            Intent audio_picker_intent = new Intent(
+                    Intent.ActionPick,
+                    Android.Provider.MediaStore.Audio.Media.InternalContentUri
+                );                   
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
+            
+            
+            Intent audio_picker_intent = new Intent(Android.Provider.Settings.ActionSoundSettings);
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(
+                Intent.CreateChooser(audio_picker_intent, "выбор есть" ),
+                REQ_PICK_AUDIO);//*/
+
+
+
+        }
+
 
 
 
@@ -160,7 +221,7 @@ namespace XxmsApp.Api.Droid
 
             Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
 
-            var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
+            
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
                 builder.SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
@@ -181,13 +242,14 @@ namespace XxmsApp.Api.Droid
 
             Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
             vibrator.Vibrate(400);
-            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);            
+            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);        
 
         }
 
 
 
     }
+
 
 
 }

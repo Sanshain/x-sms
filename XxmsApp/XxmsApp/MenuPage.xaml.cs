@@ -33,7 +33,8 @@ namespace XxmsApp
                     "Настройки",
                     "Read sms",
                     "О нас",
-                    SIM_CARDS
+                    SIM_CARDS,
+                    "Play"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
             };
@@ -131,6 +132,15 @@ namespace XxmsApp
                     {
                         DisplayAlert(sim.IccId, sim.Name + ": слот - " + sim.Slot + $" номер - {sim.SubId}", "ok");
                     }
+
+                    goto default;
+
+
+                case "Play":
+
+
+                    var r = DependencyService.Get<XxmsApp.Api.IMessages>();
+                    r.Play();
 
                     goto default;
 
