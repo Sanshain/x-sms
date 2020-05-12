@@ -104,13 +104,20 @@ namespace XxmsApp.Droid
             base.OnActivityResult(requestCode, resultCode, data);
             switch (requestCode)
             {
-                case 1:
+                case 0:
 
                     if (data == null)  return;
                     if (resultCode == Result.Ok)
                     {
                         Android.Net.Uri chosenImageUri = data.Data;
-                        string path = chosenImageUri.Path;
+
+                        // string path = chosenImageUri.Path;
+                        // var context = Android.App.Application.Context;
+                        // var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.All);
+
+                        Android.Media.Ringtone r = Android.Media.RingtoneManager.GetRingtone(this, chosenImageUri);
+                        r.Play();
+
                     }
                     
                     // String name = data.GetStringExtra("name");
