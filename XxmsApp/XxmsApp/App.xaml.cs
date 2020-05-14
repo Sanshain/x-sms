@@ -46,7 +46,7 @@ namespace XxmsApp
                     var i = 0;
 
                     var msgs = new List<Model.Message>();
-                     
+                    
                     while (i < messages.Count)
                     {
                         var id = msgs.FindIndex(m => m.Address == messages[i].Address && m.Time == messages[i].Time);

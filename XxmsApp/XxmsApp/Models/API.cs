@@ -69,13 +69,15 @@ namespace XxmsApp.Api
         void ShowNotification(string title, string content);
 
         void Vibrate(int ms);
-        void Play();
+        void Play(string sound, Action<string> onFinish);
+        List<(string Name, string Path)> GetStockSounds();
     }
+
 
 
     public interface ILowLevelApi
     {        
-        void Play();
+        void Play();                // Play(string sound, Action<string> onFinish);        
         void Vibrate(int ms);
     }
 

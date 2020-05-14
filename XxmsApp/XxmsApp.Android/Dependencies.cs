@@ -17,7 +17,10 @@ using XxmsApp.Model;
 using XxmsApp.Api;
 using Android.Support.V4.App;
 
-[assembly: Dependency(typeof(XxmsApp.Api.IncomingSms))]
+
+
+
+// [assembly: Dependency(typeof(XxmsApp.Api.IncomingSms))]
 namespace XxmsApp.Api
 {
 

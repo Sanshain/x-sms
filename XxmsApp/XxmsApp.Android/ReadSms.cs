@@ -153,63 +153,59 @@ namespace XxmsApp.Api.Droid
             vibrator.Vibrate(ms);            
         }
 
-        public void Play()
+        public void Play(string sound, Action<string> onFinish)
         {
-
+            if (string.IsNullOrEmpty(sound))
+            {
+                // XxmsApp.Api.Utilites.LowLevelApi.RingtonPlay();
+            }
             var context = Android.App.Application.Context;
-
-            /*
-            var ringtoneMgr = new Android.Media.RingtoneManager(context);
-            var connecttion = ringtoneMgr.Cursor;//*/
-
-            const int REQ_PICK_AUDIO = 0;
-
-            // var action = Android.Media.RingtoneManager.ActionRingtonePicker;
-
-
-            /*      
-            Intent audio_picker_intent = new Intent(
-                    Intent.ActionPick,
-                    Android.Provider.MediaStore.Audio.Media.InternalContentUri
-                );                   
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
-
-            
-            var settingsContentObserver = new SettingsContentObserver(new Handler());
-
-            context.ContentResolver.RegisterContentObserver(
-                Android.Provider.Settings.System.ContentUri, 
-                true,
-                settingsContentObserver);
-
-
-            
-            Intent audio_picker_intent = new Intent(Android.Provider.Settings.ActionSoundSettings);
-            audio_picker_intent.SetFlags(ActivityFlags.NewTask);
-            audio_picker_intent.SetFlags(ActivityFlags.NoHistory);
-            audio_picker_intent.SetFlags(ActivityFlags.ExcludeFromRecents);
-            audio_picker_intent.SetFlags(ActivityFlags.MultipleTask);
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(
-                Intent.CreateChooser(audio_picker_intent, "выбор есть" ),
-                REQ_PICK_AUDIO);//*/
-
-            /*
-            try
+            var Urim = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Notification);
+            var player = new Android.Media.MediaPlayer();
+            player.Reset();            
+            player.SetDataSource(Urim.Path);
+            // player.SetDataSource(context, Urim);
+            player.Prepare();
+            player.Start();
+            player.Completion += (object sender, EventArgs e) =>
             {
-                var Uri = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Notification);
-                var uri = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Ringtone);
-                var auri = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Alarm);
-                var r = Android.Media.RingtoneManager.GetRingtone(context, auri ?? uri);
-                r.Play();
-            }
-            catch(Exception ex)
-            {
-                var er = ex.Message;
-            }
-            //*/
+                onFinish?.Invoke(sound);
+            };
+
         }
 
 
+        public List<(string Name, string Path)> GetStockSounds()
+        {
+
+            var alarms = new List<Android.Net.Uri>();            
+            var sounds = new List<(string Name, string Path)>();
+
+            var ringtoneMgr = new Android.Media.RingtoneManager(XxmsApp.Droid.MainActivity.Instance);
+            ringtoneMgr.SetType(Android.Media.RingtoneType.All);
+
+            var cursor = ringtoneMgr.Cursor;//*/
+            var cnt = cursor.Count;
+
+
+            while (!cursor.IsAfterLast && cursor.MoveToNext())
+            {
+                var title = cursor.GetString(cursor.GetColumnIndex("title"));                          
+
+                int currentPosition = cursor.Position;
+                var uri = ringtoneMgr.GetRingtoneUri(currentPosition);
+                alarms.Add(uri);
+
+                sounds.Add((title, uri.Path));
+            }
+
+            var names = cursor.GetColumnNames();
+            var cc = cursor.ColumnCount;
+            var fields = cursor.Extras.KeySet().ToList();
+
+            return sounds;
+
+        }
 
 
         [Obsolete("for crossplatform, but not not finished")]
@@ -244,22 +240,5 @@ namespace XxmsApp.Api.Droid
 
     }
 
-    
-    public class SettingsContentObserver : ContentObserver
-    {
-
-        public SettingsContentObserver(Handler handler) : base(handler) { }
-
-        public override bool DeliverSelfNotifications()
-        {
-            return base.DeliverSelfNotifications();            
-        }
-    
-        public override void OnChange(bool selfChange)
-        {
-            base.OnChange(selfChange); 
-            
-        }
-    }//*/
 
 }

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XxmsApp.Views.SoundPage">
+
+    <ListView x:Name="SoundList"
+            ItemsSource="{Binding Items}"
+            ItemTapped="Handle_ItemTapped"
+            CachingStrategy="RecycleElement">
+
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <CustomCell>
+                    <AbsoluteLayout>
+                        <Label Text="{Binding Name}" 
+                               AbsoluteLayout.LayoutBounds="10, 10, 0.7, 35" 
+                               AbsoluteLayout.LayoutFlags="SizeProportional" />
+                        <Frame CornerRadius="20" BackgroundColor="Beige" Padding="0"
+                               IsClippedToBounds="True" HasShadow="False"
+                               AbsoluteLayout.LayoutFlags="XProportional"
+                               AbsoluteLayout.LayoutBounds="0.9, 5, 35, 35" >
+                            <Image x:Name="Play" Source="play2.png" Margin="8" Opacity="0.5"></Image>
+                        </Frame>
+                    </AbsoluteLayout>
+                </CustomCell>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
+
+
+</ContentPage>
