@@ -51,9 +51,6 @@ namespace XxmsApp.Views.Droid
                     
                     if (Context is FormsAppCompatActivity activity)
                     {
-                        var fragment = new SettingsFragment();
-                        var transaction = activity.FragmentManager.BeginTransaction();
-                        transaction.Add(Control.Id, fragment).Commit();
 
                     }
 

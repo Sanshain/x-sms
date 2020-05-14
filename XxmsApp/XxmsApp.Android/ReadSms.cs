@@ -17,7 +17,7 @@ using XxmsApp.Model;
 
 using Android.Support.V7.App;
 using Java.IO;
-
+using Android.Net;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.IRington))
 namespace XxmsApp.Api.Droid
@@ -159,27 +159,13 @@ namespace XxmsApp.Api.Droid
             var context = Android.App.Application.Context;
 
             /*
-            File dir = new File(Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).Path);           
-            File f = new File(dir.ToString());
-            File[] list = f.ListFiles(); // Получаю null, хотя файлы и папки там есть //*/
-
-            /*
             var ringtoneMgr = new Android.Media.RingtoneManager(context);
             var connecttion = ringtoneMgr.Cursor;//*/
-
-
 
             const int REQ_PICK_AUDIO = 0;
 
             // var action = Android.Media.RingtoneManager.ActionRingtonePicker;
 
-            /*
-            Intent intent = new Intent(Android.Media.RingtoneManager.ActionRingtonePicker);
-            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneType,(int)Android.Media.RingtoneType.Notification);
-            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneType, true);
-            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneShowSilent, true);
-            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneDefaultUri, Android.Provider.Settings.System.DefaultNotificationUri);
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(intent, REQ_PICK_AUDIO);//*/
 
             /*      
             Intent audio_picker_intent = new Intent(
@@ -188,25 +174,39 @@ namespace XxmsApp.Api.Droid
                 );                   
             XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
 
-            /*
+            
+            var settingsContentObserver = new SettingsContentObserver(new Handler());
+
+            context.ContentResolver.RegisterContentObserver(
+                Android.Provider.Settings.System.ContentUri, 
+                true,
+                settingsContentObserver);
+
+
+            
             Intent audio_picker_intent = new Intent(Android.Provider.Settings.ActionSoundSettings);
+            audio_picker_intent.SetFlags(ActivityFlags.NewTask);
+            audio_picker_intent.SetFlags(ActivityFlags.NoHistory);
+            audio_picker_intent.SetFlags(ActivityFlags.ExcludeFromRecents);
+            audio_picker_intent.SetFlags(ActivityFlags.MultipleTask);
             XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(
                 Intent.CreateChooser(audio_picker_intent, "выбор есть" ),
                 REQ_PICK_AUDIO);//*/
 
-            
-            context = XxmsApp.Droid.MainActivity.Instance;
-            // var type = null;
-            Intent audio_picker_intent = new Intent(context, typeof(XxmsApp.Droid.MelodyPicker));
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
-
-            try { }
+            /*
+            try
+            {
+                var Uri = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Notification);
+                var uri = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Ringtone);
+                var auri = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Alarm);
+                var r = Android.Media.RingtoneManager.GetRingtone(context, auri ?? uri);
+                r.Play();
+            }
             catch(Exception ex)
             {
                 var er = ex.Message;
             }
-            
-
+            //*/
         }
 
 
@@ -244,6 +244,22 @@ namespace XxmsApp.Api.Droid
 
     }
 
+    
+    public class SettingsContentObserver : ContentObserver
+    {
 
+        public SettingsContentObserver(Handler handler) : base(handler) { }
+
+        public override bool DeliverSelfNotifications()
+        {
+            return base.DeliverSelfNotifications();            
+        }
+    
+        public override void OnChange(bool selfChange)
+        {
+            base.OnChange(selfChange); 
+            
+        }
+    }//*/
 
 }
