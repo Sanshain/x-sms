@@ -5,6 +5,7 @@ using System.Text;
 
 using Android.App;
 using Android.Content;
+using Android.Content.Res;
 using Android.OS;
 using Android.Preferences;
 using Android.Runtime;
@@ -75,7 +76,7 @@ namespace XxmsApp.Droid
         }
     }
 
-    public class SettingsFragment : PreferenceFragment
+    public class SettingsFragment : PreferenceFragment, ISharedPreferencesOnSharedPreferenceChangeListener
     {
 
         public override void OnCreate(Bundle savedInstanceState)
@@ -83,12 +84,24 @@ namespace XxmsApp.Droid
             base.OnCreate(savedInstanceState);
 
             AddPreferencesFromResource(Resource.Xml.preferences);
+        }               
+
+        public override void OnConfigurationChanged(Configuration newConfig)
+        {            
+            base.OnConfigurationChanged(newConfig);
         }
+
+        void OnSharedPreferenceChanged(ISharedPreferences sharedPreferences, string key)
+        {
+
+        }
+
     }
     
     
     public class SettingsPickerFragment : Android.Support.V7.Preferences.PreferenceFragmentCompat
-    {
+    {        
+
         public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
         {
             try
@@ -103,7 +116,7 @@ namespace XxmsApp.Droid
 
         const int REQUEST_CODE_ALERT_RINGTONE = 0;
 
-
+        
 
         public override bool OnPreferenceTreeClick(Android.Support.V7.Preferences.Preference preference)
         {
