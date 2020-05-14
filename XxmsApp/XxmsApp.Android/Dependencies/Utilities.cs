@@ -13,12 +13,13 @@ using XxmsApp.Api;
 using Xamarin.Forms;
 
 
-// [assembly: Dependency(typeof(XxmsApp.Api.Utilites.IUtilites))]
+[assembly: Dependency(typeof(XxmsApp.Api.ILowLevelApi))]
 namespace XxmsApp.Api.Utilites
 {
-    public class Utilites // : IUtilites
+    public class LowLevelApi : ILowLevelApi
     {
-        public Utilites() : base() { }
+        private static Context context = Android.App.Application.Context;     
+        
 
         public void Vibrate(int ms)
         {
@@ -26,6 +27,14 @@ namespace XxmsApp.Api.Utilites
             Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
             vibrator.Vibrate(150);
         }
+
+        public void Play()
+        {                     
+            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
+            var r = Android.Media.RingtoneManager.GetRingtone(context, uri);
+            r.Play();
+        }
+
     }
 
 }

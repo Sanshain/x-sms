@@ -152,10 +152,8 @@ namespace XxmsApp
 
                     (this.Parent as MasterDetailPage).IsPresented = false;
 
-                    break;
-                
+                    break;                
             }
-
 
 
             /*

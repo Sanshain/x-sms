@@ -18,7 +18,8 @@ using XxmsApp.Model;
 using Android.Support.V7.App;
 using Java.IO;
 
-[assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages)), Dependency(typeof(XxmsApp.Api.IRington))]
+
+[assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.IRington))
 namespace XxmsApp.Api.Droid
 {
 
@@ -170,6 +171,16 @@ namespace XxmsApp.Api.Droid
 
             const int REQ_PICK_AUDIO = 0;
 
+            // var action = Android.Media.RingtoneManager.ActionRingtonePicker;
+
+            /*
+            Intent intent = new Intent(Android.Media.RingtoneManager.ActionRingtonePicker);
+            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneType,(int)Android.Media.RingtoneType.Notification);
+            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneType, true);
+            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneShowSilent, true);
+            intent.PutExtra(Android.Media.RingtoneManager.ExtraRingtoneDefaultUri, Android.Provider.Settings.System.DefaultNotificationUri);
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(intent, REQ_PICK_AUDIO);//*/
+
             /*      
             Intent audio_picker_intent = new Intent(
                     Intent.ActionPick,
@@ -183,9 +194,18 @@ namespace XxmsApp.Api.Droid
                 Intent.CreateChooser(audio_picker_intent, "выбор есть" ),
                 REQ_PICK_AUDIO);//*/
 
+            
             context = XxmsApp.Droid.MainActivity.Instance;
-            Intent audio_picker_intent = new Intent(context, typeof(XxmsApp.Droid.RingtonPicker));
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);
+            // var type = null;
+            Intent audio_picker_intent = new Intent(context, typeof(XxmsApp.Droid.MelodyPicker));
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
+
+            try { }
+            catch(Exception ex)
+            {
+                var er = ex.Message;
+            }
+            
 
         }
 
@@ -198,9 +218,7 @@ namespace XxmsApp.Api.Droid
             var context = Android.App.Application.Context;
 
             Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
-
-            
-
+           
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
                 builder.SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)                   // icon
                 .SetContentTitle(title)
@@ -223,8 +241,6 @@ namespace XxmsApp.Api.Droid
             // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);        
 
         }
-
-
 
     }
 

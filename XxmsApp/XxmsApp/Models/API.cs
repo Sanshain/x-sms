@@ -72,9 +72,11 @@ namespace XxmsApp.Api
         void Play();
     }
 
-    public interface IRington
+
+    public interface ILowLevelApi
     {        
         void Play();
+        void Vibrate(int ms);
     }
 
 }

@@ -10,13 +10,14 @@ using Xamarin.Forms.Xaml;
 
 namespace XxmsApp.Views
 {
+
+    public class HeaderFrame : Frame { }
+
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SettingPage : ContentPage
     {
 
-        Options.AbstractSettings settings;
-
-        
+        Options.AbstractSettings settings;        
 
         public SettingPage(Options.AbstractSettings settingList = null)
         {
@@ -25,11 +26,14 @@ namespace XxmsApp.Views
             var itemTemplate = new DataTemplate(() => CellGenerate());
 
 
+
             Button reset;
             var SettingList = new ListView()
             {
                 ItemTemplate = itemTemplate,
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
+
+                Header = new HeaderFrame { Padding = new Thickness(0), HeightRequest = 80 },
                 Footer = reset = new Button { Text = "Сброс настроек" },
                 // ItemsSource = settings = Options.Settings.Initialize()                
                 // ItemsSource = settings = Options.ObSettings.Initialize()
@@ -93,7 +97,7 @@ namespace XxmsApp.Views
 
             var sc = new SwitchCell { };
             sc.SetBinding(SwitchCell.TextProperty, "Description");
-            sc.SetBinding(SwitchCell.OnProperty, "Content");//*/
+            sc.SetBinding(SwitchCell.OnProperty, "Content");//*/            
 
             return sc;
         }

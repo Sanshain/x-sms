@@ -19,19 +19,60 @@ using Android.Support.V7.Widget;
 using Android.Animation;
 
 using XxmsApp;
-
-
-
+using XxmsApp.Views;
+using XxmsApp.Droid;
 using XxmsApp.Views.Droid;
 
 
 [assembly: ExportRenderer(typeof(NavPage), typeof(NavPageRenderer))]
+[assembly: ExportRenderer(typeof(HeaderFrame), typeof(HeaderFrameRenderer))]
 namespace XxmsApp.Views.Droid
 {
 
+
+
+
+    public class HeaderFrameRenderer : Xamarin.Forms.Platform.Android.AppCompat.FrameRenderer
+    {
+        static bool initialize = false;
+
+        public HeaderFrameRenderer(Context context) : base(context) { }
+
+        protected override void OnAttachedToWindow()
+        {
+            base.OnAttachedToWindow();
+            if (initialize == false)
+            {
+
+                initialize = true;
+                if (Control is Android.Widget.FrameLayout frame)
+                {
+                    // frame.AddView()
+                    
+                    if (Context is FormsAppCompatActivity activity)
+                    {
+                        var fragment = new SettingsFragment();
+                        var transaction = activity.FragmentManager.BeginTransaction();
+                        transaction.Add(Control.Id, fragment).Commit();
+
+                    }
+
+                }
+                // this.SetBackgroundColor(Android.Graphics.Color.Red);
+            }            
+        }
+
+    }
+
+
+
+
+
+
+
     public class NavPageRenderer : Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
     {
-
+        
         ObjectAnimator objectAnimator;
         
         public NavPageRenderer(Context context) : base(context) { }
