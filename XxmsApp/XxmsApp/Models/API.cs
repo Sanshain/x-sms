@@ -69,7 +69,8 @@ namespace XxmsApp.Api
         void ShowNotification(string title, string content);
 
         void Vibrate(int ms);
-        void SoundPlay(string nameOrUrl, Action<string> onFinish, string type);
+        int SoundPlay(string nameOrUrl, string type = null, Action<string> onFinish = null);
+        void StopSound();
         List<(string Name, string Path, string Group)> GetStockSounds();
     }
 

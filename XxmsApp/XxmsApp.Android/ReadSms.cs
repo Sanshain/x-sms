@@ -35,6 +35,8 @@ namespace XxmsApp.Api.Droid
         /// </summary>
         internal static PendingIntent PendInDelivered { get; set; }
 
+        static Android.Media.Ringtone currentSound = null;
+        static Android.Media.MediaPlayer currentMelody = null;
 
         ContentResolver contentResolver;
 
@@ -153,42 +155,53 @@ namespace XxmsApp.Api.Droid
             vibrator.Vibrate(ms);            
         }
 
-        public void SoundPlay(string name, Action<string> onFinish, string soundType)
+        /// <summary>
+        /// Stop current ringtone playing if playing was started by RingtoneManager,
+        /// Unless of you need pass OnFinish action for playing stop
+        /// </summary>
+        public void StopSound()
+        {
+            currentSound?.Stop();
+            currentMelody?.Stop();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path">url или имя русурса для воспроизведения</param>
+        /// <param name="soundType">указывается, если в параметр path передается имя</param>
+        /// <param name="onFinish">метод, кторый будет вызван по завершении воспроизведения</param>
+        /// <returns>вернет продолжительность воспроизведения, если указан soundType, иначе - -1</returns>
+        public int SoundPlay(string path, string soundType, Action<string> onFinish)
         {
             var context = Android.App.Application.Context;
 
-            if (onFinish == null)
-            {
-                var Urim = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Notification);
-                var path = Urim.Path;
-
-                string _path = name;
+            if (string.IsNullOrEmpty(soundType))
+            {                
                 try
-                {
-                    var uri = Android.Net.Uri.Parse(name);                    
-                    var r = Android.Media.RingtoneManager.GetRingtone(context, uri);
-                    r.Play();
+                {            
+                    if (currentSound != null) currentSound.Stop();
+                    var uri = Android.Net.Uri.Parse(path);
+                    currentSound = Android.Media.RingtoneManager.GetRingtone(context, uri);
+                    currentSound.Play();
+                    return -1;
                 }
                 catch (Exception iex)
                 {
                     var er = iex;
-                }
-                return;
-            }
-            else if(string.IsNullOrEmpty(soundType) == false)
-            {
-
-            }
-            else
-            {
-                throw new Exception("");
+                }                
             }
 
-            // string sound = $@"/system/media/audio/{soundType.ToLower()}s/{name}.ogg";
-            string sound = name;
+            string sound = $@"/system/media/audio/{soundType.ToLower()}s/{path}.ogg";
 
             var player = new Android.Media.MediaPlayer();
-            player.Reset();            
+            player.Reset();
+            player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
+            player.Prepare();
+            var duration = player.Duration;
+            player.Start();
+            
+            player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
 
             try
             {
@@ -198,11 +211,13 @@ namespace XxmsApp.Api.Droid
                 // player.Duration;
                 player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var er = ex.Message;
+                return -2;
             }
 
+            return 1; // duration;
         }
 
 

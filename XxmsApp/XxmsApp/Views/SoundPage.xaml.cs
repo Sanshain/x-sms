@@ -15,6 +15,8 @@ namespace XxmsApp.Views
 
     public class SoundCell : ViewCell
     {
+        public static Dictionary<string, SoundCell> Cells = new Dictionary<string, SoundCell>();       
+
         const string playIcon = "play2.png";
         const string pauseIcon = "pause2.png";
 
@@ -24,19 +26,28 @@ namespace XxmsApp.Views
         Frame frame;
         Image play;
         bool selected = false;
-        public bool Selected
+        /// <summary>
+        /// исключительно для public использования
+        /// </summary>
+        public bool Selected 
         {
             get => selected;
             set
-            {
-                selected = value;
-                if (selected && LastCell != null)
+            {                
+
+                if(value)
                 {
-                    LastCell.Selected = false;
+                    if ( LastCell!=null)
+                    {
+                        LastCell.Selected = false;
+                    }
+                    LastCell = this;
                 }
+                
+                OnSelectionChanged(selected = value);
             }
         }
-        SoundCell LastCell = null;
+        static SoundCell LastCell = null;
 
         public SoundCell()
         {            
@@ -59,30 +70,35 @@ namespace XxmsApp.Views
 
             this.View = root;            
 
-        }     
-                
+        }                     
 
-        async protected override void OnTapped()
+        protected override void OnTapped()
         {
-            selected = !selected;
+            Selected = !Selected;
 
-            base.OnTapped();
+            base.OnTapped();            
+        }
 
+        async private void OnSelectionChanged(bool _selected)
+        {
             await play.FadeTo(0);
-            if (selected)
+
+            var player = DependencyService.Get<XxmsApp.Api.IMessages>();
+
+            if (_selected)
             {
-                var r = DependencyService.Get<XxmsApp.Api.IMessages>();
 
                 var sound = this.BindingContext as Sound;
-                r.SoundPlay(sound.Path ?? null, async s => // sound.RingtoneType ?? 
+                player.SoundPlay(sound.Path ?? null, null, async s => // 
                 {
                     await play.FadeTo(0);
 
                     play.Source = PlayIcon;
                     play.FadeTo(0.7);
                     selected = false;
-                }, null);
+                });
             }
+            else player.StopSound();
 
             play.Source = new FileImageSource { File = selected ? pauseIcon : playIcon };
             play.FadeTo(0.7);
@@ -92,7 +108,9 @@ namespace XxmsApp.Views
         {
             base.OnBindingContextChanged();
 
-            sound.SetBinding(Label.TextProperty, "Name");            
+            sound.SetBinding(Label.TextProperty, "Name");
+            
+            Cells.Add((this.BindingContext as Sound).Name, this);
         }
     }
 
@@ -122,44 +140,72 @@ namespace XxmsApp.Views
 
             // InitializeComponent();        
 
-            var SoundList = new ListView
-            {
-                ItemTemplate = new DataTemplate(typeof(SoundCell))
-            };
+            SoundCell.Cells = new Dictionary<string, SoundCell>();
 
             var lst = DependencyService.Get<XxmsApp.Api.IMessages>().GetStockSounds();
-
 
             var Items = lst
                 .Select(s => new Sound(s.Name, s.Path, s.Group))
                 .GroupBy(s => s.RingtoneType).ToList();
-			
-			SoundList.ItemsSource = Items;
-            SoundList.IsGroupingEnabled = true;
-            SoundList.GroupDisplayBinding = new Binding("Key");
-            SoundList.GroupHeaderTemplate = new DataTemplate(() =>
-            {                
-                new TextCell
-                {
-                    Height = 55,
-                    TextColor = Color.Orange
-                };
 
-                var lbl = new Label {
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = Color.Black,
-                    HeightRequest = 55,
-                    Margin = new Thickness(15),
-                    HorizontalOptions = LayoutOptions.Center
-                };
-                lbl.SetBinding(Label.TextProperty, "Key");
-                return new ViewCell
-                {
-                    View = new StackLayout().AddChilds(lbl)
-                };
-            });
+            var SoundList = new ListView
+            {
+                ItemTemplate = new DataTemplate(typeof(SoundCell)),
+                ItemsSource = Items,
 
-            Content = SoundList;
+                IsGroupingEnabled = true,
+                GroupDisplayBinding = new Binding("Key"),
+                GroupHeaderTemplate = new DataTemplate(() =>
+                {
+                    new TextCell
+                    {
+                        Height = 55,
+                        TextColor = Color.Orange
+                    };
+
+                    var lbl = new Label
+                    {
+                        FontAttributes = FontAttributes.Bold,
+                        TextColor = Color.Black,
+                        HeightRequest = 55,
+                        Margin = new Thickness(15),
+                        HorizontalOptions = LayoutOptions.Center
+                    };
+                    lbl.SetBinding(Label.TextProperty, "Key");
+                    return new ViewCell
+                    {
+                        View = new StackLayout().AddChilds(lbl)
+                    };
+                })
+            };
+
+            SoundList.ItemTapped += SoundList_ItemTapped;
+            SoundList.ItemSelected += SoundList_ItemSelected;
+
+
+            Content = SoundList;            
+        }
+
+        // 1? - if changed
+        private void SoundList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            
+        }
+
+        // 2
+        // 3
+        async private void SoundList_ItemTapped(object sender, ItemTappedEventArgs e)
+        {
+            var s = e.Item;
+            var s2 = (sender as ListView).SelectedItem;
+
+            var b = await DisplayAlert("", "Выбрать текущую мелодию", "Ладно", "Нет");
+            if (b)
+            {
+                
+            }
+
+            SoundCell.Cells[(e.Item as Sound).Name].Selected = false;
         }
 
         private void Handle_ItemTapped(object sender, ItemTappedEventArgs e)
