@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -11,9 +12,15 @@ using XxmsApp;
 namespace XxmsApp.Views
 {
 
+
     public class SoundCell : ViewCell
     {
-        Label sound;
+        const string playIcon = "play2.png";
+        const string pauseIcon = "pause2.png";
+
+        static FileImageSource PlayIcon = new FileImageSource { File = playIcon };
+    
+        Label sound;    
         Frame frame;
         Image play;
         bool selected = false;
@@ -29,8 +36,6 @@ namespace XxmsApp.Views
                 }
             }
         }
-        string playIcon = "play2.png";
-        string pauseIcon = "pause2.png";
         SoundCell LastCell = null;
 
         public SoundCell()
@@ -55,7 +60,6 @@ namespace XxmsApp.Views
             this.View = root;            
 
         }     
-
                 
 
         async protected override void OnTapped()
@@ -68,14 +72,16 @@ namespace XxmsApp.Views
             if (selected)
             {
                 var r = DependencyService.Get<XxmsApp.Api.IMessages>();
-                r.Play("", async s =>
+
+                var sound = this.BindingContext as Sound;
+                r.SoundPlay(sound.Path ?? null, async s => // sound.RingtoneType ?? 
                 {
                     await play.FadeTo(0);
 
-                    play.Source = new FileImageSource { File = playIcon };
+                    play.Source = PlayIcon;
                     play.FadeTo(0.7);
                     selected = false;
-                });
+                }, null);
             }
 
             play.Source = new FileImageSource { File = selected ? pauseIcon : playIcon };
@@ -92,20 +98,23 @@ namespace XxmsApp.Views
 
     public class Sound
     {
-        public Sound(string name)
+        public Sound(string name, string path, string ringtoneType)
         {
             Name = name;
+            Path = path;
+            RingtoneType = ringtoneType;
         }
 
         public string Name { get; set; }
+        public string Path { get; set; }
+        public string RingtoneType { get; set; }
     }
 
     // [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SoundPage : ContentPage
     {
 
-        public static string CurrentMelody { get; set; } = string.Empty;
-        public ObservableCollection<Sound> Items { get; set; }
+        public static string CurrentMelody { get; set; } = string.Empty;        
 
         public SoundPage()
         {
@@ -120,9 +129,35 @@ namespace XxmsApp.Views
 
             var lst = DependencyService.Get<XxmsApp.Api.IMessages>().GetStockSounds();
 
-            Items = new ObservableCollection<Sound>(lst.Select(s => new Sound(s.Name)));
+
+            var Items = lst
+                .Select(s => new Sound(s.Name, s.Path, s.Group))
+                .GroupBy(s => s.RingtoneType).ToList();
 			
 			SoundList.ItemsSource = Items;
+            SoundList.IsGroupingEnabled = true;
+            SoundList.GroupDisplayBinding = new Binding("Key");
+            SoundList.GroupHeaderTemplate = new DataTemplate(() =>
+            {                
+                new TextCell
+                {
+                    Height = 55,
+                    TextColor = Color.Orange
+                };
+
+                var lbl = new Label {
+                    FontAttributes = FontAttributes.Bold,
+                    TextColor = Color.Black,
+                    HeightRequest = 55,
+                    Margin = new Thickness(15),
+                    HorizontalOptions = LayoutOptions.Center
+                };
+                lbl.SetBinding(Label.TextProperty, "Key");
+                return new ViewCell
+                {
+                    View = new StackLayout().AddChilds(lbl)
+                };
+            });
 
             Content = SoundList;
         }

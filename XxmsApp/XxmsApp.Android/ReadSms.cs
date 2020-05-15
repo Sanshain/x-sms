@@ -153,55 +153,100 @@ namespace XxmsApp.Api.Droid
             vibrator.Vibrate(ms);            
         }
 
-        public void Play(string sound, Action<string> onFinish)
+        public void SoundPlay(string name, Action<string> onFinish, string soundType)
         {
-            if (string.IsNullOrEmpty(sound))
-            {
-                // XxmsApp.Api.Utilites.LowLevelApi.RingtonPlay();
-            }
             var context = Android.App.Application.Context;
-            var Urim = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Notification);
+
+            if (onFinish == null)
+            {
+                var Urim = Android.Media.RingtoneManager.GetActualDefaultRingtoneUri(context, Android.Media.RingtoneType.Notification);
+                var path = Urim.Path;
+
+                string _path = name;
+                try
+                {
+                    var uri = Android.Net.Uri.Parse(name);                    
+                    var r = Android.Media.RingtoneManager.GetRingtone(context, uri);
+                    r.Play();
+                }
+                catch (Exception iex)
+                {
+                    var er = iex;
+                }
+                return;
+            }
+            else if(string.IsNullOrEmpty(soundType) == false)
+            {
+
+            }
+            else
+            {
+                throw new Exception("");
+            }
+
+            // string sound = $@"/system/media/audio/{soundType.ToLower()}s/{name}.ogg";
+            string sound = name;
+
             var player = new Android.Media.MediaPlayer();
             player.Reset();            
-            player.SetDataSource(Urim.Path);
-            // player.SetDataSource(context, Urim);
-            player.Prepare();
-            player.Start();
-            player.Completion += (object sender, EventArgs e) =>
+
+            try
             {
-                onFinish?.Invoke(sound);
-            };
+                player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
+                player.Prepare();
+                player.Start();
+                // player.Duration;
+                player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
+            }
+            catch(Exception ex)
+            {
+                var er = ex.Message;
+            }
 
         }
 
 
-        public List<(string Name, string Path)> GetStockSounds()
+        public List<(string, string, string)> GetStockSounds()
         {
+                   
+            var sounds = new List<(string, string, string)>();
 
-            var alarms = new List<Android.Net.Uri>();            
-            var sounds = new List<(string Name, string Path)>();
-
-            var ringtoneMgr = new Android.Media.RingtoneManager(XxmsApp.Droid.MainActivity.Instance);
-            ringtoneMgr.SetType(Android.Media.RingtoneType.All);
-
-            var cursor = ringtoneMgr.Cursor;//*/
-            var cnt = cursor.Count;
-
-
-            while (!cursor.IsAfterLast && cursor.MoveToNext())
+            Android.Media.RingtoneManager ringtoneMgr = null;
+            
+            Android.Media.RingtoneType[] types =
             {
-                var title = cursor.GetString(cursor.GetColumnIndex("title"));                          
+                Android.Media.RingtoneType.Alarm,
+                Android.Media.RingtoneType.Notification,
+                Android.Media.RingtoneType.Ringtone
+            };
 
-                int currentPosition = cursor.Position;
-                var uri = ringtoneMgr.GetRingtoneUri(currentPosition);
-                alarms.Add(uri);
+            foreach (var ringtoneType in types)
+            {
+                // Android.Media.RingtoneType.All
 
-                sounds.Add((title, uri.Path));
+                (ringtoneMgr = new Android.Media.RingtoneManager(XxmsApp.Droid.MainActivity.Instance)).SetType(ringtoneType);                                
+
+                var cursor = ringtoneMgr.Cursor;//*/
+
+                while (!cursor.IsAfterLast && cursor.MoveToNext())
+                {
+                    var title = cursor.GetString(cursor.GetColumnIndex("title"));                    
+                    var _uri = ringtoneMgr.GetRingtoneUri(cursor.Position);
+                    var path = string.Join(":", _uri.Scheme, _uri.SchemeSpecificPart);
+
+                    sounds.Add((title, path, ringtoneType.ToString()));
+                }
+
+                // cursor.MoveToPosition(0);
+
             }
 
+
+            /*
             var names = cursor.GetColumnNames();
             var cc = cursor.ColumnCount;
             var fields = cursor.Extras.KeySet().ToList();
+            //*/
 
             return sounds;
 

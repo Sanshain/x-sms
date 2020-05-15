@@ -142,7 +142,7 @@ namespace XxmsApp
                     ((App.Current.MainPage as MasterDetailPage).Detail as NavigationPage).BackgroundColor = Color.Transparent;
 
                     var r = DependencyService.Get<XxmsApp.Api.IMessages>();
-                    r.Play(string.Empty, null);
+                    r.SoundPlay(string.Empty, null, null);
 
                     goto default;
 
