@@ -33,6 +33,9 @@ namespace XxmsApp.Piece
 
 namespace XxmsApp.Droid
 {
+    public delegate void ActivityResultHandler(Android.Net.Uri uri, object subj);
+
+
     [Activity(Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Portrait)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
@@ -99,6 +102,9 @@ namespace XxmsApp.Droid
 
         }
 
+        
+        public event Action<Android.Net.Uri, object> ReceiveActivityResult;
+
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
@@ -109,14 +115,22 @@ namespace XxmsApp.Droid
                     if (data == null)  return;
                     if (resultCode == Result.Ok)
                     {
+
+                        XxmsApp.Api.Droid.XMessages.currentSound?.Stop();
                         Android.Net.Uri chosenImageUri = data.Data;
+                        XxmsApp.Api.Droid.XMessages.currentSound = Android.Media.RingtoneManager.GetRingtone(this, chosenImageUri);
+                        XxmsApp.Api.Droid.XMessages.currentSound.Play();                       
+                        ReceiveActivityResult?.Invoke(chosenImageUri, XxmsApp.Api.Droid.XMessages.currentSound);
 
-                        // string path = chosenImageUri.Path;
-                        // var context = Android.App.Application.Context;
-                        // var sUri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.All);
-
-                        Android.Media.Ringtone r = Android.Media.RingtoneManager.GetRingtone(this, chosenImageUri);
-                        r.Play();
+                        /*
+                        var player = new Android.Media.MediaPlayer();
+                        player.Reset();
+                        player.SetDataSource(this, chosenSoundri);  // player.SetDataSource(context, Urim);
+                        player.Prepare();
+                        var duration = player.Duration;
+                        player.Start();
+                        player.CurrentPosition
+                        //*/
 
                     }
                     

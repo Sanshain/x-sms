@@ -8,6 +8,33 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XxmsApp;
+using XxmsApp.Piece;
+
+
+namespace XxmsApp
+{
+    public class Sound
+    {
+        public Sound(string name, string path, string ringtoneType)
+        {
+            Name = name;
+            Path = path;
+            RingtoneType = ringtoneType;
+        }
+
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string RingtoneType { get; set; }
+    }
+
+    public class SoundMusic : Sound
+    {
+        public SoundMusic(string name, string path, string ringtoneType = null) : base(name, path, ringtoneType) { }
+
+        
+    }
+}
+
 
 namespace XxmsApp.Views
 {
@@ -89,13 +116,18 @@ namespace XxmsApp.Views
             {
 
                 var sound = this.BindingContext as Sound;
-                player.SoundPlay(sound.Path ?? null, null, async s => // 
+                player.SoundPlay(sound.Name, sound.RingtoneType, async s => // 
                 {
                     await play.FadeTo(0);
 
                     play.Source = PlayIcon;
                     play.FadeTo(0.7);
                     selected = false;
+
+                }, er =>
+                {
+                    player.SoundPlay(sound.Path);
+                    // write log error to database
                 });
             }
             else player.StopSound();
@@ -114,19 +146,7 @@ namespace XxmsApp.Views
         }
     }
 
-    public class Sound
-    {
-        public Sound(string name, string path, string ringtoneType)
-        {
-            Name = name;
-            Path = path;
-            RingtoneType = ringtoneType;
-        }
 
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public string RingtoneType { get; set; }
-    }
 
     // [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SoundPage : ContentPage
@@ -142,7 +162,8 @@ namespace XxmsApp.Views
 
             SoundCell.Cells = new Dictionary<string, SoundCell>();
 
-            var lst = DependencyService.Get<XxmsApp.Api.IMessages>().GetStockSounds();
+            var lowApi = DependencyService.Get<XxmsApp.Api.IMessages>();
+            var lst = lowApi.GetStockSounds();
 
             var Items = lst
                 .Select(s => new Sound(s.Name, s.Path, s.Group))
@@ -151,7 +172,11 @@ namespace XxmsApp.Views
             var SoundList = new ListView
             {
                 ItemTemplate = new DataTemplate(typeof(SoundCell)),
-                ItemsSource = Items,
+                ItemsSource = Items,    
+                Header = new RoundedButton("Выбрать файл", (s,e) =>
+                {
+                    lowApi.SelectExternalSound();
+                }),
 
                 IsGroupingEnabled = true,
                 GroupDisplayBinding = new Binding("Key"),
@@ -186,14 +211,14 @@ namespace XxmsApp.Views
             Content = SoundList;            
         }
 
-        // 1? - if changed
+        // 1? - item_selected - if selection changed
         private void SoundList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
             
         }
 
-        // 2
-        // 3
+        // 2 - cell_tapped
+        // 3 - item_tapped
         async private void SoundList_ItemTapped(object sender, ItemTappedEventArgs e)
         {
             var s = e.Item;

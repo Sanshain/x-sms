@@ -44,14 +44,12 @@ namespace XxmsApp.Api.Utilites
 
             // var action = Android.Media.RingtoneManager.ActionRingtonePicker;
 
-
             /*      
             Intent audio_picker_intent = new Intent(
                     Intent.ActionPick,
                     Android.Provider.MediaStore.Audio.Media.InternalContentUri
                 );                   
             XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
-
 
             /*
             Intent audio_picker_intent = new Intent(Android.Provider.Settings.ActionSoundSettings);

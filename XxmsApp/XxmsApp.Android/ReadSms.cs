@@ -35,7 +35,7 @@ namespace XxmsApp.Api.Droid
         /// </summary>
         internal static PendingIntent PendInDelivered { get; set; }
 
-        static Android.Media.Ringtone currentSound = null;
+        public static Android.Media.Ringtone currentSound = null;
         static Android.Media.MediaPlayer currentMelody = null;
 
         ContentResolver contentResolver;
@@ -172,55 +172,84 @@ namespace XxmsApp.Api.Droid
         /// <param name="soundType">указывается, если в параметр path передается имя</param>
         /// <param name="onFinish">метод, кторый будет вызван по завершении воспроизведения</param>
         /// <returns>вернет продолжительность воспроизведения, если указан soundType, иначе - -1</returns>
-        public int SoundPlay(string path, string soundType, Action<string> onFinish)
+        public int SoundPlay(string path, string soundType, Action<string> onFinish, Action<Exception> OnError)
         {
             var context = Android.App.Application.Context;
 
-            if (string.IsNullOrEmpty(soundType))
-            {                
-                try
-                {            
-                    if (currentSound != null) currentSound.Stop();
-                    var uri = Android.Net.Uri.Parse(path);
-                    currentSound = Android.Media.RingtoneManager.GetRingtone(context, uri);
-                    currentSound.Play();
-                    return -1;
-                }
-                catch (Exception iex)
-                {
-                    var er = iex;
-                }                
-            }
-
-            string sound = $@"/system/media/audio/{soundType.ToLower()}s/{path}.ogg";
-
-            var player = new Android.Media.MediaPlayer();
-            player.Reset();
-            player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
-            player.Prepare();
-            var duration = player.Duration;
-            player.Start();
-            
-            player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
-
-            try
+            if (string.IsNullOrEmpty(soundType) == false)
             {
+                string sound = $@"/system/media/audio/{soundType.ToLower()}s/{path}.ogg";
+
+                currentMelody?.Stop();
+                var player = currentMelody = new Android.Media.MediaPlayer();
+                player.Reset();
                 player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
                 player.Prepare();
+                var duration = player.Duration;
                 player.Start();
-                // player.Duration;
+
                 player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
-            }
-            catch (Exception ex)
-            {
-                var er = ex.Message;
-                return -2;
+
+                try
+                {
+                    player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
+                    player.Prepare();
+                    player.Start();
+                    // player.Duration;
+                    player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
+
+                    return 1; // duration;   
+                }
+                catch (Exception ex)
+                {
+                    var er = ex.Message;
+                    OnError?.Invoke(ex);
+                    return -2;
+                }
+                
             }
 
-            return 1; // duration;
+            if (currentSound != null) currentSound.Stop();
+            var uri = Android.Net.Uri.Parse(path);
+            currentSound = Android.Media.RingtoneManager.GetRingtone(context, uri);
+            currentSound.Play();                
+
+            return -1;
+
         }
 
+        public void SelectExternalSound(Action<SoundMusic> onselect)
+        {
+            const int REQ_PICK_AUDIO = 0;
 
+            Intent audio_picker_intent = new Intent(Intent.ActionGetContent);
+            audio_picker_intent.SetType("audio/*");
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(
+                audio_picker_intent,
+                REQ_PICK_AUDIO);//*/
+
+            Action<Android.Net.Uri, object> act = null;
+            act = (Android.Net.Uri uri, object subj) =>
+            {
+                var ab = XxmsApp.Droid.MainActivity.Instance.ActionBar;
+                ab.Subtitle = "13";
+
+                // subj as 
+
+                // onselect(new SoundMusic(uri.Path))
+
+                XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult -= act;
+            };
+            XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult += act;
+
+            /*
+            Intent audio_picker_intent = new Intent(
+                    Intent.ActionPick,
+                    Android.Provider.MediaStore.Audio.Media.ExternalContentUri
+                );                   
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
+        }
+        
         public List<(string, string, string)> GetStockSounds()
         {
                    
