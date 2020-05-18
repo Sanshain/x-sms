@@ -231,8 +231,8 @@ namespace XxmsApp.Api.Droid
         {
             
             XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult = (Android.Net.Uri uri, object subj) =>
-            {
-                onselect?.Invoke(new SoundMusic(string.Join(":", uri.Scheme, uri.EncodedSchemeSpecificPart)));
+            {                
+                onselect?.Invoke(new SoundMusic(uri.Path, string.Join(":", uri.Scheme, uri.EncodedSchemeSpecificPart)));
             };
             
             Intent audio_picker_intent = new Intent(Intent.ActionGetContent);

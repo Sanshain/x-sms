@@ -35,9 +35,9 @@ namespace XxmsApp
 
     public class SoundMusic : Sound
     {
-        public SoundMusic(string path) : base(null, path, null)
+        public SoundMusic(string name, string path) : base(null, path, null)
         {
-            Name = path.Split('/').LastOrDefault();
+            Name = name.Split('/').LastOrDefault();
             if (Name.Length > 25)
             {
                 Name = "..." + Name.Substring(Name.Length - 25);
@@ -159,7 +159,11 @@ namespace XxmsApp.Views
 
             sound.SetBinding(Label.TextProperty, "Name");
             
-            Cells.Add((this.BindingContext as Sound).Name, this);
+            if (this.BindingContext != null)
+            {
+                Cells.Add((this.BindingContext as Sound).Name, this);
+            }
+            
         }
     }
 
@@ -203,6 +207,7 @@ namespace XxmsApp.Views
     // [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SoundPage : ContentPage
     {
+        public bool inited = false;
 
         public static string CurrentMelody { get; set; } = string.Empty;        
 
@@ -227,26 +232,44 @@ namespace XxmsApp.Views
                 ItemsSource = Items,
                 Header = new StackLayout().AddChilds(new RoundedButton("Выбрать файл", (s, e) =>
                 {
+                    
                     lowApi.SelectExternalSound(sound =>
-                    {
-                        var lv = ((s as RoundedButton).Parent as StackLayout).Children.OfType<SoundListView>().First();
+                    {                        
+
+                        var lv = ((s as RoundedButton).Parent as StackLayout).Children.OfType<SoundListView>().First();                        
 
                         if (lv != null)
                         {
-                            lv.ItemsSource = new Sound[] { sound };
-                            lv.IsVisible = true;
+
+                            if (lv.ItemsSource == null)
+                            {
+                                lv.ItemsSource = new Sound[] { sound };
+                            }
+                            else
+                            {
+                                // lv.ItemsSource = null;
+                                lv.ItemsSource = new Sound[] { sound };                                
+                            }
+
+                            // if (inited) return;
+
+                            lv.IsVisible = true;                            
 
                             SoundCell.Cells.SetOnCollectionChangedEvent((object sender, NotifyCollectionChangedEventArgs ev) =>
-                            {
-                                if (ev.Action == NotifyCollectionChangedAction.Add)
+                            {                                
+                                
+                                if (ev.Action == NotifyCollectionChangedAction.Add || ev.Action == NotifyCollectionChangedAction.Replace)
                                 {
                                     if (ev.NewItems[0] is KeyValuePair<string, SoundCell> soundItem)
                                     {
                                         if (soundItem.Key == sound.Name)
-                                        {                                            
+                                        {                                             
+
                                             SoundCell.Cells[sound.Name].Selected = true;
                                             lv.SoundList_ItemTapped(sound, null);
                                             SoundCell.Cells.SetOnCollectionChangedEvent(null);
+
+                                            inited = true;
                                         }
                                     }
                                 }

@@ -56,6 +56,17 @@ namespace XxmsApp
                 this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, base.Keys.ToList().IndexOf(key)));
                 this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
             }
+            else
+            {
+                var oldItem = new KeyValuePair<TKey, TValue>(key, base[key]);
+                this.OnCollectionChanged(
+                    new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Replace,                    
+                        new KeyValuePair<TKey, TValue>(key, base[key] = value),
+                        oldItem
+                    )
+                );                
+            }
         }
 
         public new bool Remove(TKey key)
