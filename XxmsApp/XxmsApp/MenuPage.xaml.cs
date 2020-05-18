@@ -137,12 +137,17 @@ namespace XxmsApp
 
 
                 case "Play":
-                                                           
-                    (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SoundPage());
-                    ((App.Current.MainPage as MasterDetailPage).Detail as NavigationPage).BackgroundColor = Color.Transparent;
+
 
                     var r = DependencyService.Get<XxmsApp.Api.IMessages>();
                     r.SoundPlay(string.Empty);
+
+                                        
+                    await (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SoundPage(sound =>
+                    {
+                        DisplayAlert("Result", sound.Name, "ok");//*/
+                    }));
+
 
                     goto default;
 

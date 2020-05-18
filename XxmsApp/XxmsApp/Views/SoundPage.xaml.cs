@@ -169,7 +169,7 @@ namespace XxmsApp.Views
 
     public class SoundListView : ListView
     {
-        ContentPage parentPage = null;
+        ContentPage parentPage = null;        
 
         public SoundListView(ContentPage page)
         {            
@@ -191,10 +191,10 @@ namespace XxmsApp.Views
 
             var b = await parentPage.DisplayAlert("", "Выбрать текущую мелодию", "Ладно", "Нет");
             if (b)
-            {
-
-            }
-        
+            {                
+                ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).PopAsync();
+                (parentPage as SoundPage).OnResult((sender as ListView)?.SelectedItem as Sound);
+            }        
             
             var name = (e?.Item as Sound)?.Name ?? (sender as SoundMusic).Name;
 
@@ -206,16 +206,18 @@ namespace XxmsApp.Views
 
     // [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SoundPage : ContentPage
-    {
-        public bool inited = false;
+    {        
 
-        public static string CurrentMelody { get; set; } = string.Empty;        
+        public static string CurrentMelody { get; set; } = string.Empty;        // ?
 
-        public SoundPage()
+
+        public virtual Action<Sound> OnResult { get; private set; }
+
+        public SoundPage(Action<Sound> onResult = null)
         {
             Title = "Выбор мелодии";
 
-            // InitializeComponent();        
+            // InitializeComponent();              
 
             SoundCell.Cells = new ObservableDictionary<string, SoundCell>();
 
@@ -246,12 +248,9 @@ namespace XxmsApp.Views
                                 lv.ItemsSource = new Sound[] { sound };
                             }
                             else
-                            {
-                                // lv.ItemsSource = null;
+                            {                                
                                 lv.ItemsSource = new Sound[] { sound };                                
-                            }
-
-                            // if (inited) return;
+                            }                            
 
                             lv.IsVisible = true;                            
 
@@ -268,8 +267,7 @@ namespace XxmsApp.Views
                                             SoundCell.Cells[sound.Name].Selected = true;
                                             lv.SoundList_ItemTapped(sound, null);
                                             SoundCell.Cells.SetOnCollectionChangedEvent(null);
-
-                                            inited = true;
+                                            
                                         }
                                     }
                                 }
@@ -307,7 +305,9 @@ namespace XxmsApp.Views
                 })
             };
                         
-            Content = SoundList;            
+            Content = SoundList;
+
+            OnResult = onResult;
         }
 
 
