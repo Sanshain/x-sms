@@ -23,6 +23,16 @@ using Android.Net;
 namespace XxmsApp.Api.Droid
 {
 
+    public static class Utils
+    {
+        public static int ToInt(this OnResult arg) => (int) arg;
+    }
+
+    public enum OnResult 
+    {
+        IsAudio = 0
+    }
+
     class XMessages : IMessages
     {
 
@@ -35,8 +45,8 @@ namespace XxmsApp.Api.Droid
         /// </summary>
         internal static PendingIntent PendInDelivered { get; set; }
 
-        public static Android.Media.Ringtone currentSound = null;
-        static Android.Media.MediaPlayer currentMelody = null;
+        internal static Android.Media.Ringtone currentSound = null;
+        internal static Android.Media.MediaPlayer currentMelody = null;
 
         ContentResolver contentResolver;
 
@@ -178,24 +188,23 @@ namespace XxmsApp.Api.Droid
 
             if (string.IsNullOrEmpty(soundType) == false)
             {
-                string sound = $@"/system/media/audio/{soundType.ToLower()}s/{path}.ogg";
 
-                currentMelody?.Stop();
+                string sound = soundType == typeof(SoundMusic).Name 
+                    ? path 
+                    : $@"/system/media/audio/{soundType.ToLower()}s/{path}.ogg";
+                
+                StopSound();                                                   // currentMelody?.Stop();
                 var player = currentMelody = new Android.Media.MediaPlayer();
-                player.Reset();
-                player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
-                player.Prepare();
-                var duration = player.Duration;
-                player.Start();
-
-                player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
+                player.Reset();                
 
                 try
                 {
-                    player.SetDataSource(sound);  // player.SetDataSource(context, Urim);
+                    var soundUri = Android.Net.Uri.Parse(sound);                // player.SetDataSource(sound); - just for asci
+                    player.SetDataSource(context, soundUri);                    // player.SetDataSource(context, Urim);
                     player.Prepare();
-                    player.Start();
-                    // player.Duration;
+                    // var duration = player.Duration;
+
+                    player.Start();                    
                     player.Completion += (object sender, EventArgs e) => onFinish?.Invoke(sound);
 
                     return 1; // duration;   
@@ -220,27 +229,16 @@ namespace XxmsApp.Api.Droid
 
         public void SelectExternalSound(Action<SoundMusic> onselect)
         {
-            const int REQ_PICK_AUDIO = 0;
-
+            
+            XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult = (Android.Net.Uri uri, object subj) =>
+            {
+                onselect?.Invoke(new SoundMusic(string.Join(":", uri.Scheme, uri.EncodedSchemeSpecificPart)));
+            };
+            
             Intent audio_picker_intent = new Intent(Intent.ActionGetContent);
             audio_picker_intent.SetType("audio/*");
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(
-                audio_picker_intent,
-                REQ_PICK_AUDIO);//*/
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, OnResult.IsAudio.ToInt());
 
-            Action<Android.Net.Uri, object> act = null;
-            act = (Android.Net.Uri uri, object subj) =>
-            {
-                var ab = XxmsApp.Droid.MainActivity.Instance.ActionBar;
-                ab.Subtitle = "13";
-
-                // subj as 
-
-                // onselect(new SoundMusic(uri.Path))
-
-                XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult -= act;
-            };
-            XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult += act;
 
             /*
             Intent audio_picker_intent = new Intent(

@@ -28,13 +28,14 @@ namespace XxmsApp.Piece
                 Text = text,
             };
 
-
-            innerButton.Clicked += Clicked += (s, e) =>
+            Clicked = (s, e) =>
             {
-                onClicked?.Invoke(s, e);
-            }; 
-            
-            
+                onClicked?.Invoke(this, e);
+            };
+
+            innerButton.Clicked += Clicked;
+
+
         }               
 
         public string Text
