@@ -122,10 +122,6 @@ namespace XxmsApp.Views
 
         async private void OnSelectionChanged(bool _selected)
         {
-            if (play.AnimationIsRunning("FadeTo"))
-            {
-                return;
-            }
 
             await play.FadeTo(0);
 
@@ -240,14 +236,6 @@ namespace XxmsApp.Views
                             lv.ItemsSource = new Sound[] { sound };
                             lv.IsVisible = true;
 
-                            /*
-                            Utils.CallAfter(300, () =>
-                            {
-                                SoundCell.Cells[sound.Name].Selected = true;
-                                lv.SoundList_ItemTapped(sound, null);
-                            });
-                            //*/
-                            
                             SoundCell.Cells.SetOnCollectionChangedEvent((object sender, NotifyCollectionChangedEventArgs ev) =>
                             {
                                 if (ev.Action == NotifyCollectionChangedAction.Add)
@@ -258,7 +246,7 @@ namespace XxmsApp.Views
                                         {                                            
                                             SoundCell.Cells[sound.Name].Selected = true;
                                             lv.SoundList_ItemTapped(sound, null);
-                                            // SoundCell.Cells.SetOnCollectionChangedEvent(null);
+                                            SoundCell.Cells.SetOnCollectionChangedEvent(null);
                                         }
                                     }
                                 }
