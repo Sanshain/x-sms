@@ -423,7 +423,7 @@ namespace XxmsApp.Options
 
 
         [FullDescription("Мелодия сообщения")]
-        public string Ringtone
+        public Sound Ringtone
         {
             get
             {

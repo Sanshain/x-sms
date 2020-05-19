@@ -11,6 +11,8 @@ using Xamarin.Forms.Xaml;
 using XxmsApp;
 using XxmsApp.Piece;
 
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
 namespace XxmsApp
 {
@@ -31,6 +33,17 @@ namespace XxmsApp
         {
             return RingtoneType == typeof(SoundMusic).Name ? Path : Name;
         }
+
+        
+        public static implicit operator string (Sound stg) => $"{stg.Name}|{stg.Path}";
+        
+        public static implicit operator Sound(string stg)
+        {
+            var strs = stg.Split('|');
+            return 
+                new Sound(strs[0], strs.Length > 1 ? strs[1] : strs[0], null);
+        }
+
     }
 
     public class SoundMusic : Sound

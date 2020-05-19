@@ -34,11 +34,14 @@ namespace XxmsApp.Views
                 }
             );
 
-            // optionDesc.SetBinding(Label.TextProperty, new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize() });
-            pickedSound.SetBinding(
-                Label.TextProperty, 
-                new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize(), Mode = BindingMode.TwoWay });
+            var pickedBinding = new Binding {
+                Path = "Name",
+                Source = Options.ModelSettings.Initialize().Ringtone,
+                Mode = BindingMode.TwoWay };
 
+            // optionDesc.SetBinding(Label.TextProperty, new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize() });
+            pickedSound.SetBinding(Label.TextProperty, pickedBinding);
+            pickedSound.BindingContextChanged += PickedSound_BindingContextChanged;
 
             TapOnFrame = new TapGestureRecognizer();
             TapOnFrame.Tapped += (object sender, EventArgs e) =>
@@ -49,12 +52,17 @@ namespace XxmsApp.Views
                 {
                     // (this.Parent.Parent as ContentPage)?.DisplayAlert("Result", sound.Name, "ok");
                     pickedSound.Text = sound.Name;
+                    Options.ModelSettings.Initialize().Ringtone = sound;
+                    // pickedSound.BindingContext = sound;
                 }));
             };
             this.GestureRecognizers.Add(TapOnFrame);
         }
 
-
+        private void PickedSound_BindingContextChanged(object sender, EventArgs e)
+        {
+            
+        }
     }
 
     [XamlCompilation(XamlCompilationOptions.Compile)]
