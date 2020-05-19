@@ -11,6 +11,8 @@ using System.Collections.Specialized;
 using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Xamarin.Forms;
+using System.Globalization;
 
 namespace XxmsApp.Options
 {
@@ -48,7 +50,7 @@ namespace XxmsApp.Options
         public string Name { get; set; }
         public string Description { get; set; }
         public string FullDescription { get; set; }
-        public bool Content
+        public string Content
         {
             get => content;
             set 
@@ -57,11 +59,11 @@ namespace XxmsApp.Options
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs((content).ToString()));
             }
         }
-        bool content;
+        string content;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public static implicit operator Setting((string Name, bool Value, string Desc, string FullDesc) setting) 
+        public static implicit operator Setting((string Name, string Value, string Desc, string FullDesc) setting) 
         {
             return new Setting {
                 Name = setting.Name,
@@ -71,7 +73,27 @@ namespace XxmsApp.Options
             };
         }
 
-        public static implicit operator bool(Setting stg) => stg.Content;
+        public static implicit operator bool(Setting stg) => bool.Parse(stg.Content);
+
+
+
+
+        public class ContentConverter : IValueConverter
+        {
+            public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                if (targetType == typeof(bool)) return bool.Parse(value.ToString());                
+                else
+                    throw new Exception("Unexpect convertation");
+            }
+
+            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                if (targetType == typeof(string)) return value.ToString();                
+                else
+                    throw new Exception("Unexpect back convertation");
+            }
+        }
 
     }
 
@@ -105,18 +127,19 @@ namespace XxmsApp.Options
         {
             PropertyInfo[] props = typeof(Settings).GetProperties(BindingFlags.Static | BindingFlags.Public);            
 
-            List<Setting> stgs = props.Select(p =>
-            {
-                var attr = p.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;               
+            List<Setting> stgs = props.Where(p => p.PropertyType == typeof(bool)).Select(prop =>
+            {                
 
-                var value = (bool)p.GetValue(null);
+                var attr = prop.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;               
+
+                var value = (bool)prop.GetValue(null);
 
                 return new Setting
                 {
-                    Name = p.Name,
+                    Name = prop.Name,
                     Description = attr.Description,
                     FullDescription = attr.FullDescription,
-                    Content = value
+                    Content = value.ToString()
                 };
             }).ToList();
 
@@ -135,7 +158,87 @@ namespace XxmsApp.Options
         public virtual event CollectionChangedEventHandler CollectionChanged;
     }
 
-    
+
+
+    public class Settings : AbstractSettings
+    {
+
+        public Settings(IEnumerable<Setting> settings) : base(settings) { }
+
+        public override event CollectionChangedEventHandler CollectionChanged;
+
+
+        [FullDescription("Мелодия сообщения")]
+        public static string Ringtone { get; set; }
+        [FullDescription("Включить вибрацию", "Вибрация при получении сообщения")]
+        public static bool Vibration { get => Get(); set => Set(value); }
+        [FullDescription("Краткое описание", "Полное описание")]
+        public static bool AutoFocus1 { get => Get(); set => Set(value); }
+        [FullDescription("Краткое описание", "Полное описание")]
+        public static bool AutoFocus2 { get => Get(); set => Set(value); }
+
+
+        public static Settings Initialize()
+        {
+            Stopwatch sw = new Stopwatch(); sw.Start();
+
+            var lst = Reset();
+
+            var settings = new Settings(lst);
+
+            settings.ForEach(s => s.PropertyChanged += settings.Setting_Changed);
+
+            sw.Stop(); var l = sw.ElapsedMilliseconds;
+
+            return settings;
+        }
+
+        internal static List<Setting> Reset()
+        {
+
+            if (App.Current.Properties.Any(kv =>
+            {
+                bool v = kv.Value.GetType() != typeof(bool);
+                return v;
+            }))
+            {
+                ObSettings.RemoveAllCurrentProps();
+            }
+
+            return Settings.ToList();
+        }
+
+        internal static void FillCurrentAppProps(Dictionary<string, bool> dict)
+        {
+            foreach (var kv in dict)
+            {
+                if (App.Current.Properties.ContainsKey(kv.Key))
+                {
+                    App.Current.Properties[kv.Key] = kv.Value;
+                }
+                else App.Current.Properties.Add(kv.Key, kv.Value);
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     public class ObSettings : AbstractSettings
@@ -154,7 +257,7 @@ namespace XxmsApp.Options
             return new Setting
             {
                 Name = attrs[0],
-                Content = Convert.ToBoolean(attrs[1]),
+                Content = attrs[1], // Convert.ToBoolean(attrs[1]),
                 Description = attrs[2],
                 FullDescription = attrs[3]
             };
@@ -165,14 +268,14 @@ namespace XxmsApp.Options
             var method = new StackTrace(false).GetFrame(1).GetMethod();
             var name = method.Name.Substring(4);
 
-            if (App.Current.Properties.ContainsKey(name)) return Unserialize(App.Current.Properties[name].ToString()).Content;
+            if (App.Current.Properties.ContainsKey(name)) return bool.Parse(Unserialize(App.Current.Properties[name].ToString()).Content);
             else
             {                              
                 var desc = method.DeclaringType.GetProperty(name).GetCustomAttribute(typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
                 App.Current.Properties[name] = Serialize(new Setting
                 {
-                    Content = false,
+                    Content = false.ToString(),
                     Name = name,
                     Description = desc.Description,
                     FullDescription = desc.FullDescription
@@ -190,7 +293,7 @@ namespace XxmsApp.Options
             if (App.Current.Properties.ContainsKey(name))
             {
                 var setting = Unserialize(App.Current.Properties[name] as string);
-                setting.Content = value;
+                setting.Content = value.ToString();
                 App.Current.Properties[name] = Serialize(setting);
             }
             else
@@ -202,7 +305,7 @@ namespace XxmsApp.Options
                 App.Current.Properties.Add(name, Serialize(new Setting
                 {
                     Name = name,
-                    Content = value,
+                    Content = value.ToString(),
                     Description = desc.Description,
                     FullDescription = desc.FullDescription
                 }));
@@ -227,7 +330,7 @@ namespace XxmsApp.Options
             sw.Stop(); var l = sw.ElapsedMilliseconds;
 
 
-            settings.initialized = settings.Count(s => s.Content);
+            settings.initialized = settings.Count(s => bool.Parse(s.Content));
 
 
             return settings;
@@ -293,70 +396,7 @@ namespace XxmsApp.Options
             }
         }
     }
-
-
-    public class Settings : AbstractSettings
-    {
-
-        public Settings(IEnumerable<Setting> settings) : base(settings) { }
-
-        public override event CollectionChangedEventHandler CollectionChanged;
-
-
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus { get => Get(); set => Set(value); }
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus1 { get => Get(); set => Set(value); }
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus2 { get => Get(); set => Set(value); }
-
-
-        public static Settings Initialize()
-        {
-            Stopwatch sw = new Stopwatch(); sw.Start();
-
-            var lst = Reset();
-
-            var settings = new Settings(lst);
-
-            settings.ForEach(s => s.PropertyChanged += settings.Setting_Changed);
-
-            sw.Stop(); var l = sw.ElapsedMilliseconds;
-
-            return settings;
-        }
-
-        internal static List<Setting> Reset()
-        {
-
-            if (App.Current.Properties.Any(kv =>
-            {
-                bool v = kv.Value.GetType() != typeof(bool);
-                return v;
-            }))
-            {
-                ObSettings.RemoveAllCurrentProps();
-            }
-
-            return Settings.ToList();
-        }
-
-        internal static void FillCurrentAppProps(Dictionary<string, bool> dict)
-        {
-            foreach (var kv in dict)
-            {
-                if (App.Current.Properties.ContainsKey(kv.Key))
-                {
-                    App.Current.Properties[kv.Key] = kv.Value;
-                }
-                else App.Current.Properties.Add(kv.Key, kv.Value);
-            }
-        }
-
-    }
-
 }
-
 
 
 
@@ -385,16 +425,15 @@ namespace XxmsApp.Options
             Cache.database.Update((sender as Options.ModelSettings)[e.Id]);
         }
 
-
-
-        protected new static Func<bool> Get = () =>
+        static bool GetFunc([CallerMemberName]string propertyName = null)
         {
             var name = new StackTrace(false).GetFrame(1).GetMethod().Name.Substring(4);
 
             if (Items.ContainsKey(name)) return Items[name];
             else return Items[name] = false;
+        }
 
-        };
+        protected new static Func<string, bool> Get = GetFunc;
 
         protected new static Action<bool> Set = (value) =>
         {
@@ -407,7 +446,7 @@ namespace XxmsApp.Options
 
         private static void ReadToDictionary()
         {
-            Items = Cache.Read<Setting>().ToDictionary(s => s.Name, s => s.Content);
+            Items = Cache.Read<Setting>().ToDictionary(s => s.Name, s => bool.Parse(s.Content));
         }
 
         private void Setting_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -428,7 +467,7 @@ namespace XxmsApp.Options
 
             Stopwatch sw = new Stopwatch(); sw.Start();
 
-            var settings = new ModelSettings(Cache.Read<Setting>());  // Read()                  
+            var settings = new ModelSettings(new List<Setting>()); // new ModelSettings(Cache.Read<Setting>());  // Read()                  
 
             if (settings.Count == 0)
             {

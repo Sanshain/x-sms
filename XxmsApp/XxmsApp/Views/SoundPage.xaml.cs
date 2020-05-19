@@ -193,7 +193,7 @@ namespace XxmsApp.Views
             if (b)
             {                
                 ((Application.Current.MainPage as MasterDetailPage).Detail as NavigationPage).PopAsync();
-                (parentPage as SoundPage).OnResult((sender as ListView)?.SelectedItem as Sound);
+                (parentPage as SoundPage).OnResult((sender as ListView)?.SelectedItem as Sound ?? sender as Sound);
             }        
             
             var name = (e?.Item as Sound)?.Name ?? (sender as SoundMusic).Name;

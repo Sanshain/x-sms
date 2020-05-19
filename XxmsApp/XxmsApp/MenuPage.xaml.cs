@@ -34,7 +34,7 @@ namespace XxmsApp
                     "Read sms",
                     "О нас",
                     SIM_CARDS,
-                    "Play"
+                    // "Play"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
             };
@@ -175,7 +175,7 @@ namespace XxmsApp
 
         Views.SettingPage settingsPage = null;
         private void GoToSettings()
-        {
+        {            
             settingsPage = settingsPage ?? new Views.SettingPage(Options.ModelSettings.Initialize());
             (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(settingsPage, true);
             (this.Parent as MasterDetailPage).IsPresented = false;

@@ -11,7 +11,58 @@ using Xamarin.Forms.Xaml;
 namespace XxmsApp.Views
 {
 
-    public class HeaderFrame : Frame { }
+    public class HeaderFrame : Frame
+    {
+        TapGestureRecognizer TapOnFrame = null;
+        Label pickedSound = null;
+
+        public HeaderFrame(Action<HeaderFrame> onClick = null)
+        {
+            Content = new StackLayout().AddChilds(
+                new Label { Text = "Выбрать мелодию",
+                    Margin = new Thickness(15, 20, 15, 0),
+                    FontAttributes = FontAttributes.Bold,
+                    FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label))
+                },
+                pickedSound = new Label
+                {
+                    Text = "не выбрана",
+                    Margin = new Thickness(15, -10, 15, 20),                    
+                    FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label))
+                }
+            );
+
+            TapOnFrame = new TapGestureRecognizer();
+            TapOnFrame.Tapped += (object sender, EventArgs e) =>
+            {
+                var navPage = (App.Current.MainPage as MasterDetailPage).Detail as NavigationPage;
+
+                navPage.PushAsync(new Views.SoundPage(sound =>
+                {
+                    // (this.Parent.Parent as ContentPage)?.DisplayAlert("Result", sound.Name, "ok");
+                    pickedSound.Text = sound.Name;
+                }));
+            };
+            this.GestureRecognizers.Add(TapOnFrame);
+        }
+
+
+        // public EventHandler OnTap { set => TapOnFrame.Tapped += value; }
+        /*
+        public async virtual void OnClick(Action<HeaderFrame> onClick)
+        {
+            onClick?.Invoke(this);
+
+            var r = DependencyService.Get<XxmsApp.Api.IMessages>();
+            r.SoundPlay(string.Empty);
+
+            await (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SoundPage(sound =>
+            {
+                (this.Parent.Parent as ContentPage)?.DisplayAlert("Result", sound.Name, "ok");
+            }));
+        }//*/
+
+    }
 
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SettingPage : ContentPage
@@ -97,7 +148,7 @@ namespace XxmsApp.Views
 
             var sc = new SwitchCell { };
             sc.SetBinding(SwitchCell.TextProperty, "Description");
-            sc.SetBinding(SwitchCell.OnProperty, "Content");//*/            
+            sc.SetBinding(SwitchCell.OnProperty, "Content",  BindingMode.TwoWay, new Options.Setting.ContentConverter());       //*/            
 
             return sc;
         }
