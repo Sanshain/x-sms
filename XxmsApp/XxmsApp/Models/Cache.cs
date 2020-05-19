@@ -108,7 +108,7 @@ namespace XxmsApp
 
         static Cache()
         {
-            database.DropTable<Model.Message>();
+            // database.DropTable<Model.Message>();
             database.CreateTable<Model.Message>();
 
             // database.DropTable<Model.Contacts>();
@@ -210,6 +210,7 @@ namespace XxmsApp
                 // throw new KeyNotFoundException("The type yet was not added to cache");
             }
         }
+
 
 
         static List<T> iConvert<T>(List<object> raw) where T: IModel, new()

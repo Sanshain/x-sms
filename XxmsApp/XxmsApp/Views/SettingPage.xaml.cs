@@ -14,23 +14,31 @@ namespace XxmsApp.Views
     public class HeaderFrame : Frame
     {
         TapGestureRecognizer TapOnFrame = null;
-        Label pickedSound = null;
+        Label optionDesc = null;
+        Label pickedSound = null;        
 
         public HeaderFrame(Action<HeaderFrame> onClick = null)
         {
             Content = new StackLayout().AddChilds(
-                new Label { Text = "Выбрать мелодию",
+                optionDesc = new Label {
+                    Text = "Выбрать мелодию",
                     Margin = new Thickness(15, 20, 15, 0),
                     FontAttributes = FontAttributes.Bold,
                     FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label))
                 },
                 pickedSound = new Label
                 {
-                    Text = "не выбрана",
+                    // Text = "не выбрана",
                     Margin = new Thickness(15, -10, 15, 20),                    
                     FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label))
                 }
             );
+
+            // optionDesc.SetBinding(Label.TextProperty, new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize() });
+            pickedSound.SetBinding(
+                Label.TextProperty, 
+                new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize(), Mode = BindingMode.TwoWay });
+
 
             TapOnFrame = new TapGestureRecognizer();
             TapOnFrame.Tapped += (object sender, EventArgs e) =>
@@ -46,21 +54,6 @@ namespace XxmsApp.Views
             this.GestureRecognizers.Add(TapOnFrame);
         }
 
-
-        // public EventHandler OnTap { set => TapOnFrame.Tapped += value; }
-        /*
-        public async virtual void OnClick(Action<HeaderFrame> onClick)
-        {
-            onClick?.Invoke(this);
-
-            var r = DependencyService.Get<XxmsApp.Api.IMessages>();
-            r.SoundPlay(string.Empty);
-
-            await (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SoundPage(sound =>
-            {
-                (this.Parent.Parent as ContentPage)?.DisplayAlert("Result", sound.Name, "ok");
-            }));
-        }//*/
 
     }
 

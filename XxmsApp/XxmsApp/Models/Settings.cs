@@ -53,7 +53,7 @@ namespace XxmsApp.Options
         public string Content
         {
             get => content;
-            set 
+            set
             {
                 content = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs((content).ToString()));
@@ -63,7 +63,7 @@ namespace XxmsApp.Options
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public static implicit operator Setting((string Name, string Value, string Desc, string FullDesc) setting) 
+        public static implicit operator Setting((string Name, string Value, string Desc, string FullDesc) setting)
         {
             return new Setting {
                 Name = setting.Name,
@@ -82,14 +82,14 @@ namespace XxmsApp.Options
         {
             public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
             {
-                if (targetType == typeof(bool)) return bool.Parse(value.ToString());                
+                if (targetType == typeof(bool)) return bool.Parse(value.ToString());
                 else
                     throw new Exception("Unexpect convertation");
             }
 
             public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             {
-                if (targetType == typeof(string)) return value.ToString();                
+                if (targetType == typeof(string)) return value.ToString();
                 else
                     throw new Exception("Unexpect back convertation");
             }
@@ -100,6 +100,8 @@ namespace XxmsApp.Options
 
     public abstract class AbstractSettings : List<Setting>
     {
+
+        static readonly Type Storage = typeof(ModelSettings);
 
         public AbstractSettings(IEnumerable<Setting> settings) : base(settings) { }
 
@@ -125,12 +127,12 @@ namespace XxmsApp.Options
 
         public static List<Setting> ToList()
         {
-            PropertyInfo[] props = typeof(Settings).GetProperties(BindingFlags.Static | BindingFlags.Public);            
+            PropertyInfo[] props = Storage.GetProperties(BindingFlags.Static | BindingFlags.Public);
 
             List<Setting> stgs = props.Where(p => p.PropertyType == typeof(bool)).Select(prop =>
-            {                
+            {
 
-                var attr = prop.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;               
+                var attr = prop.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
                 var value = (bool)prop.GetValue(null);
 
@@ -153,11 +155,33 @@ namespace XxmsApp.Options
             CollectionChanged?.Invoke(this, new CollectionChangedEventArgs<Setting>(sender as Setting, this.IndexOf(sender as Setting)));
 
             App.Current.Properties[(sender as Setting).Name] = (sender as Setting).Content;
-        }        
-        
+        }
+
         public virtual event CollectionChangedEventHandler CollectionChanged;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+namespace XxmsApp.Options.Obsolete
+{ 
 
 
     public class Settings : AbstractSettings
@@ -221,24 +245,6 @@ namespace XxmsApp.Options
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public class ObSettings : AbstractSettings
@@ -404,14 +410,72 @@ namespace XxmsApp.Options
 
 namespace XxmsApp.Options
 {
+    
     /// <summary>
     /// Alternative solution for storing settings in the database
     /// </summary>
     public class ModelSettings : AbstractSettings
     {
 
-        public static Dictionary<string, bool> Items { get; private set; } = new Dictionary<string, bool>();
+        public static Dictionary<string, string> Items { get; private set; } = new Dictionary<string, string>();
         protected int _initialized = 0;
+        public static ModelSettings Instance = null;
+
+
+        [FullDescription("Мелодия сообщения")]
+        public string Ringtone
+        {
+            get
+            {
+                if (Items.TryGetValue(nameof(Ringtone), out string value)) return value;
+                else
+                {
+                    var ringtone = Cache.database.Find<Setting>(s => s.Name == nameof(Ringtone));
+                    Items.Add(nameof(Ringtone), ringtone.Content);
+                    return ringtone?.Content ?? "Не выбрана";
+                }
+            }
+            set
+            {
+                if (Items.ContainsKey(nameof(Ringtone)))
+                {                   
+                    Items[nameof(Ringtone)] = value;
+                    // just if Items dous not consists of this setting:
+                    Cache.database.Update(new Setting
+                    {
+                        Content = value,
+                        Name = nameof(Ringtone)
+                    });
+                }
+                else
+                {
+                    Items.Add(nameof(Ringtone), value);
+                    // just if Items dous not consists of this setting:
+                    try
+                    {
+                        Cache.database.Insert(new Setting
+                        {
+                            Content = value,
+                            Name = nameof(Ringtone)
+                        });
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+                }
+
+            }
+        }
+
+
+        [FullDescription("Включить вибрацию", "Вибрация при получении сообщения")]
+        public static bool Vibration { get => GetFunc(); set => Set(value); }
+        [FullDescription("Краткое описание", "Полное описание")]
+        public static bool AutoFocus1 { get => GetFunc(); set => Set(value); }
+        [FullDescription("Краткое описание", "Полное описание")]
+        public static bool AutoFocus2 { get => GetFunc(); set => Set(value); }
+
 
         public override event CollectionChangedEventHandler CollectionChanged;
         
@@ -420,33 +484,47 @@ namespace XxmsApp.Options
             this.CollectionChanged += ModelSettings_CollectionChanged;
         }
 
-        private void ModelSettings_CollectionChanged(object sender, CollectionChangedEventArgs<Setting> e)
-        {
-            Cache.database.Update((sender as Options.ModelSettings)[e.Id]);
-        }
+
+
+
+
+        // delegate bool GetSgn([CallerMemberName]string propertyName = null);
 
         static bool GetFunc([CallerMemberName]string propertyName = null)
         {
             var name = new StackTrace(false).GetFrame(1).GetMethod().Name.Substring(4);
 
-            if (Items.ContainsKey(name)) return Items[name];
-            else return Items[name] = false;
+            if (Items.ContainsKey(name)) return Items[name].ToBoolean();
+            else return (Items[name] = false.ToString()).ToBoolean();
+
         }
 
-        protected new static Func<string, bool> Get = GetFunc;
+        [Obsolete]
+        protected new static Func<bool> Get = () =>
+        {            
+            var name = new StackTrace(false).GetFrame(1).GetMethod().Name.Substring(4);
+
+            if (Items.ContainsKey(name)) return Items[name].ToBoolean();
+            else return (Items[name] = false.ToString()).ToBoolean();
+        };
 
         protected new static Action<bool> Set = (value) =>
         {
             var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
-            if (Items.ContainsKey(name)) Items[name] = value;
-            else Items.Add(name, value);
+            if (Items.ContainsKey(name)) Items[name] = value.ToString();
+            else Items.Add(name, value.ToString());
         };
-
         
+
 
         private static void ReadToDictionary()
         {
-            Items = Cache.Read<Setting>().ToDictionary(s => s.Name, s => bool.Parse(s.Content));
+            Items = Cache.Read<Setting>().ToDictionary(s => s.Name, s => s.Content);
+        }
+
+        private void ModelSettings_CollectionChanged(object sender, CollectionChangedEventArgs<Setting> e)
+        {
+            Cache.database.Update((sender as Options.ModelSettings)[e.Id]);
         }
 
         private void Setting_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -467,7 +545,9 @@ namespace XxmsApp.Options
 
             Stopwatch sw = new Stopwatch(); sw.Start();
 
-            var settings = new ModelSettings(new List<Setting>()); // new ModelSettings(Cache.Read<Setting>());  // Read()                  
+            // var settings = new ModelSettings(new List<Setting>()); // new ModelSettings(Cache.Read<Setting>());  // Read()                  
+            var settings = Instance ?? (Instance = new ModelSettings(Cache.Read<Setting>()
+                .Where(p => p.Name != nameof(Ringtone))));                                                  
 
             if (settings.Count == 0)
             {
@@ -491,7 +571,7 @@ namespace XxmsApp.Options
                         FullDesc : "Ленивая подгрузка сообщений при открытии диалога")
                 });//*/
                 
-                settings = new ModelSettings(Settings.ToList());
+                settings = new ModelSettings(ModelSettings.ToList());
 
                 Save(settings.ToArray());
             }
