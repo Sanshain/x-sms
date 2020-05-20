@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using XxmsApp;
+using Utilites.Views;
 
 namespace XxmsApp.Views
 {
@@ -34,9 +36,11 @@ namespace XxmsApp.Views
                 }
             );
 
+            var rt = Options.ModelSettings.Initialize();
+
             var pickedBinding = new Binding {
                 Path = "Name",
-                Source = Options.ModelSettings.Initialize().Ringtone,
+                Source = rt.Ringtone,
                 Mode = BindingMode.TwoWay };
 
             // optionDesc.SetBinding(Label.TextProperty, new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize() });
@@ -75,9 +79,10 @@ namespace XxmsApp.Views
         {
 
 
-            var itemTemplate = new DataTemplate(() => CellGenerate());
+            // var itemTemplate = new DataTemplate(() => CellGenerate());
+            var itemTemplate = new DataTemplate(MultiPurposeCellGenerate);
 
-
+            
 
             Button reset;
             var SettingList = new ListView()
@@ -121,31 +126,49 @@ namespace XxmsApp.Views
 
         }
 
-        private static object CellGenerate()
+        [Obsolete("В разработке")]
+        private static object MultiPurposeCellGenerate()
         {
-            /*
-            var view = new StackLayout {
-                Orientation = StackOrientation.Horizontal,
-                Padding = new Thickness(15, 0, 0, 0) };
+            var w = "ж".GetWidth();
 
-            Label setting = new Label {
-                HorizontalOptions = LayoutOptions.StartAndExpand, VerticalOptions = LayoutOptions.Center };
-            Switch swtch = new Switch {
-                HorizontalOptions = LayoutOptions.End,
-                VerticalOptions = LayoutOptions.Center
-            };
+            var view = new RelativeLayout { };
+            // var descLabel = new Label { };
+            // var switchView = new Switch { };
+            var valueLabel = new Label { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };
+            
 
-            setting.SetBinding(Label.TextProperty, "Prop");
-            swtch.SetBinding(Switch.IsEnabledProperty, "Enabled");
-            swtch.Toggled += Swtch_Toggled;
-
-            view.Children.Add(setting);
-            view.Children.Add(swtch);
+            view.Children
+                .AddAsRelative(new Label { }, 15, 15)
+                .SetBinding(Label.TextProperty,"Description");
+            view.Children
+                .AddAsRelative(valueLabel, p => p.Width - w * valueLabel.Text.Length, p=>15)
+                .SetBindings(Label.IsVisibleProperty, "IsBool", BindingMode.Default, new Utilites.InvertConverter())
+                .SetBinding(Label.TextProperty, "Label");
+            view.Children
+                .AddAsRelative(new Switch { }, p => p.Width - 50, p => 15)
+                .SetBindings(Switch.IsVisibleProperty, "IsBool")
+                .SetBinding(Switch.IsToggledProperty, new Binding("Content", BindingMode.TwoWay, new Options.Setting.ContentConverter())); // , valueLabel
 
             var viewCell = new ViewCell { View = view };
 
+            viewCell.Tapped += (object sender, EventArgs e) =>
+            {
+                if (valueLabel.BindingContext is Options.Setting setting)
+                {
+                    var type = setting.Type;
+                    if (Options.ModelSettings.Actions.TryGetValue(type, out Action<Options.Setting> action))
+                    {
+                        action(setting);
+                    }
+                }
+            };
+
             return viewCell;
-            //*/
+        }
+
+
+        private static object CellGenerate()
+        {
 
             var sc = new SwitchCell { };
             sc.SetBinding(SwitchCell.TextProperty, "Description");
@@ -182,7 +205,10 @@ namespace XxmsApp.Views
 
             var setting = (((ListView)sender).SelectedItem as Options.Setting);
 
-            await DisplayAlert("Описание", setting.FullDescription, "OK", "Отмена");
+            if (setting.IsBool)
+            {
+                await DisplayAlert("Описание", setting.FullDescription, "OK", "Отмена");
+            }
 
             //Deselect Item
             ((ListView)sender).SelectedItem = null;

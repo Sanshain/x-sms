@@ -13,11 +13,20 @@ using XxmsApp.Piece;
 
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using XxmsApp.Options;
+using System.Reflection;
 
 namespace XxmsApp
 {
-    public class Sound
+
+    public class Sound : Options.IAbstractOption
     {
+
+        public string Name { get; set; }
+        public string Path { get; set; }
+        public string RingtoneType { get; set; }
+
+        public Sound() { }
         public Sound(string name, string path, string ringtoneType)
         {
             Name = name;
@@ -25,23 +34,40 @@ namespace XxmsApp
             RingtoneType = ringtoneType;
         }
 
-        public string Name { get; set; }
-        public string Path { get; set; }
-        public string RingtoneType { get; set; }
 
-        public override string ToString()
-        {
-            return RingtoneType == typeof(SoundMusic).Name ? Path : Name;
-        }
 
-        
-        public static implicit operator string (Sound stg) => $"{stg.Name}|{stg.Path}";
-        
         public static implicit operator Sound(string stg)
         {
             var strs = stg.Split('|');
-            return 
-                new Sound(strs[0], strs.Length > 1 ? strs[1] : strs[0], null);
+            if (strs.Length > 1) return new Sound(strs[1], strs.Length > 2 ? strs[2] : strs[1], null);
+            else
+                throw new Exception("Wrong string pattern ({s}) inside " + MethodBase.GetCurrentMethod().Name);
+        }
+        public static implicit operator string(Sound stg) => $"{stg.GetType().Name}|{stg.Name}|{stg.Path}";
+
+
+
+        public override string ToString() => this;                                      // see higher `implicit operator string`
+        public IAbstractOption FromString(string s)
+        {
+            var arr = s.Split('|');
+            if (arr.Length > 1)
+            {
+                Name = arr[1];
+                if (arr.Length > 2)
+                {
+                    Path = arr[2];
+                }
+            }
+            else throw new Exception($"Wrong string pattern ({s}) inside " + MethodBase.GetCurrentMethod().Name);            
+            return this;
+        }
+        public string DefaultValue { get; } = "Не выбрано";
+        public string Value => this.Name;
+        public IAbstractOption SetDefault()
+        {
+            this.Name = DefaultValue;
+            return this;
         }
 
     }

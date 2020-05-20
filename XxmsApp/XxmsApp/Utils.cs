@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Xamarin.Forms;
@@ -7,6 +8,8 @@ using XxmsApp.Piece;
 
 namespace XxmsApp
 {
+
+
     public static class Utils
     {
 
@@ -143,5 +146,49 @@ namespace XxmsApp
     }
 
 
+
+}
+
+namespace Utilites
+{
+    public class InvertConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType == typeof(bool)) return !(bool)value;
+            else
+                throw new Exception("Unexpect convertation in " + nameof(InvertConverter));
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new Exception("Unexpect back convertation in " + this.GetType().Name);
+        }
+    }
+
+
+    public static class USettings
+    {
+        public static XxmsApp.Options.IAbstractOption ToOption(this string data)
+        {
+            return null;
+        }
+    }
+    
+    namespace Views
+    {
+        public static class Views
+        {
+            public static View SetBindings(this View view, 
+                BindableProperty prop, 
+                string path, 
+                BindingMode mode = BindingMode.Default, 
+                IValueConverter converter = null)
+            {
+                view.SetBinding(prop, path, mode, converter);
+                return view;
+            }
+        }
+    }
 
 }

@@ -203,7 +203,12 @@ namespace XxmsApp
 
         public static void Update<T>(T subject, int id) where T : new() 
         {
-            if (cache.ContainsKey(typeof(T))) cache[typeof(T)][id] = subject;                                                           // 
+            var type = typeof(T);
+            if (cache.ContainsKey(typeof(T)))
+            {
+                var cc = cache[typeof(T)];
+                cc[id] = subject;                                                           // 
+            }
             else
             {
                 cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());

@@ -42,6 +42,16 @@ namespace XxmsApp.Options
 
     }
 
+    public interface IAbstractOption
+    {
+        string DefaultValue { get; }
+        string Value { get; }
+
+        IAbstractOption FromString(string s);  
+        IAbstractOption SetDefault();
+    }
+
+
     [Table("Settings")]
     public class Setting : INotifyPropertyChanged
     {
@@ -57,11 +67,24 @@ namespace XxmsApp.Options
             {
                 content = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs((content).ToString()));
+                if (IsBool == false)
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Label)));
+                }
+                
             }
         }
         string content;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public bool IsBool => bool.TryParse(Content, out bool result);
+
+        public string Label => this.IsBool ? string.Empty : content.Split('|')[1]; 
+        public string Type => content.Split('|').First();
+
+        // public bool IsCustomOption => Content.Contains('|');
+
+        public static implicit operator bool(Setting stg) => bool.Parse(stg.Content);
 
         public static implicit operator Setting((string Name, string Value, string Desc, string FullDesc) setting)
         {
@@ -73,25 +96,26 @@ namespace XxmsApp.Options
             };
         }
 
-        public static implicit operator bool(Setting stg) => bool.Parse(stg.Content);
-
-
-
+        
 
         public class ContentConverter : IValueConverter
         {
             public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
             {
-                if (targetType == typeof(bool)) return bool.Parse(value.ToString());
+                if (targetType == typeof(bool))
+                {
+                    // if (parameter is View view) { return !view.IsVisible; } // Error unexpected
+                    return bool.TryParse(value.ToString(), out bool result) ? result : false;
+                }
                 else
-                    throw new Exception("Unexpect convertation");
+                    throw new Exception("Unexpect convertation in " + this.GetType().Name);
             }
 
             public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             {
                 if (targetType == typeof(string)) return value.ToString();
                 else
-                    throw new Exception("Unexpect back convertation");
+                    throw new Exception("Unexpect back convertation in " + this.GetType().Name);
             }
         }
 
@@ -129,20 +153,29 @@ namespace XxmsApp.Options
         {
             PropertyInfo[] props = Storage.GetProperties(BindingFlags.Static | BindingFlags.Public);
 
-            List<Setting> stgs = props.Where(p => p.PropertyType == typeof(bool)).Select(prop =>
+            List<Setting> stgs = props.Select(prop =>
             {
+                
 
                 var attr = prop.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
-                var value = (bool)prop.GetValue(null);
+                string value = prop.GetValue(null).ToString();
 
-                return new Setting
+                if (prop.GetValue(null) is IAbstractOption option)
+                {
+                    // value = option.FromString(value).Value;
+                }
+
+                var setting = new Setting
                 {
                     Name = prop.Name,
                     Description = attr.Description,
                     FullDescription = attr.FullDescription,
-                    Content = value.ToString()
+                    Content = value
                 };
+
+                return setting;
+
             }).ToList();
 
             return stgs;
@@ -417,7 +450,38 @@ namespace XxmsApp.Options
     public class ModelSettings : AbstractSettings
     {
 
-        public static Dictionary<string, string> Items { get; private set; } = new Dictionary<string, string>();
+        public static Dictionary<string, Action<Setting>> Actions = new Dictionary<string, Action<Setting>>()
+        {
+            { typeof(Sound).Name, s =>
+            {
+                var navPage = (App.Current.MainPage as MasterDetailPage).Detail as NavigationPage;
+
+                navPage.PushAsync(new Views.SoundPage(sound =>
+                {
+                    try
+                    {
+                        s.Content = sound.ToString();
+                    }
+                    catch(Exception ex)
+                    {
+                        var m = ex.Message;
+                    }
+                    
+                }));
+            }}
+        };
+
+
+        [FullDescription("Выбрать мелодию", "1")]
+        public static Sound Rington { get => GetFunc<Sound>(); set => SetFunc(value); }
+        [FullDescription("Включить вибрацию", "Вибрация при получении сообщения")]
+        public static bool Vibration { get => GetFunc(); set => Set(value); }
+        [FullDescription("Краткое описание", "Полное описание")]
+        public static bool AutoFocus1 { get => GetFunc(); set => Set(value); }
+        [FullDescription("Краткое описание", "Полное описание")]
+        public static bool AutoFocus2 { get => GetFunc(); set => Set(value); }
+
+        internal static Dictionary<string, string> Items { get; private set; } = new Dictionary<string, string>();
         protected int _initialized = 0;
         public static ModelSettings Instance = null;
 
@@ -431,14 +495,15 @@ namespace XxmsApp.Options
                 else
                 {
                     var ringtone = Cache.database.Find<Setting>(s => s.Name == nameof(Ringtone));
-                    Items.Add(nameof(Ringtone), ringtone.Content);
-                    return ringtone?.Content ?? "Не выбрана";
+                    Items.Add(nameof(Ringtone), ringtone?.Content);
+                    var data = ringtone?.Content ?? new Sound().SetDefault().ToString();
+                    return data;
                 }
             }
             set
             {
                 if (Items.ContainsKey(nameof(Ringtone)))
-                {                   
+                {
                     Items[nameof(Ringtone)] = value;
                     // just if Items dous not consists of this setting:
                     Cache.database.Update(new Setting
@@ -451,30 +516,18 @@ namespace XxmsApp.Options
                 {
                     Items.Add(nameof(Ringtone), value);
                     // just if Items dous not consists of this setting:
-                    try
+                    Cache.database.Insert(new Setting
                     {
-                        Cache.database.Insert(new Setting
-                        {
-                            Content = value,
-                            Name = nameof(Ringtone)
-                        });
-                    }
-                    catch(Exception ex)
-                    {
-
-                    }
+                        Content = value,
+                        Name = nameof(Ringtone)
+                    });
                 }
 
             }
         }
 
 
-        [FullDescription("Включить вибрацию", "Вибрация при получении сообщения")]
-        public static bool Vibration { get => GetFunc(); set => Set(value); }
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus1 { get => GetFunc(); set => Set(value); }
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus2 { get => GetFunc(); set => Set(value); }
+
 
 
         public override event CollectionChangedEventHandler CollectionChanged;
@@ -490,14 +543,37 @@ namespace XxmsApp.Options
 
         // delegate bool GetSgn([CallerMemberName]string propertyName = null);
 
+
+
+
+
         static bool GetFunc([CallerMemberName]string propertyName = null)
         {
             var name = new StackTrace(false).GetFrame(1).GetMethod().Name.Substring(4);
 
             if (Items.ContainsKey(name)) return Items[name].ToBoolean();
             else return (Items[name] = false.ToString()).ToBoolean();
-
         }
+
+        static T GetFunc<T>([CallerMemberName]string propertyName = null)  where T : class, IAbstractOption, new()
+        {
+            var name = new StackTrace(false).GetFrame(1).GetMethod().Name.Substring(4);
+
+            if (Items.ContainsKey(name)) return new T().FromString(Items[name]) as T;
+            else
+                return new T().SetDefault() as T;
+        }
+
+        static void SetFunc(IAbstractOption value) 
+        {
+            var name = System.Reflection.MethodBase.GetCurrentMethod().Name.Substring(4);
+            if (Items.ContainsKey(name)) Items[name] = value.ToString();
+            else Items.Add(name, value.ToString());
+        }
+
+
+
+
 
         [Obsolete]
         protected new static Func<bool> Get = () =>
@@ -519,7 +595,18 @@ namespace XxmsApp.Options
 
         private static void ReadToDictionary()
         {
-            Items = Cache.Read<Setting>().ToDictionary(s => s.Name, s => s.Content);
+
+            var cache = Cache.Read<Setting>();
+            try
+            {
+                Items = cache.ToDictionary(s => s.Name, s => s.Content);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(
+                    "Cache from database is not synced with ModelSettings[] items. " +
+                    "See Cache.Update to fix it or sync it (you need)");
+            }
         }
 
         private void ModelSettings_CollectionChanged(object sender, CollectionChangedEventArgs<Setting> e)
@@ -545,9 +632,8 @@ namespace XxmsApp.Options
 
             Stopwatch sw = new Stopwatch(); sw.Start();
 
-            // var settings = new ModelSettings(new List<Setting>()); // new ModelSettings(Cache.Read<Setting>());  // Read()                  
-            var settings = Instance ?? (Instance = new ModelSettings(Cache.Read<Setting>()
-                .Where(p => p.Name != nameof(Ringtone))));                                                  
+            var settings = Instance ?? (Instance = new ModelSettings(new List<Setting>())); // new ModelSettings(Cache.Read<Setting>());  // Read()                  
+            // var settings = Instance ?? (Instance = new ModelSettings(Cache.Read<Setting>().Where(p => p.Name != nameof(Ringtone))));                                                  
 
             if (settings.Count == 0)
             {
