@@ -69,10 +69,13 @@ namespace XxmsApp.Api
         void ShowNotification(string title, string content);
 
         void Vibrate(int ms);
+
         int SoundPlay(string nameOrUrl, string type = null, Action<string> onFinish = null, Action<Exception> onError = null);
+        int SoundPlay(XxmsApp.Sound sound, Action<string> onFinish = null, Action<Exception> OnError = null);
         void StopSound();
         List<(string Name, string Path, string Group)> GetStockSounds();
         void SelectExternalSound(Action<SoundMusic> sound);
+        (string, string, string) GetDefaultSound();
     }
 
 

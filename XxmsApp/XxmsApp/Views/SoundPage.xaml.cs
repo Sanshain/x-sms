@@ -21,10 +21,12 @@ namespace XxmsApp
 
     public class Sound : Options.IAbstractOption
     {
+        const string DefaultValue = "Не выбрано";
 
         public string Name { get; set; }
         public string Path { get; set; }
         public string RingtoneType { get; set; }
+
 
         public Sound() { }
         public Sound(string name, string path, string ringtoneType)
@@ -34,42 +36,47 @@ namespace XxmsApp
             RingtoneType = ringtoneType;
         }
 
-
-
         public static implicit operator Sound(string stg)
         {
             var strs = stg.Split('|');
-            if (strs.Length > 1) return new Sound(strs[1], strs.Length > 2 ? strs[2] : strs[1], null);
+            if (strs.Length > 1) return new Sound(strs[1], strs.Length > 2 ? strs[2] : strs[1], strs.Length > 3 ? strs[3] : null);
             else
                 throw new Exception("Wrong string pattern ({s}) inside " + MethodBase.GetCurrentMethod().Name);
         }
-        public static implicit operator string(Sound stg) => $"{stg.GetType().Name}|{stg.Name}|{stg.Path}";
+        public static implicit operator string(Sound stg) => $"{stg.GetType().Name}|{stg.Name}|{stg.Path}|{stg.RingtoneType}";
 
 
 
         public override string ToString() => this;                                      // see higher `implicit operator string`
         public IAbstractOption FromString(string s)
         {
+
             var arr = s.Split('|');
             if (arr.Length > 1)
             {
                 Name = arr[1];
                 if (arr.Length > 2)
-                {
                     Path = arr[2];
-                }
+                if (arr.Length > 3)
+                    RingtoneType = arr[3];
             }
             else throw new Exception($"Wrong string pattern ({s}) inside " + MethodBase.GetCurrentMethod().Name);            
             return this;
         }
-        public string DefaultValue { get; } = "Не выбрано";
-        public string Value => this.Name;
+        
         public IAbstractOption SetDefault()
         {
-            this.Name = DefaultValue;
+            (string Name, string Path, string Group) snd = DependencyService.Get<Api.IMessages>().GetDefaultSound();
+            this.Name = snd.Name ?? DefaultValue;
+            this.Path = snd.Path;
+            this.RingtoneType = snd.Group;
+            
             return this;
         }
 
+        public virtual string NameOrPath => this.Name;
+
+        // public string Value => this.Name;
     }
 
     public class SoundMusic : Sound
@@ -82,7 +89,9 @@ namespace XxmsApp
                 Name = "..." + Name.Substring(Name.Length - 25);
             }            
             RingtoneType = this.GetType().Name;
-        }        
+        }
+
+        public override string NameOrPath => this.Path;
     }
 }
 
@@ -171,7 +180,7 @@ namespace XxmsApp.Views
 
                 var sound = this.BindingContext as Sound;                
 
-                player.SoundPlay(sound.ToString(), sound.RingtoneType, async s => // 
+                player.SoundPlay(sound.NameOrPath, sound.RingtoneType, async s => // 
                 {
                     await play.FadeTo(0);
 

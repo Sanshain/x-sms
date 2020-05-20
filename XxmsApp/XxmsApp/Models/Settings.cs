@@ -44,10 +44,11 @@ namespace XxmsApp.Options
 
     public interface IAbstractOption
     {
-        string DefaultValue { get; }
-        string Value { get; }
+        // string DefaultValue { get; }
+        // string Value { get; }
 
-        IAbstractOption FromString(string s);  
+        String ToString(); 
+        IAbstractOption FromString(string s);        
         IAbstractOption SetDefault();
     }
 
@@ -71,13 +72,20 @@ namespace XxmsApp.Options
                 {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Label)));
                 }
-                
+
             }
         }
         string content;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public bool IsBool => bool.TryParse(Content, out bool result);
+        public bool IsIterate
+        {
+            get
+            {
+                return Content.Count(c => c == '|') == 1;
+            }             
+        }
 
         public string Label => this.IsBool ? string.Empty : content.Split('|')[1]; 
         public string Type => content.Split('|').First();
@@ -480,27 +488,35 @@ namespace XxmsApp.Options
     public class ModelSettings : AbstractSettings
     {
 
-        public static Dictionary<string, Action<Setting>> Actions = new Dictionary<string, Action<Setting>>()
+        public static Dictionary<string, Action<Setting, Picker>> Actions = new Dictionary<string, Action<Setting, Picker>>()
         {
-            { typeof(Sound).Name, s =>
+            { typeof(Sound).Name, (s, v) =>
             {
                 var navPage = (App.Current.MainPage as MasterDetailPage).Detail as NavigationPage;
                 navPage.PushAsync(new Views.SoundPage(sound =>
                 {
                      s.Content = sound.ToString();                    
                 }));
+            }},
+            { typeof(Piece.Languages).Name, (s, v) => 
+            {                
+                v.ItemsSource = new Piece.Languages().FromString(s.Content) as Piece.Languages;
+                v.Focus();
             }}
         };
+        static ModelSettings()
+        {
+            Actions.Add(typeof(SoundMusic).Name, Actions[typeof(Sound).Name]);
+        }
 
-
-        [FullDescription("Выбрать мелодию", "1")]
+        [FullDescription("Выбрать мелодию", "")]
         public static Sound Rington { get => GetFunc<Sound>(); set => SetFunc(value); }
+        [FullDescription("Звуковое уведомление", "Звуковое уведомление при получении смс")]
+        public static bool Sound { get => GetFunc(); set => Set(value); }
         [FullDescription("Включить вибрацию", "Вибрация при получении сообщения")]
         public static bool Vibration { get => GetFunc(); set => Set(value); }
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus1 { get => GetFunc(); set => Set(value); }
-        [FullDescription("Краткое описание", "Полное описание")]
-        public static bool AutoFocus2 { get => GetFunc(); set => Set(value); }
+        [FullDescription("Выберите язык", "")]
+        public static Piece.Languages Language { get => GetFunc<Piece.Languages>(); set => SetFunc(value); }
 
         internal static Dictionary<string, string> Items { get; private set; } = new Dictionary<string, string>();
         protected int _initialized = 0;

@@ -13,8 +13,8 @@ using XxmsApp.Api;
 using Xamarin.Forms;
 
 
-[assembly: Dependency(typeof(XxmsApp.Api.ILowLevelApi))]
-namespace XxmsApp.Api.Utilites
+[assembly: Dependency(typeof(XxmsApp.Api.LowLevelApi))]
+namespace XxmsApp.Api
 {
     public class LowLevelApi : ILowLevelApi
     {

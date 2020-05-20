@@ -148,14 +148,14 @@ namespace XxmsApp.Views
         {
             var w = "ж".GetWidth();
 
-            var view = new RelativeLayout { };            
-            // var descLabel = new Label { };
-            // var switchView = new Switch { };
-            var valueLabel = new Label { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };            
-            
+            var view = new RelativeLayout { };
+            var picker = new Picker { IsVisible = false };
+            var descLabel = new Label { };            
+            var valueLabel = new Label { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };
+
             view.Children
-                .AddAsRelative(new Label { }, 15, 15)
-                .SetBindings(Label.TextProperty,"Description")
+                .AddAsRelative(descLabel, 15, 15)
+                .SetBindings(Label.TextProperty, "Description")
                 .SetBindings(Label.FontAttributesProperty, "IsBool", BindingMode.Default, cellViewBinder)
                 .SetBindings(Label.FontSizeProperty, "IsBool", BindingMode.Default, cellViewBinder);
             view.Children                
@@ -167,7 +167,15 @@ namespace XxmsApp.Views
                 .AddAsRelative(new Switch { }, p => p.Width - 50, p => 15)
                 .SetBindings(Switch.IsVisibleProperty, "IsBool")
                 .SetBinding(Switch.IsToggledProperty, new Binding("Content", BindingMode.TwoWay, new Options.Setting.ContentConverter())); // , valueLabel
-            
+            view.Children.AddAsRelative(picker, 0);
+
+            picker.SelectedIndexChanged += (object sender, EventArgs e) =>
+            {
+                if (picker.SelectedIndex < 0) return;
+                var setting = (view.BindingContext as Setting);
+                setting.Content = setting.Type + "|" + picker.Items[picker.SelectedIndex];
+            };
+
             view.SetBinding(RelativeLayout.HeightRequestProperty, "IsBool", converter: new Setting.BoolConverter<double>((b, type) =>
             {
                 return b ? 45 : 70;
@@ -175,14 +183,28 @@ namespace XxmsApp.Views
 
             var viewCell = new ViewCell { View = view };
 
+            viewCell.BindingContextChanged += (object sender, EventArgs e) =>
+            {
+                if (((sender as ViewCell).BindingContext as Setting).IsIterate)
+                {
+                    RelativeLayout.SetXConstraint(valueLabel, Constraint.RelativeToParent(p => p.Width - w* valueLabel.Text.Length));
+                    RelativeLayout.SetYConstraint(valueLabel, Constraint.Constant(20));
+                    // descLabel.FontAttributes = FontAttributes.None;
+                    descLabel.FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label));
+
+                    view.HeightRequest = 50;
+                    // view.BackgroundColor = Color.LightSkyBlue;
+                }
+            };
+
             viewCell.Tapped += (object sender, EventArgs e) =>
             {
                 if (valueLabel.BindingContext is Options.Setting setting)
                 {
                     var type = setting.Type;
-                    if (Options.ModelSettings.Actions.TryGetValue(type, out Action<Options.Setting> action))
+                    if (Options.ModelSettings.Actions.TryGetValue(type, out Action<Options.Setting, Picker> action))
                     {
-                        action(setting);
+                        action(setting, picker);
                     }
                 }
             };
@@ -230,8 +252,9 @@ namespace XxmsApp.Views
             var setting = (((ListView)sender).SelectedItem as Options.Setting);
 
             if (setting.IsBool)
-            {
-                await DisplayAlert("Описание", setting.FullDescription, "OK", "Отмена");
+            {                
+                var okBtn = bool.Parse(setting.Content) ? "Включено" : "Выключено";
+                await DisplayAlert(okBtn, setting.FullDescription, "Ok");
             }
 
             //Deselect Item

@@ -34,7 +34,7 @@ namespace XxmsApp
                     "Read sms",
                     "О нас",
                     SIM_CARDS,
-                    // "Play"
+                    "Play"
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint))
             };
@@ -138,16 +138,21 @@ namespace XxmsApp
 
                 case "Play":
 
-
                     var r = DependencyService.Get<XxmsApp.Api.IMessages>();
-                    r.SoundPlay(string.Empty);
+                    var ringtone = Options.ModelSettings.Rington;
+                    r.SoundPlay(ringtone);
 
+                    /*
+                    var ir = DependencyService.Get<XxmsApp.Api.ILowLevelApi>();
+                    ir.Play();
+                    */
                                         
+                    /*
                     await (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SoundPage(sound =>
                     {
-                        DisplayAlert("Result", sound.Name, "ok");//*/
+                        // DisplayAlert("Result", sound.Name, "ok");
                     }));
-
+                    //*/
 
                     goto default;
 

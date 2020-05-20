@@ -18,8 +18,9 @@ using XxmsApp.Model;
 using Android.Support.V7.App;
 using Java.IO;
 using Android.Net;
+using System.Text.RegularExpressions;
 
-[assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.IRington))
+[assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.Rington))
 namespace XxmsApp.Api.Droid
 {
 
@@ -35,6 +36,17 @@ namespace XxmsApp.Api.Droid
 
     class XMessages : IMessages
     {
+        static XMessages instance = null;
+        public static XMessages Instance
+        {
+            get => instance ?? (instance = new XMessages());
+            set => instance = value;
+        }
+
+        public XMessages() : base()
+        {
+            Instance = this;
+        }
 
         /// <summary>
         /// Для получения информации о том, что смс ушла до получателя
@@ -175,6 +187,18 @@ namespace XxmsApp.Api.Droid
             currentMelody?.Stop();
         }
 
+        public int SoundPlay(XxmsApp.Sound sound, Action<string> onFinish, Action<Exception> OnError)
+        {
+            return SoundPlay(
+                sound.RingtoneType == typeof(SoundMusic).Name 
+                    ? sound.Path 
+                    : sound.Name, 
+                sound.RingtoneType, 
+                onFinish, 
+                OnError);
+
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -248,6 +272,28 @@ namespace XxmsApp.Api.Droid
             XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
         }
         
+        public (string, string, string) GetDefaultSound()
+        {
+            var context = Android.App.Application.Context;
+            Android.Media.Ringtone ringtone = null;
+
+            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
+            var path = uri != null ? string.Join(":", uri?.Scheme, uri?.SchemeSpecificPart) : null;            
+            if (uri is Android.Net.Uri)
+            {
+                ringtone = Android.Media.RingtoneManager.GetRingtone(context, uri);
+            }
+
+            var title = ringtone?.GetTitle(context);
+            if (title != null)
+            {
+                var m = new Regex(@"\((\w+)\.").Match(title);
+                if (m.Groups.Count > 1) title = m.Groups[1].Value;
+            }
+
+            return (title, path, "Notification");
+        }
+
         public List<(string, string, string)> GetStockSounds()
         {
                    
@@ -321,7 +367,9 @@ namespace XxmsApp.Api.Droid
 
             Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
             vibrator.Vibrate(400);
-            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);        
+            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);      
+
+            XMessages.Instance.SoundPlay(Options.ModelSettings.Rington, null, null);
 
         }
 

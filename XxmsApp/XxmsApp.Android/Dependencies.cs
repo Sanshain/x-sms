@@ -102,6 +102,7 @@ namespace XxmsApp.Api
             Notification notification = builder.Build();
             ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
 
+            
 
         }
 
