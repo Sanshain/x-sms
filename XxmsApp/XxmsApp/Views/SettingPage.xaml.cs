@@ -9,6 +9,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using XxmsApp;
 using Utilites.Views;
+using XxmsApp.Options;
 
 namespace XxmsApp.Views
 {
@@ -87,16 +88,16 @@ namespace XxmsApp.Views
             Button reset;
             var SettingList = new ListView()
             {
-                ItemTemplate = itemTemplate,
-                // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
-
-                Header = new HeaderFrame { Padding = new Thickness(0), HeightRequest = 80 },
+                ItemTemplate = itemTemplate,                
+                HasUnevenRows = true,
+                // Header = new HeaderFrame { Padding = new Thickness(0), HeightRequest = 80 },
                 Footer = reset = new Button { Text = "Сброс настроек" },
+                ItemsSource = settings = settingList ?? Options.ModelSettings.Initialize()
+
+                // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
                 // ItemsSource = settings = Options.Settings.Initialize()                
                 // ItemsSource = settings = Options.ObSettings.Initialize()
-                ItemsSource = settings = settingList ?? Options.ModelSettings.Initialize()
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
-
             };
 
 
@@ -126,28 +127,51 @@ namespace XxmsApp.Views
 
         }
 
+        /// <summary>
+        /// for MultiPurposeCellGenerate
+        /// </summary>
+        private IValueConverter cellViewBinder = new Setting.BoolConverter<object>((b, type) =>
+        {
+            if (type == typeof(double))
+                return Device.GetNamedSize(b ? NamedSize.Default : NamedSize.Medium, typeof(Label));
+            else if (type == typeof(FontAttributes))
+                return b ? FontAttributes.None : FontAttributes.Bold;
+            else if (type == typeof(Thickness))
+                return new Thickness(0, 0, 0, b ? 0 : 20);
+            return null;
+        });
+
+
+
         [Obsolete("В разработке")]
-        private static object MultiPurposeCellGenerate()
+        private object MultiPurposeCellGenerate()
         {
             var w = "ж".GetWidth();
 
-            var view = new RelativeLayout { };
+            var view = new RelativeLayout { };            
             // var descLabel = new Label { };
             // var switchView = new Switch { };
-            var valueLabel = new Label { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };
+            var valueLabel = new Label { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };            
             
-
             view.Children
                 .AddAsRelative(new Label { }, 15, 15)
-                .SetBinding(Label.TextProperty,"Description");
-            view.Children
-                .AddAsRelative(valueLabel, p => p.Width - w * valueLabel.Text.Length, p=>15)
+                .SetBindings(Label.TextProperty,"Description")
+                .SetBindings(Label.FontAttributesProperty, "IsBool", BindingMode.Default, cellViewBinder)
+                .SetBindings(Label.FontSizeProperty, "IsBool", BindingMode.Default, cellViewBinder);
+            view.Children                
+                .AddAsRelative(valueLabel, p => 15, p=> 35)         // .AddAsRelative(valueLabel, p => p.Width - w * valueLabel.Text.Length, p=>15)
                 .SetBindings(Label.IsVisibleProperty, "IsBool", BindingMode.Default, new Utilites.InvertConverter())
+                // .SetBindings(Label.MarginProperty, "IsBool", BindingMode.Default, cellViewBinder)
                 .SetBinding(Label.TextProperty, "Label");
             view.Children
                 .AddAsRelative(new Switch { }, p => p.Width - 50, p => 15)
                 .SetBindings(Switch.IsVisibleProperty, "IsBool")
                 .SetBinding(Switch.IsToggledProperty, new Binding("Content", BindingMode.TwoWay, new Options.Setting.ContentConverter())); // , valueLabel
+            
+            view.SetBinding(RelativeLayout.HeightRequestProperty, "IsBool", converter: new Setting.BoolConverter<double>((b, type) =>
+            {
+                return b ? 45 : 70;
+            }));
 
             var viewCell = new ViewCell { View = view };
 
