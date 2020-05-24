@@ -41,7 +41,7 @@ namespace XxmsApp.Views
 
             var pickedBinding = new Binding {
                 Path = "Name",
-                Source = rt.Ringtone,
+                // Source = rt.Ringtone,
                 Mode = BindingMode.TwoWay };
 
             // optionDesc.SetBinding(Label.TextProperty, new Binding { Path = "Ringtone", Source = Options.ModelSettings.Initialize() });
@@ -57,7 +57,7 @@ namespace XxmsApp.Views
                 {
                     // (this.Parent.Parent as ContentPage)?.DisplayAlert("Result", sound.Name, "ok");
                     pickedSound.Text = sound.Name;
-                    Options.ModelSettings.Initialize().Ringtone = sound;
+                    // Options.ModelSettings.Initialize().Ringtone = sound;
                     // pickedSound.BindingContext = sound;
                 }));
             };
@@ -130,7 +130,7 @@ namespace XxmsApp.Views
         /// <summary>
         /// for MultiPurposeCellGenerate
         /// </summary>
-        private IValueConverter cellViewBinder = new Setting.BoolConverter<object>((b, type) =>
+        private IValueConverter cellViewBinder = new BoolConverter<object>((b, type) =>
         {
             if (type == typeof(double))
                 return Device.GetNamedSize(b ? NamedSize.Default : NamedSize.Medium, typeof(Label));
@@ -142,8 +142,7 @@ namespace XxmsApp.Views
         });
 
 
-
-        [Obsolete("В разработке")]
+        
         private object MultiPurposeCellGenerate()
         {
             var w = "ж".GetWidth();
@@ -166,9 +165,10 @@ namespace XxmsApp.Views
             view.Children
                 .AddAsRelative(new Switch { }, p => p.Width - 50, p => 15)
                 .SetBindings(Switch.IsVisibleProperty, "IsBool")
-                .SetBinding(Switch.IsToggledProperty, new Binding("Content", BindingMode.TwoWay, new Options.Setting.ContentConverter())); // , valueLabel
-            view.Children.AddAsRelative(picker, 0);
-
+                .SetBinding(Switch.IsToggledProperty, new Binding("Content", BindingMode.TwoWay, new Options.ContentConverter())); // , valueLabel
+            view.Children.AddAsRelative(picker, 0)
+                .SetBinding(Picker.TitleProperty, "Description");
+            
             picker.SelectedIndexChanged += (object sender, EventArgs e) =>
             {
                 if (picker.SelectedIndex < 0) return;
@@ -176,7 +176,7 @@ namespace XxmsApp.Views
                 setting.Content = setting.Type + "|" + picker.Items[picker.SelectedIndex];
             };
 
-            view.SetBinding(RelativeLayout.HeightRequestProperty, "IsBool", converter: new Setting.BoolConverter<double>((b, type) =>
+            view.SetBinding(RelativeLayout.HeightRequestProperty, "IsBool", converter: new BoolConverter<double>((b, type) =>
             {
                 return b ? 45 : 70;
             }));
@@ -212,13 +212,13 @@ namespace XxmsApp.Views
             return viewCell;
         }
 
-
+        [Obsolete("Simplified")]
         private static object CellGenerate()
         {
 
             var sc = new SwitchCell { };
             sc.SetBinding(SwitchCell.TextProperty, "Description");
-            sc.SetBinding(SwitchCell.OnProperty, "Content",  BindingMode.TwoWay, new Options.Setting.ContentConverter());       //*/            
+            // sc.SetBinding(SwitchCell.OnProperty, "Content",  BindingMode.TwoWay, new Options.Setting.ContentConverter());       //*/            
 
             return sc;
         }
