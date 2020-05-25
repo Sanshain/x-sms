@@ -66,7 +66,7 @@ namespace XxmsApp
         
         public IAbstractOption SetDefault()
         {
-            (string Name, string Path, string Group) snd = DependencyService.Get<Api.IMessages>().GetDefaultSound();
+            (string Name, string Path, string Group) snd = DependencyService.Get<Api.IPlayer>().GetDefaultSound();
             this.Name = snd.Name ?? DefaultValue;
             this.Path = snd.Path;
             this.RingtoneType = snd.Group;
@@ -173,7 +173,7 @@ namespace XxmsApp.Views
 
             await play.FadeTo(0);
 
-            var player = DependencyService.Get<XxmsApp.Api.IMessages>();
+            var player = DependencyService.Get<XxmsApp.Api.IPlayer>();
 
             if (_selected)
             {
@@ -269,7 +269,7 @@ namespace XxmsApp.Views
 
             SoundCell.Cells = new ObservableDictionary<string, SoundCell>();
 
-            var lowApi = DependencyService.Get<XxmsApp.Api.IMessages>();
+            var lowApi = DependencyService.Get<XxmsApp.Api.IPlayer>();
             var lst = lowApi.GetStockSounds();
 
             var Items = lst

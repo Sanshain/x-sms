@@ -124,9 +124,9 @@ namespace XxmsApp.Droid
                         ReceiveActivityResult?.Invoke(chosenImageUri, XxmsApp.Api.Droid.XMessages.currentSound);
                         //*/
 
-                        
-                        XMessages.currentMelody?.Stop();
-                        var player = XMessages.currentMelody = new Android.Media.MediaPlayer();
+
+                        Dependencies.Player.currentMelody?.Stop();
+                        var player = Dependencies.Player.currentMelody = new Android.Media.MediaPlayer();
                         /*
                         player.Reset();
                         player.SetDataSource(chosenImageUri.Scheme + ":" + chosenImageUri.SchemeSpecificPart);

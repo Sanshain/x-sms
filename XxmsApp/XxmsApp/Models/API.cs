@@ -59,36 +59,56 @@ namespace XxmsApp.Api
 
 
     /// <summary>
-    /// Read sms
+    /// Deal with sms
     /// </summary>
     public interface IMessages
-    {
-        // List<string> Read();
-        List<XxmsApp.Model.Message> Read();
+    {                
+        List<XxmsApp.Model.Message> ReadAll();
+        List<XxmsApp.Model.Message> ReadFrom(int start);
+
         bool Send(string adressee, string content, int? sim = null);
         void Send(XxmsApp.Model.Message msg);
+        
+        int SetStateRead(int messId);        
+        void SetSimSender(int messId, int simId);
+
         IEnumerable<Sim> GetSimsInfo();
-
-        void ShowNotification(string title, string content);
-
-        void Vibrate(int ms);
-
-        int SoundPlay(string nameOrUrl, string type = null, Action<string> onFinish = null, Action<Exception> onError = null);
-        int SoundPlay(XxmsApp.Sound sound, Action<string> onFinish = null, Action<Exception> OnError = null);
-        void StopSound();
-        List<(string Name, string Path, string Group)> GetStockSounds();
-        void SelectExternalSound(Action<SoundMusic> sound);
-        (string, string, string) GetDefaultSound();
     }
 
 
 
     public interface ILowLevelApi
-    {        
+    {                
+        void Vibrate(int ms);        
+
+        void ShowNotification(string title, string content);
+        
+        void AppExit();
+
         void Play();                // Play(string sound, Action<string> onFinish);        
-        void Vibrate(int ms);
-        void Finish();
     }
+
+
+    public interface IPlayer
+    {
+        (string, string, string) GetDefaultSound();
+        List<(string Name, string Path, string Group)> GetStockSounds();
+        void SelectExternalSound(Action<SoundMusic> sound);
+
+        int SoundPlay(string nameOrUrl, string type = null, Action<string> onFinish = null, Action<Exception> onError = null);
+        int SoundPlay(XxmsApp.Sound sound, Action<string> onFinish = null, Action<Exception> OnError = null);
+        void StopSound();
+    }
+
+
+
+
+
+
+
+
+
+
 
     public static class Funcs
     {
@@ -98,7 +118,7 @@ namespace XxmsApp.Api
         /// <summary>
         /// App exit
         /// </summary>
-        public static void AppExit() => api.Finish();
+        public static void AppExit() => api.AppExit();
 
     }
 

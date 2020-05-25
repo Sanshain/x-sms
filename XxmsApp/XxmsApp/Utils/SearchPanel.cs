@@ -202,7 +202,7 @@ namespace XxmsApp
                     {
                         searchEntry.Text = "";
 
-                        var di = DependencyService.Get<Api.IMessages>();
+                        var di = DependencyService.Get<Api.ILowLevelApi>();
                         di.Vibrate(50);
 
                         return true;

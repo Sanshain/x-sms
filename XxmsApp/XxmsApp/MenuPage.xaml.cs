@@ -121,7 +121,7 @@ namespace XxmsApp
 
                     sw.Stop();
 
-                    var di = DependencyService.Get <XxmsApp.Api.IMessages>();
+                    var di = DependencyService.Get <XxmsApp.Api.ILowLevelApi>();
                     di.ShowNotification("Test", "content");
                     
 
@@ -157,7 +157,7 @@ namespace XxmsApp
 
                 case "Play":
 
-                    var r = DependencyService.Get<XxmsApp.Api.IMessages>();
+                    var r = DependencyService.Get<XxmsApp.Api.IPlayer>();
                     var ringtone = Options.ModelSettings.Rington;
                     r.SoundPlay(ringtone);
 

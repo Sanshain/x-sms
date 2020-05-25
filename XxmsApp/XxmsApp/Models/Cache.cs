@@ -140,7 +140,7 @@ namespace XxmsApp
                     var msgs = await Task.Factory.StartNew<List<object>>(() =>
                     {
                         var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
-                        var messages = x_messages.Read();
+                        var messages = x_messages.ReadAll();
                         var objects = messages.Select(m => m as object).ToList();
 
                         return objects;
