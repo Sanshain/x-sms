@@ -48,6 +48,9 @@ namespace XxmsApp.Api
         {
             return $" Слот № {this.Slot + 1} ({this.Name})";
         }
+
+
+
     }
 
 
@@ -84,6 +87,19 @@ namespace XxmsApp.Api
     {        
         void Play();                // Play(string sound, Action<string> onFinish);        
         void Vibrate(int ms);
+        void Finish();
+    }
+
+    public static class Funcs
+    {
+        static ILowLevelApi api = null;
+        static Funcs() =>  api = DependencyService.Get<ILowLevelApi>();
+        
+        /// <summary>
+        /// App exit
+        /// </summary>
+        public static void AppExit() => api.Finish();
+
     }
 
 }

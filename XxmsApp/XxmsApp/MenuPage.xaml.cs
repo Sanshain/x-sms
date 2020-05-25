@@ -25,6 +25,7 @@ namespace XxmsApp
 		{
             
             var menuContainer = new StackLayout { };
+
             var menu = new ListView
             {
                 HorizontalOptions = LayoutOptions.Center,
@@ -34,13 +35,29 @@ namespace XxmsApp
                     "Read sms",
                     "О нас",
                     SIM_CARDS,
-                    "Play"
+                    "Play",                    
                 },
-                ItemTemplate = new DataTemplate(typeof(MenuPoint))
-            };
-            
+                ItemTemplate = new DataTemplate(typeof(MenuPoint)),                
+            };            
             menuContainer.Children.Add(menu);
             menu.ItemSelected += Menu_ItemSelected;
+
+
+            var quit = new ListView
+            {
+                ItemsSource = new string[] {"","Выход"},                
+                VerticalOptions = LayoutOptions.EndAndExpand,
+                ItemTemplate = new DataTemplate(() => new MenuPoint { }),                
+                HeightRequest = 90
+            };
+            quit.ItemSelected += (s, e) => 
+            {
+                if (e.SelectedItem.ToString().Length > 0) Api.Funcs.AppExit();
+                else quit.SelectedItem = null;
+            };
+            // menuContainer.AddChilds(quit);
+
+            
             
             this.Appearing += (object _sender, EventArgs _e) =>
             {
@@ -69,6 +86,8 @@ namespace XxmsApp
             Content = menuContainer;
 
         }
+
+
 
         private async void Menu_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
@@ -153,6 +172,15 @@ namespace XxmsApp
                         // DisplayAlert("Result", sound.Name, "ok");
                     }));
                     //*/
+
+                    goto default;
+
+                case "Выход":
+                    
+                    // Process.GetCurrentProcess().CloseMainWindow();                      // App.Current.Quit();
+                    // Process.GetCurrentProcess().Close();
+
+                    Api.Funcs.AppExit();
 
                     goto default;
 

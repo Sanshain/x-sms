@@ -36,6 +36,31 @@ namespace XxmsApp.Api
         }//*/
 
 
+        public void Finish()
+        {                                
+            XxmsApp.Droid.MainActivity.Instance.FinishAndRemoveTask();                        // завершает приложение полностью
+            Android.OS.Process.KillProcess(Android.OS.Process.MyPid());                       // подобен GetCurrentProcess().CloseMainWindow() // GetCurrentProcess().Close()
+
+            // (Xamarin.Forms.Forms.Context as Activity).Finish();                             // устаревший метод
+            // XxmsApp.Droid.MainActivity.Instance.FinishAffinity();                           // по факту как будто сворачивает просто
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [Obsolete("just to test, not release")]
         public static void RingtonPlay()
         {
 

@@ -95,14 +95,26 @@ namespace XxmsApp.Api
 
                 .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0))
                 .SetAutoCancel(true)
-                
+                                
                 .SetDefaults((int)NotificationPriority.High);
                 
 
             Notification notification = builder.Build();
+            // notification.Sound = null;
+            if (Options.ModelSettings.Sound == true)
+            {
+                notification.Sound = Android.Net.Uri.Parse(Options.ModelSettings.Rington.Path);
+            }
             ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
 
-            
+
+            if (Options.ModelSettings.Vibration == true)
+            {
+                Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
+                vibrator.Vibrate(400);            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);   
+            }
+
+            // if (Options.ModelSettings.Sound == true) XMessages.Instance.SoundPlay(Options.ModelSettings.Rington, null, null);
 
         }
 

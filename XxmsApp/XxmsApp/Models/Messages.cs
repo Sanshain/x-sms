@@ -333,11 +333,11 @@ namespace XxmsApp
         // public string Count => $"({Messages?.Count.ToString()})";
         public string Count => count;
 
-        public IEnumerable<Message> CreateMessage(string receiver, string value)
+        public IEnumerable<Message> CreateMessage(string receiver, string value, int? simId = null)
         {
             Message message = null;
 
-            (Messages as IList<Message>).Add(message = new Message(receiver, value));                  
+            (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));                  
 
             return Messages;
         }

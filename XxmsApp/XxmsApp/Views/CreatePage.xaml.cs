@@ -292,13 +292,15 @@ namespace XxmsApp.Views
             string text = messageEditor.Text, receiver = adresseeEntry.Text;
 
             if (Model.Message.Sims.Length > 1)
-                SimChoice(async (index) => await SendMessage(text, receiver, Model.Message.Sims[index].SubId));
+                Cards.SimChoice(bottom, async (index) => await SendMessage(text, receiver, Model.Message.Sims[index].SubId));
+                
+                // SimChoice(async (index) => await SendMessage(text, receiver, Model.Message.Sims[index].SubId));
             else            
                 await SendMessage(text, receiver);
             
         }
 
-
+        [Obsolete]
         private void SimChoice(Action<int> onChoice = null)
         {            
            
@@ -329,7 +331,7 @@ namespace XxmsApp.Views
             else
             {
                 var msgApi = DependencyService.Get<Api.IMessages>();
-                // msgApi.Send(receiver, text, sim);
+                msgApi.Send(receiver, text, sim);
 
                 await DisplayAlert("Info", "Сообщение отправлено", "Ok");
 

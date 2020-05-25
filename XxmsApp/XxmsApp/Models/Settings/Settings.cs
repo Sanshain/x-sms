@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 using System.Globalization;
+using XxmsApp.Piece;
 
 namespace XxmsApp.Options
 {
@@ -231,7 +232,7 @@ namespace XxmsApp.Options
     /// Alternative solution for storing settings in the database
     /// </summary>
     public class ModelSettings : AbstractSettings
-    {
+    {        
 
         public static Dictionary<string, Action<Setting, Picker>> Actions = new Dictionary<string, Action<Setting, Picker>>()
         {
@@ -243,15 +244,20 @@ namespace XxmsApp.Options
                      s.Content = sound.ToString();                    
                 }));
             }},
-            { typeof(Piece.Languages).Name, (s, v) => 
-            {                
-                v.ItemsSource = new Piece.Languages().FromString(s.Content) as Piece.Languages;
-                v.Focus();
+            { typeof(Piece.Languages).Name, (Setting s, Picker v) => 
+            {                                                
+                v.ItemsSource = new Languages().FromString(s.Content) as Languages; v.Focus();
+            }},
+            { typeof(Piece.SimDefault).Name, (Setting s, Picker v) =>
+            {
+                v.ItemsSource = new SimDefault().FromString(s.Content) as SimDefault; v.Focus();
             }}
         };
         static ModelSettings()
-        {
-            Actions.Add(typeof(SoundMusic).Name, Actions[typeof(Sound).Name]);
+        {            
+            Actions.Add(typeof(SoundMusic).Name, Actions[typeof(Sound).Name]);            
+
+            Initialize();
         }
 
         [FullDescription("Выбрать мелодию", "")]
@@ -262,8 +268,9 @@ namespace XxmsApp.Options
         public static bool Vibration { get => GetFunc(); set => Set(value); }
         [FullDescription("Выберите язык", "")]
         public static Piece.Languages Language { get => GetFunc<Piece.Languages>(); set => SetFunc(value); }
+        [FullDescription("Sim для отправки", "")]
+        public static Piece.SimDefault Sim { get => GetFunc<Piece.SimDefault>(); set => SetFunc(value); }
 
-        
         protected int _initialized = 0;
         public static ModelSettings Instance = null;
 

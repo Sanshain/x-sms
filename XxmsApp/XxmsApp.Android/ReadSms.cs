@@ -365,11 +365,14 @@ namespace XxmsApp.Api.Droid
             ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify("Новое сообщение", 2, notification);
 
 
-            Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
-            vibrator.Vibrate(400);
-            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);      
 
-            XMessages.Instance.SoundPlay(Options.ModelSettings.Rington, null, null);
+            if (Options.ModelSettings.Vibration == true)
+            {
+                Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
+                vibrator.Vibrate(400);            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);   
+            }
+
+            if (Options.ModelSettings.Sound == true) XMessages.Instance.SoundPlay(Options.ModelSettings.Rington, null, null);
 
         }
 

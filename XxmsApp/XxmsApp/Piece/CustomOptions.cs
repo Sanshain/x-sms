@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xamarin.Forms;
 using XxmsApp.Options;
 
 namespace XxmsApp.Piece
 {
     public abstract class AbstractOption : List<string>, Options.IAbstractOption
     {
+        public AbstractOption(IEnumerable<string> values) : base(values) { }
 
         public int Id => this.IndexOf(Value);
         public string Value { private set; get; }
@@ -34,6 +36,21 @@ namespace XxmsApp.Piece
         {
             return this.GetType().Name + "|" + this.Value;
         }
+    }
+
+    public class SimDefault : AbstractOption
+    {
+        public const string Choice = "На выбор (по умолчанию)";
+        static List<string> values = new List<string> {  };
+
+        static SimDefault()
+        {
+            var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
+            values.AddRange(info.GetSimsInfo().ToArray().Select(s => s.Name));
+            values.Add(Choice);
+        }
+
+        public SimDefault() : base(values) {}
     }
 
 

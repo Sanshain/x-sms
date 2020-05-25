@@ -6,6 +6,9 @@ using Xamarin.Forms;
 
 namespace XxmsApp.Options
 {
+
+
+
     public class BoolConverter<T> : IValueConverter
     {
 
@@ -27,6 +30,11 @@ namespace XxmsApp.Options
             throw new NotImplementedException();
         }
     }
+
+
+
+
+
 
 
     public class ContentConverter : IValueConverter

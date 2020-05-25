@@ -83,7 +83,7 @@ namespace XxmsApp.Views
                 var msg = e.NewItems[0] as Message;
 
                 var msgApi = DependencyService.Get<Api.IMessages>();
-                msgApi.Send(msg.Address, msg.Value, null);
+                msgApi.Send(msg.Address, msg.Value, int.Parse(msg.SimOsId));
 
             }
         }
@@ -264,8 +264,13 @@ namespace XxmsApp.Views
                     totalHeihght = messagesList.HeightRequest - messagesList.Margin.Bottom;
                 }
 
-                dialog.CreateMessage(dialog.Address, editor.Text);
+                string message = editor.Text;
 
+                Cards.SimChoice(bottom, (index) =>
+                {                    
+                    dialog.CreateMessage(dialog.Address, message, Message.Sims[index].SubId);
+                });
+                
 
                 // messagesList.ItemsSource = null;
                 // messagesList.ItemsSource = dialog.Messages;

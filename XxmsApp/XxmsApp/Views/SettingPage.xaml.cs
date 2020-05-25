@@ -148,7 +148,7 @@ namespace XxmsApp.Views
             var w = "ж".GetWidth();
 
             var view = new RelativeLayout { };
-            var picker = new Picker { IsVisible = false };
+            var picker = new Picker { IsVisible = false, TextColor = Color.DarkGray };
             var descLabel = new Label { };            
             var valueLabel = new Label { FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label)) };
 
@@ -187,8 +187,8 @@ namespace XxmsApp.Views
             {
                 if (((sender as ViewCell).BindingContext as Setting).IsIterate)
                 {
-                    RelativeLayout.SetXConstraint(valueLabel, Constraint.RelativeToParent(p => p.Width - w* valueLabel.Text.Length));
-                    RelativeLayout.SetYConstraint(valueLabel, Constraint.Constant(20));
+                    RelativeLayout.SetXConstraint(valueLabel, Constraint.RelativeToParent(p => p.Width - valueLabel.Text.GetWidth() - 15));
+                    RelativeLayout.SetYConstraint(valueLabel, Constraint.Constant(15));
                     // descLabel.FontAttributes = FontAttributes.None;
                     descLabel.FontSize = Device.GetNamedSize(NamedSize.Small, typeof(Label));
 
@@ -246,8 +246,7 @@ namespace XxmsApp.Views
 
         async void SettingList_ItemTapped(object sender, ItemTappedEventArgs e)
         {
-            if (e.Item == null)
-                return;
+            if (e.Item == null) return;
 
             var setting = (((ListView)sender).SelectedItem as Options.Setting);
 
