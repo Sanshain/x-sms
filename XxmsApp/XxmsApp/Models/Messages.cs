@@ -376,6 +376,12 @@ namespace XxmsApp
             }
         }
 
+        public bool SetAsRead()
+        {
+            var id_s = this.Messages.Select(m => m.Id).ToArray();
+            var r = DependencyService.Get<Api.IMessages>().SetStateRead(id_s);
+            return Convert.ToBoolean(r);
+        }
 
         public static Dialog GetOrCreate(string adressee, Message newMsg = null)
         {
@@ -397,6 +403,8 @@ namespace XxmsApp
             if (newMsg != null) dialog.Messages.Add(newMsg);
             return dialog;
         }
+
+        
 
     }
 }

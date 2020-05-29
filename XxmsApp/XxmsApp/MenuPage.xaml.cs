@@ -33,9 +33,10 @@ namespace XxmsApp
                 {
                     "Настройки",
                     "Read sms",
+                    "Сделать дефолтным",
                     "О нас",
                     SIM_CARDS,
-                    "Play",                    
+                    "Play",                        
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint)),                
             };            
@@ -180,9 +181,12 @@ namespace XxmsApp
                     // Process.GetCurrentProcess().CloseMainWindow();                      // App.Current.Quit();
                     // Process.GetCurrentProcess().Close();
 
+
                     Api.Funcs.AppExit();
 
                     goto default;
+
+                case "Сделать дефолтным": DependencyService.Get<Api.ILowLevelApi>().ChangeDefault(); goto default;
 
                 default:
 

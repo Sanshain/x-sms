@@ -70,7 +70,8 @@ namespace XxmsApp.Api
         void Send(XxmsApp.Model.Message msg);
         
         int SetStateRead(int messId);        
-        void SetSimSender(int messId, int simId);
+        int SetStateRead(int[] messIds);
+        int SetSimSender(int messId, int simId);
 
         IEnumerable<Sim> GetSimsInfo();
     }
@@ -84,6 +85,7 @@ namespace XxmsApp.Api
         void ShowNotification(string title, string content);
         
         void AppExit();
+        void ChangeDefault();
 
         void Play();                // Play(string sound, Action<string> onFinish);        
     }

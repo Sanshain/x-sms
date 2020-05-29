@@ -13,6 +13,7 @@ using XxmsApp.Api;
 using Xamarin.Forms;
 using XxmsApp.Api.Droid;
 using Android.Support.V7.App;
+using Android.Provider;
 
 [assembly: Dependency(typeof(XxmsApp.Api.LowLevelApi))]
 namespace XxmsApp.Api
@@ -88,97 +89,18 @@ namespace XxmsApp.Api
         }
 
 
-        public (string, string, string) GetDefaultSound()
+
+        public bool IsDefault => Telephony.Sms.GetDefaultSmsPackage(context).Equals(context.PackageName);
+
+        public void ChangeDefault()
         {
-            var context = Android.App.Application.Context;
-            Android.Media.Ringtone ringtone = null;
+            
+            Intent intent = new Intent(Telephony.Sms.Intents.ActionChangeDefault);
+            intent.PutExtra(Telephony.Sms.Intents.ExtraPackageName, context.PackageName);
 
-            var uri = Android.Media.RingtoneManager.GetDefaultUri(Android.Media.RingtoneType.Notification);
-            var path = uri != null ? string.Join(":", uri?.Scheme, uri?.SchemeSpecificPart) : null;
-            if (uri is Android.Net.Uri)
-            {
-                ringtone = Android.Media.RingtoneManager.GetRingtone(context, uri);
-            }
-
-            var title = ringtone?.GetTitle(context);
-            if (title != null)
-            {
-                var m = new System.Text.RegularExpressions.Regex(@"\((\w+)\.").Match(title);
-                if (m.Groups.Count > 1) title = m.Groups[1].Value;
-            }
-
-            return (title, path, "Notification");
-        }
-
-        public List<(string, string, string)> GetStockSounds()
-        {
-
-            var sounds = new List<(string, string, string)>();
-
-            Android.Media.RingtoneManager ringtoneMgr = null;
-
-            Android.Media.RingtoneType[] types =
-            {
-                Android.Media.RingtoneType.Alarm,
-                Android.Media.RingtoneType.Notification,
-                Android.Media.RingtoneType.Ringtone
-            };
-
-            foreach (var ringtoneType in types)
-            {
-                // Android.Media.RingtoneType.All
-
-                (ringtoneMgr = new Android.Media.RingtoneManager(XxmsApp.Droid.MainActivity.Instance)).SetType(ringtoneType);
-
-                var cursor = ringtoneMgr.Cursor;//*/
-
-                while (!cursor.IsAfterLast && cursor.MoveToNext())
-                {
-                    var title = cursor.GetString(cursor.GetColumnIndex("title"));
-                    var _uri = ringtoneMgr.GetRingtoneUri(cursor.Position);
-                    var path = string.Join(":", _uri.Scheme, _uri.SchemeSpecificPart);
-
-                    sounds.Add((title, path, ringtoneType.ToString()));
-                }
-
-                // cursor.MoveToPosition(0);
-
-            }
-
-
-            /*
-            var names = cursor.GetColumnNames();
-            var cc = cursor.ColumnCount;
-            var fields = cursor.Extras.KeySet().ToList();
-            //*/
-
-            return sounds;
+            context.StartActivity(intent);
 
         }
-
-        public void SelectExternalSound(Action<SoundMusic> onselect)
-        {
-
-            XxmsApp.Droid.MainActivity.Instance.ReceiveActivityResult = (Android.Net.Uri uri, object subj) =>
-            {
-                onselect?.Invoke(new SoundMusic(uri.Path, string.Join(":", uri.Scheme, uri.EncodedSchemeSpecificPart)));
-            };
-
-            Intent audio_picker_intent = new Intent(Intent.ActionGetContent);
-            audio_picker_intent.SetType("audio/*");
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, OnResult.IsAudio.ToInt());
-
-
-            /*
-            Intent audio_picker_intent = new Intent(
-                    Intent.ActionPick,
-                    Android.Provider.MediaStore.Audio.Media.ExternalContentUri
-                );                   
-            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(audio_picker_intent, REQ_PICK_AUDIO);//*/
-        }
-
-
-
 
 
 

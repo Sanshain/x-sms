@@ -16,18 +16,17 @@ using Xamarin.Forms;
 using XxmsApp.Model;
 using XxmsApp.Api;
 using Android.Support.V4.App;
+using static Android.Manifest;
 
-
-
-
-// [assembly: Dependency(typeof(XxmsApp.Api.IncomingSms))]
 namespace XxmsApp.Api
 {
 
     // [BroadcastReceiver(Enabled = true, Exported = true)]
+    //               // "android.provider.Telephony.SMS_RECEIVED"
+    // [IntentFilter(new string[] { Telephony.Sms.Intents.SmsDeliverAction })]
 
-    [BroadcastReceiver(Enabled = true, Label = "SMS Receiver")]
-    [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction })]               // "android.provider.Telephony.SMS_RECEIVED"
+    [BroadcastReceiver(Enabled = true, Label = "SMS Receiver", Permission = Permission.BroadcastSms)]
+    [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction, Telephony.Sms.Intents.SmsDeliverAction })] 
     public class IncomingSms : BroadcastReceiver
     {
         
@@ -75,6 +74,7 @@ namespace XxmsApp.Api
             ShowNotification(
                 "Новое сообщение от " + XMessages.First().Address,
                 XMessages.First().Value);
+
 
         }
 

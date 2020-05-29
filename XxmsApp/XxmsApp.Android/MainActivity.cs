@@ -13,6 +13,10 @@ using Android.Content;
 using Android.Telephony;
 
 using XxmsApp.Api.Droid;
+using Android.Provider;
+
+
+// [assembly: Permission(Name = "android.permission.BROADCAST_WAP_PUSH")] namespace Receiver {}
 
 [assembly: Dependency(typeof(XxmsApp.Piece.MeasureString))]
 namespace XxmsApp.Piece
@@ -31,12 +35,22 @@ namespace XxmsApp.Piece
     }
 }
 
+
+
 namespace XxmsApp.Droid
 {
     public delegate void ActivityResultHandler(Android.Net.Uri uri, object subj);
 
 
-    [Activity(Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Portrait)]
+    [Activity(
+        Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", //, MainLauncher = true
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Portrait
+        ), ]
+    [IntentFilter(new string[] { Intent.ActionSend, Intent.ActionSendto, Intent.ActionMain }, Categories = new string[]{
+        Intent.CategoryLauncher,
+        Intent.CategoryDefault,
+        Intent.CategoryBrowsable
+    }, DataSchemes = new string[] { "sms", "smsto", "mms", "mmsto" })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static Android.Content.ContentResolver InstanceResolver;
@@ -197,9 +211,21 @@ namespace XxmsApp.Droid
 
 
 
+
+
+
+    [BroadcastReceiver(Label = "MMS Receiver", Permission = Android.Manifest.Permission.BroadcastWapPush)]
+    // [IntentFilter(new string[] { Telephony.Sms.Intents.SmsDeliverAction })] // ->
+
+    [IntentFilter(new string[] { Telephony.Sms.Intents.WapPushDeliverAction }, DataMimeType = @"application/vnd.wap.mms-message")]   
     class XamBroadcastReceiver : BroadcastReceiver
     {
         public Action<Intent, int> Hook { get; set; } = null;
+
+        public XamBroadcastReceiver() : base()
+        {
+
+        }
 
         public XamBroadcastReceiver(Action<Intent, int> action) : base()
         {

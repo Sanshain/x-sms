@@ -67,6 +67,12 @@ namespace XxmsApp.Views
                 dialog.Messages.CollectionChanged += Messages_CollectionChanged;
 
                 // messagesList.ItemsSource = dialog.Messages;
+
+                if (dialog.LastMsgState == MessageState.Unread)
+                {
+                    dialog.SetAsRead();
+                }
+
             }
 
 

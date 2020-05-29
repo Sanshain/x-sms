@@ -76,7 +76,7 @@
     <Compile Include="Dependencies\Player.cs" />
     <Compile Include="Dependencies\Utilities.cs" />
     <Compile Include="MainActivity.cs" />
-    <Compile Include="ReadSms.cs" />
+    <Compile Include="IMessages.cs" />
     <Compile Include="Renderer\CustomRenderer.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -34,9 +34,13 @@ namespace XxmsApp.Droid
     }
 
 
-
     // [Service(IsolatedProcess = true)]                       // [Service(Exported = true, Name = "com.xamarin.example.DemoService")]
-    [Service(Name = "com.xamarin.ServicesDemo1")]
+
+    [Service(Name = "com.xamarin.example.DemoService", Exported = true, 
+        Permission = Android.Manifest.Permission.SendRespondViaMessage)]
+    [IntentFilter(new string[] { "android.intent.action.RESPOND_VIA_MESSAGE" }, 
+        Categories = new string[] { Intent.CategoryDefault }, 
+        DataSchemes = new string[] { "sms", "smsto", "mms", "mmsto" })]
     public class XmsService : Service, IXmessages
     {
 

@@ -19,6 +19,7 @@ using Android.Support.V7.App;
 using Java.IO;
 using Android.Net;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.Rington))
 namespace XxmsApp.Api.Droid
@@ -75,6 +76,40 @@ namespace XxmsApp.Api.Droid
             return contentResolver.Update(Android.Net.Uri.Parse(SMS_CONTENT_URI), values, where, null);
         }
 
+        public int SetStateRead(int[] messIds)
+        {
+            var context = Android.App.Application.Context;
+
+            contentResolver = contentResolver ?? XxmsApp.Droid.MainActivity.InstanceResolver ?? context.ContentResolver;
+
+            ContentValues values = new ContentValues();
+
+            values.Put("read", true);
+            var where = $"_id={messIds.Last()}";
+
+            // String selection = $"_id = ? AND read = 0";
+            // String[] selectionArgs = { messIds.Last(), "1" };
+
+
+            var uri = Android.Net.Uri.Parse(SMS_CONTENT_URI + "/inbox");
+            var idUri = ContentUris.WithAppendedId(uri, messIds.Last());
+
+            // var msgs = contentResolver.Query(idUri, null, null, null, null);
+            var msgs = contentResolver.Query(uri, null, where, null, null);
+
+            var mss = new List<XxmsApp.Model.Message>();
+            while (msgs.MoveToNext())
+            {
+                var ms = this.ParseMessage(msgs);
+                mss.Add(ms);
+            }
+
+            return contentResolver.Update(uri, values, where, null);
+        }
+
+
+            
+
         public List<XxmsApp.Model.Message> ReadFrom(int start)
         {
             contentResolver = contentResolver ?? XxmsApp.Droid.MainActivity.InstanceResolver;
@@ -92,7 +127,7 @@ namespace XxmsApp.Api.Droid
         /// </summary>
         /// <param name="messId"></param>
         /// <param name="simId"></param>
-        public void SetSimSender(int messId, int simId)
+        public int SetSimSender(int messId, int simId)
         {
             var context = Android.App.Application.Context;
 
@@ -100,10 +135,14 @@ namespace XxmsApp.Api.Droid
 
             ContentValues values = new ContentValues();
 
-            values.Put("sim_id", simId);
-            var where = $"_id = {messId}";
+            values.Put("sim_id", simId);            
+            var uri = Android.Net.Uri.Parse(SMS_CONTENT_URI);
+            var idUri = ContentUris.WithAppendedId(uri, messId);
+            // var where = $"_id = {messId}";            
+            
+            int r = contentResolver.Update(idUri, values, null, null);
 
-            int r = contentResolver.Update(Android.Net.Uri.Parse(SMS_CONTENT_URI), values, where, null);
+            return r;
         }
 
         public List<XxmsApp.Model.Message> ReadAll()
@@ -132,26 +171,14 @@ namespace XxmsApp.Api.Droid
             return messages;
         }
 
-        private static List<Model.Message> parseMessages(ICursor qs)
+        private List<Model.Message> parseMessages(ICursor qs)
         {
             List<XxmsApp.Model.Message> messages = new List<Model.Message>();
 
             while (qs.MoveToNext())
             {
-                var income = qs.GetShort(qs.GetColumnIndex("type"));
-
-                XxmsApp.Model.Message msg = new Model.Message
-                {
-                    Id = qs.GetInt(qs.GetColumnIndex("_id")),
-                    Address = qs.GetString(qs.GetColumnIndex("address")),
-                    Value = qs.GetString(qs.GetColumnIndex("body")),
-                    Incoming = income == 1 ? true : false,
-                    IsRead = Convert.ToBoolean(qs.GetShort(qs.GetColumnIndex("read"))),     // 1 - прочитано, 0 - не прочитано
-                    Delivered = !Convert.ToBoolean(qs.GetShort(qs.GetColumnIndex("status"))),
-                    ErrorCode = qs.GetInt(qs.GetColumnIndex("error_code"))
-
-                    // Protocol = qs.GetString(qs.GetColumnIndex("protocol"))               // 0 - входящее, null - исходящее
-                };
+                
+                Model.Message msg = ParseMessage(qs);
 
                 msg.SetSim(qs.GetString(qs.GetColumnIndex("sim_id")));                      // SubscriptionId
 
@@ -162,6 +189,26 @@ namespace XxmsApp.Api.Droid
             }
 
             return messages;
+        }
+
+        private Model.Message ParseMessage(ICursor qs)
+        {            
+
+            var income = qs.GetShort(qs.GetColumnIndex("type"));
+
+            XxmsApp.Model.Message msg = new Model.Message
+            {
+                Id = qs.GetInt(qs.GetColumnIndex("_id")),
+                Address = qs.GetString(qs.GetColumnIndex("address")),
+                Value = qs.GetString(qs.GetColumnIndex("body")),
+                Incoming = income == 1 ? true : false,
+                IsRead = Convert.ToBoolean(qs.GetShort(qs.GetColumnIndex("read"))),     // 1 - прочитано, 0 - не прочитано
+                Delivered = !Convert.ToBoolean(qs.GetShort(qs.GetColumnIndex("status"))),
+                ErrorCode = qs.GetInt(qs.GetColumnIndex("error_code"))
+
+                // Protocol = qs.GetString(qs.GetColumnIndex("protocol"))               // 0 - входящее, null - исходящее
+            };
+            return msg;
         }
 
         /// <summary>
@@ -182,7 +229,27 @@ namespace XxmsApp.Api.Droid
             }
             else sim = SmsManager.Default;
 
-            sim?.SendTextMessage(adressee, null, content, PendInSent, PendInDelivered);            
+            try
+            {
+                sim?.SendTextMessage(adressee, null, content, PendInSent, PendInDelivered);
+            }
+            catch(Exception ex) // if no address to send
+            {
+                var m = ex.Message;
+                return false;
+            }
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            var c =Android.App.Application.Context.ContentResolver.Query(Android.Net.Uri.Parse(SMS_CONTENT_URI), null, null, null, null);
+            c.MoveToFirst();
+            var message = ParseMessage(c);
+
+            this.SetSimSender(message.Id, sim.SubscriptionId);
+
+            sw.Stop();
+            var lg = sw.ElapsedMilliseconds;
 
             return sim != null;
         }
