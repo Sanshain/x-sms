@@ -40,14 +40,14 @@ namespace XxmsApp.Piece
 
     public class SimDefault : AbstractOption
     {
-        public const string Choice = "На выбор (по умолчанию)";
+        public const string DefaultChoice = "На выбор (по умолчанию)";
         static List<string> values = new List<string> {  };
 
         static SimDefault()
         {
             var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
             values.AddRange(info.GetSimsInfo().ToArray().Select(s => s.Name));
-            values.Add(Choice);
+            values.Add(DefaultChoice);
         }
 
         public SimDefault() : base(values) {}

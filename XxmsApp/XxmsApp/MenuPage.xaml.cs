@@ -34,6 +34,7 @@ namespace XxmsApp
                     "Настройки",
                     "Read sms",
                     "Сделать дефолтным",
+                    "Check default",
                     "О нас",
                     SIM_CARDS,
                     "Play",                        
@@ -187,6 +188,8 @@ namespace XxmsApp
                     goto default;
 
                 case "Сделать дефолтным": DependencyService.Get<Api.ILowLevelApi>().ChangeDefault(); goto default;
+                case "Check default": DisplayAlert(DependencyService.Get<Api.ILowLevelApi>().IsDefault.ToString(), "", "ok");
+                    goto default;
 
                 default:
 

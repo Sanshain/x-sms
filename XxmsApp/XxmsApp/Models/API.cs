@@ -83,9 +83,12 @@ namespace XxmsApp.Api
         void Vibrate(int ms);        
 
         void ShowNotification(string title, string content);
+        void ShowToast(string text);
         
         void AppExit();
+
         void ChangeDefault();
+        bool IsDefault { get; }
 
         void Play();                // Play(string sound, Action<string> onFinish);        
     }

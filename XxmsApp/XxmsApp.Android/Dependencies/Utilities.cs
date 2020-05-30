@@ -161,6 +161,13 @@ namespace XxmsApp.Api
             //*/
         }
 
+
+        public void ShowToast(string text)
+        {
+            var toast = Toast.MakeText(context, text, ToastLength.Long);
+            toast.SetGravity(GravityFlags.Center, 0, 100);
+            toast.Show();
+        }
     }
 
 }

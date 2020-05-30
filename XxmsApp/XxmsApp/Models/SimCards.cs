@@ -10,6 +10,23 @@ namespace XxmsApp
     {
         public static void SimChoice(StackLayout bottom, Action<int> onChoice = null)
         {
+
+            var defaultSim = Options.ModelSettings.Sim;
+
+            if ((defaultSim.Value == Piece.SimDefault.DefaultChoice) == false)
+            {
+                // var _sim = Model.Message.Sims.FirstOrDefault(sim => sim.Name == Piece.SimDefault.DefaultChoice);
+                // Array.IndexOf(Model.Message.Sims, _sim);
+
+                var simId = Array.FindIndex(Model.Message.Sims, sim => sim.Name == defaultSim.Value);
+                if (simId < 0) DependencyService.Get<Api.ILowLevelApi>().ShowToast("Sim карта, указанная в настройках, не найдена");
+                else
+                {
+                    onChoice?.Invoke(simId);
+                    return;
+                }                                
+            }
+
             const string title = "Sim";
 
             var simPicker = bottom.Children.OfType<Picker>().FirstOrDefault(p => p.Title == title);
