@@ -150,9 +150,7 @@ namespace XxmsApp.Views
             {
                 Text = "Удалить",
                 CommandParameter = content.BindingContext,
-                Command = dialog.RemoveCommand
-
-                /*
+                // Command = dialog.RemoveCommand,                
                 Command = new MessageCommander(async (mess) =>
                 {
                     if (await DisplayAlert("Подтверждение", "Вы уверены, что хотите удалить сообщение?", "Да", "Нет"))
@@ -160,7 +158,8 @@ namespace XxmsApp.Views
                         // Cache.database.Delete<Message>(mess.Id);
                         if (mess is Message)
                         {
-                            dialog.Messages.Remove(mess);
+                            // dialog.Messages.Remove(mess);
+                            dialog.RemoveCommand.Execute(mess);
                         }
 
                     }
