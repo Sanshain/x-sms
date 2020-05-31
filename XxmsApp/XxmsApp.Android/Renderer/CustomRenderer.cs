@@ -25,18 +25,21 @@ using XxmsApp.Views.Droid;
 
 
 [assembly: ExportRenderer(typeof(NavPage), typeof(NavPageRenderer))]
-[assembly: ExportRenderer(typeof(HeaderFrame), typeof(HeaderFrameRenderer))]
+[assembly: ExportRenderer(typeof(MessageFrame), typeof(MessageFrameRenderer))]
 namespace XxmsApp.Views.Droid
 {
 
 
 
 
-    public class HeaderFrameRenderer : Xamarin.Forms.Platform.Android.AppCompat.FrameRenderer
+    public class MessageFrameRenderer : Xamarin.Forms.Platform.Android.AppCompat.FrameRenderer
     {
         static bool initialize = false;
 
-        public HeaderFrameRenderer(Context context) : base(context) { }
+        public MessageFrameRenderer(Context context) : base(context)
+        {
+
+        }
 
         protected override void OnAttachedToWindow()
         {
@@ -44,11 +47,11 @@ namespace XxmsApp.Views.Droid
             if (initialize == false)
             {
 
-                initialize = true;
+                // initialize = true;
                 if (Control is Android.Widget.FrameLayout frame)
                 {
-                    // frame.AddView()
-                    
+                    frame.LongClick += Frame_LongClick;
+
                     if (Context is FormsAppCompatActivity activity)
                     {
 
@@ -59,6 +62,10 @@ namespace XxmsApp.Views.Droid
             }            
         }
 
+        private void Frame_LongClick(object sender, LongClickEventArgs e)
+        {
+            (sender as Android.Widget.FrameLayout).SetBackgroundColor(Android.Graphics.Color.Brown);            
+        }
     }
 
 

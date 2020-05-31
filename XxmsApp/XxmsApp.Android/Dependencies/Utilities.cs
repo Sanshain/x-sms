@@ -168,6 +168,16 @@ namespace XxmsApp.Api
             toast.SetGravity(GravityFlags.Center, 0, 100);
             toast.Show();
         }
+
+        public void Copy(string text)
+        {
+            ClipboardManager clipboard = (ClipboardManager)context.GetSystemService(Context.ClipboardService);
+            // clipboard.Text = text;
+
+            ClipData clip = ClipData.NewPlainText("Copied Text", text);            
+            clipboard.PrimaryClip = clip;
+            
+        }
     }
 
 }

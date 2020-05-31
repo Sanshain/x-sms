@@ -84,6 +84,7 @@ namespace XxmsApp.Api
 
         void ShowNotification(string title, string content);
         void ShowToast(string text);
+        void Copy(string text);
         
         void AppExit();
 

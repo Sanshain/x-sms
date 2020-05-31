@@ -10,7 +10,13 @@ using XxmsApp.Model;
 
 namespace XxmsApp.Views
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
+    public class MessageFrame : Frame
+    {
+
+    }
+
+
+    [XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class MessagesPage : ContentPage
 	{
 
@@ -28,9 +34,10 @@ namespace XxmsApp.Views
         {
             var root = new RelativeLayout(){ };
             Content = root;
+            dialog = source as Dialog;
 
             root.Children.AddAsRelative(messagesList = new ListView
-            {
+            {                
                 ItemTemplate = new DataTemplate(this.CellInitialize),
                 HasUnevenRows = true,
                 Margin = new Thickness(0, 0, 0, bottomHeight),
@@ -47,9 +54,7 @@ namespace XxmsApp.Views
 
 
             if (source.GetType() == typeof(Dialog))
-            {
-                dialog = source as Dialog;
-
+            {               
 
                 this.Title = "Сообщения c " + dialog.Contact;               // dialog.Address
 
@@ -94,6 +99,7 @@ namespace XxmsApp.Views
             }
         }
 
+        private View PreviousView;
         private ViewCell CellInitialize()
         {
 
@@ -113,7 +119,7 @@ namespace XxmsApp.Views
 
             time.SetBinding(Label.TextProperty, "Time");
             content.SetBinding(Label.TextProperty, "Value");
-            status.SetBinding(Label.TextProperty, "States");
+            status.SetBinding(Label.TextProperty, "States");            
 
             view.Children.Extend(time, content, status);
 
@@ -134,14 +140,63 @@ namespace XxmsApp.Views
 
             messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, IncomingConverter.Single);
             messageView.SetBinding(Frame.BackgroundColorProperty, "Incoming", BindingMode.OneWay, IncomingConverter.Single);
-   
+
+            // messageView.SetBinding(Label.TextProperty, "Selected");
 
             var viewCell = new ViewCell { View = messageView };
 
+            var copyContext = new MenuItem() { Text = "Копировать" };
+            var removeContext = new MenuItem
+            {
+                Text = "Удалить",
+                CommandParameter = content.BindingContext,
+                Command = dialog.RemoveCommand
+
+                /*
+                Command = new MessageCommander(async (mess) =>
+                {
+                    if (await DisplayAlert("Подтверждение", "Вы уверены, что хотите удалить сообщение?", "Да", "Нет"))
+                    {
+                        // Cache.database.Delete<Message>(mess.Id);
+                        if (mess is Message)
+                        {
+                            dialog.Messages.Remove(mess);
+                        }
+
+                    }
+                })//*/
+            };
+
+
+            copyContext.Clicked += (object sender, EventArgs e) =>
+            {
+                if (string.IsNullOrWhiteSpace(content.Text) == false) DependencyService.Get<Api.ILowLevelApi>().Copy(content.Text);
+            };                        
+            viewCell.ContextActions.Add(copyContext);
+
+            removeContext.SetBinding(MenuItem.CommandParameterProperty, ".");
+            viewCell.ContextActions.Add(removeContext);
+
+            
+
+            
+            viewCell.Tapped += (object sender, EventArgs e) =>
+            {
+                
+                if (messagesList.SelectedItem == content.BindingContext)
+                {
+                    /*if (PreviousView != null) PreviousView.BackgroundColor = Color.Default;                    
+                    view.BackgroundColor = Color.Orange; PreviousView = view;//*/
+
+                    var message = content.BindingContext as Message;
+                    DisplayAlert("Инфо", "", "Ok");
+                    messagesList.SelectedItem = null;
+                }
+                
+            };//*/
+
             return viewCell;
         }
-
-
 
         int count = 0;
         bool inited = false;

@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using XxmsApp.Api;
+using System.Windows.Input;
 
 namespace XxmsApp.Model
 {
@@ -279,6 +280,26 @@ namespace XxmsApp.Model
 
     }
 
+    public class MessageCommander : ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+        public Action<Message> Command = null;
+
+        public MessageCommander(Action<Message> action)  
+        {
+            Command = action;
+        }
+
+        public bool CanExecute(object parameter) => parameter is Message;   
+        public void Execute(object parameter)
+        {
+            if (CanExecute(parameter))
+            {
+                //DependencyService.Get<>
+                Command?.Invoke(parameter as Message);
+            }
+        }
+    }
 
 }
 
@@ -292,8 +313,8 @@ namespace XxmsApp
     {
 
         // [OneToMany] public Contacts Contact { get; set; }
-        [PrimaryKey] public string Address { get; set; }
 
+        [PrimaryKey] public string Address { get; set; }
         string count = string.Empty;
         static Dictionary<Dialog, string> contacts = new Dictionary<Dialog, string>();
 
@@ -340,6 +361,17 @@ namespace XxmsApp
             (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));                  
 
             return Messages;
+        }
+
+        public Dialog()
+        {
+            RemoveCommand = new Command(m =>
+            {
+                if (m is Message message)
+                {
+                    Messages.Remove(message);
+                }
+            });
         }
 
   
@@ -404,7 +436,8 @@ namespace XxmsApp
             return dialog;
         }
 
-        
+
+        public ICommand RemoveCommand { protected set; get; }
 
     }
 }

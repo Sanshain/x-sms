@@ -12,6 +12,7 @@ using XxmsApp.Model;
 namespace XxmsApp.Views
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
+    [Obsolete]
 	public partial class Messages : ContentPage
 	{
         IEnumerable<Model.Message> messages = null;
