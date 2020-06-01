@@ -43,7 +43,7 @@ namespace XxmsApp.Droid
 
 
     [Activity(
-        Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true,
+        Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme",// MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Portrait
         ), ]
     [IntentFilter(new string[] { Intent.ActionSend, Intent.ActionSendto/* , Intent.ActionMain*/ }, Categories = new string[]{
@@ -65,12 +65,16 @@ namespace XxmsApp.Droid
 
             base.OnCreate(bundle);
 
-            global::Xamarin.Forms.Forms.Init(this, bundle);
+            // new XxmsApp.Api.LowLevelApi().ShowNotification("123", "11111");      // StartActivity(typeof(SplashActivity));
 
+
+            global::Xamarin.Forms.Forms.Init(this, bundle);
+            // Toast.MakeText(this, "here", ToastLength.Long).Show();
             var application = new App();
 
+
             try
-            {
+            {                 
                 LoadApplication(application);
             }
             catch(Exception ex)
