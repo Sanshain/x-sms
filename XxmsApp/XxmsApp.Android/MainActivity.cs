@@ -43,7 +43,7 @@ namespace XxmsApp.Droid
 
 
     [Activity(
-        Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true,
+        Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", // MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Portrait
         ), ]
     [IntentFilter(new string[] { Intent.ActionSend, Intent.ActionSendto/* , Intent.ActionMain*/ }, Categories = new string[]{
