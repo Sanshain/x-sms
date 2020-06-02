@@ -7,6 +7,7 @@ using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Provider;
 using Android.Runtime;
 using Android.Support.V7.App;
 using Android.Util;
@@ -16,7 +17,12 @@ using Android.Widget;
 
 namespace XxmsApp.Droid
 {
-    [Activity(Theme = "@style/SplashTheme", NoHistory = true, MainLauncher = true)]  
+    [Activity(Theme = "@style/SplashTheme", NoHistory = true, MainLauncher = true)]   
+    [IntentFilter(new[] { Telephony.Sms.Intents.SmsReceivedAction, Intent.ActionMain }, 
+        Categories = new[] { Intent.CategoryLauncher, Intent.CategoryDefault, Intent.CategoryAppMessaging })]
+    [IntentFilter(new[] { Intent.ActionMain }, Categories = new[] {Intent.CategoryDefault }, 
+        DataMimeType = "vnd.android-dir/mms-sms")]
+
     public class SplashActivity : AppCompatActivity                      // AppCompatActivity
     {
 

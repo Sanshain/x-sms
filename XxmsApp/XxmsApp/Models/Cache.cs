@@ -104,7 +104,7 @@ namespace XxmsApp
                 Environment.GetFolderPath(Environment.SpecialFolder.Personal),                          // .Resources  for iOS and Android the better
                 App.DATABASE_FILENAME);
 
-        internal static SQLiteConnection database = new SQLiteConnection(db_filename);
+        public static SQLiteConnection database = new SQLiteConnection(db_filename);
 
         static Cache()
         {

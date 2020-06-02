@@ -4,7 +4,7 @@ using System.Text;
 
 namespace XxmsApp.Model
 {
-    class Errors
+    public class Errors
     {
         public string Name { get; set; }
         public string Method { get; set; }

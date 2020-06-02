@@ -18,6 +18,7 @@ using XxmsApp.Api;
 using Android.Support.V4.App;
 using static Android.Manifest;
 using Android.Database;
+using System.IO;
 
 namespace XxmsApp.Api
 {
@@ -34,29 +35,83 @@ namespace XxmsApp.Api
     // [IntentFilter(new string[] { Telephony.Sms.Intents.SmsDeliverAction })]
 
     [BroadcastReceiver(Enabled = true, Label = "SMS Receiver", Permission = Permission.BroadcastSms)]
-    [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction, Telephony.Sms.Intents.SmsDeliverAction })] 
+    [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction, Telephony.Sms.Intents.SmsDeliverAction }, Priority = 1000)] 
     public class MessageReceiver : BroadcastReceiver
     {
         public static Brand DeviceFirmware = Brand.Unknown;
+        static Context primaryContext = null;
 
         public override void OnReceive(Context context, Intent intent)
         {
-            
-            Device.BeginInvokeOnMainThread(() => Toast.MakeText(context, "New one message", ToastLength.Long).Show());
+
+            bool onStart = false;
+            try
+            {
+                Device.BeginInvokeOnMainThread(() => Toast.MakeText(context, "New one message", ToastLength.Long).Show());
+            }
+            catch (Exception ex)
+            {
+                var mess = ex.Message;
+
+                Cache.database.Insert(new XxmsApp.Model.Errors
+                {
+                    Name = mess,
+                    Method = nameof(OnReceive),
+                    Params = ex.StackTrace
+                });
+
+                if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction)
+                {
+                    Toast.MakeText(context, "New one message", ToastLength.Long).Show();
+                }                
+                // Api.LowLevelApi.Instance.ShowNotification("123", "111");
+
+                onStart = true;
+
+                primaryContext = context;
+            }
+
 
             if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction) return;           // and Telephony.Sms.Intents.SmsDeliverAction ?? for delevered?            
 
-            var bundle = intent.Extras;
-            var slot = bundle.GetInt("slot", -1);
+            var bundle = intent.Extras;                     // var slot = bundle.GetInt("slot", -1);
             var sub = bundle.GetInt("subscription", -1);
+            var columns = bundle.KeySet().ToArray();
 
-            SmsMessage[] messages = Telephony.Sms.Intents.GetMessagesFromIntent(intent);            
+            SmsMessage[] messages = Telephony.Sms.Intents.GetMessagesFromIntent(intent);
 
-            OnMessagesReiceved(messages, sub);
+            try
+            {
+                OnMessagesReiceved(messages, sub, onStart);
+            }
+            catch(Exception ex)
+            {
+                Cache.database.Insert(new XxmsApp.Model.Errors
+                {
+                    Name = ex.Message,
+                    Method = nameof(OnMessagesReiceved),
+                    Params = ex.StackTrace
+                });
+            }
+
 
         }
 
-        private void OnMessagesReiceved(SmsMessage[] messages, int sim)
+        private static void StartMainActivity(Context context, List<XxmsApp.Model.Message> messages)
+        {
+            var appIntent = new Intent(primaryContext, typeof(XxmsApp.Droid.SplashActivity));
+
+            System.Xml.Serialization.XmlSerializer xml = new System.Xml.Serialization.XmlSerializer(messages.GetType());
+            using (StringWriter textWriter = new StringWriter())
+            {
+                xml.Serialize(textWriter, messages);
+                var objs = textWriter.ToString();
+                appIntent.PutExtra("messages", objs);
+            }
+            context.StartActivity(appIntent);                           // typeof(XxmsApp.Droid.SplashActivity)
+        }
+
+        private void OnMessagesReiceved(SmsMessage[] messages, int sim, bool onStart = false)
         {
             
             var smsMesages = new List<(string Address, string Message)>();
@@ -67,24 +122,47 @@ namespace XxmsApp.Api
             for (var i = 0; i < messages.Length; i++)
             {
                 smsMesages.Add((messages[i].OriginatingAddress, messages[i].MessageBody));
-                
-                XMessages.Add(new XxmsApp.Model.Message
-                {
-                    SimOsId = sim.ToString(),
-                    Address = messages[i].OriginatingAddress,
-                    Value = messages[i].MessageBody,
-                    Time = new DateTime(1970, 1, 1).AddMilliseconds(messages[i].TimestampMillis)                    
-                });
 
+                var message = XMessages.FirstOrDefault(m => m.Address == messages[i].OriginatingAddress);
+
+                if (message != null) message.Value = message.Value + messages[i].MessageBody;                
+                else
+                    XMessages.Add(new XxmsApp.Model.Message
+                    {                        
+                        SimOsId = sim.ToString(),
+                        Address = messages[i].OriginatingAddress,
+                        Value = messages[i].MessageBody,
+                        TimeOut = new DateTime(1970, 1, 1).AddMilliseconds(messages[i].TimestampMillis),
+                        Time = DateTime.Now,
+                        Service = messages[i].ServiceCenterAddress,
+                        Incoming = true,
+                        IsRead = false,
+                        ErrorCode = 0,                        
+
+                    });
+
+                /*
                 var icc = messages[i].IndexOnIcc;
                 var sims = XxmsApp.Api.Droid.XMessages.Instance.GetSimsInfo().ToArray();
-                var pdu = messages[i].GetPdu();
+                var pdu = messages[i].GetPdu();//*/
 
-                if (isDefault) Save(messages[i], sim);
+                // if (isDefault) Save(messages[i], sim);
 
             }
+            
+            if (isDefault) XMessages.ForEach(m => SaveMsg(m));
 
-            Device.BeginInvokeOnMainThread(() =>
+
+            ShowNotification(
+                "Новое сообщение от " + XMessages.First().Address,
+                XMessages.First().Value);
+
+            if (onStart)
+            {
+                StartMainActivity(primaryContext, XMessages);
+                return;
+            }
+            else Device.BeginInvokeOnMainThread(() =>
             {
                 MessagingCenter.Send<XxmsApp.App, List<XxmsApp.Model.Message>>(
                     Xamarin.Forms.Application.Current as XxmsApp.App, 
@@ -92,12 +170,80 @@ namespace XxmsApp.Api
                     XMessages);
             });
 
-            ShowNotification(
-                "Новое сообщение от " + XMessages.First().Address,
-                XMessages.First().Value);
-
 
         }
+
+
+        private void Save(SmsMessage smsMessage, int sim)
+        {
+            var uri = Telephony.Sms.ContentUri;
+            var draftUri = Telephony.Sms.Draft.ContentUri;
+            var inboxUri = Telephony.Sms.Inbox.ContentUri;
+            var outboxUri = Telephony.Sms.Outbox.ContentUri;
+            var sentUri = Telephony.Sms.Sent.ContentUri;
+
+            var contentResolver = XxmsApp.Droid.MainActivity.InstanceResolver ?? primaryContext.ContentResolver; 
+
+            var values = FillValues(smsMessage, sim);
+
+            var qs = contentResolver.Insert(Telephony.Sms.Inbox.ContentUri, values); // Android.Net.Uri.Parse("content://sms/inbox")
+        }
+
+
+
+
+        private void SaveMsg(Model.Message smsMessage)
+        {
+            var uri = Telephony.Sms.ContentUri;
+            var draftUri = Telephony.Sms.Draft.ContentUri;
+            var inboxUri = Telephony.Sms.Inbox.ContentUri;
+            var outboxUri = Telephony.Sms.Outbox.ContentUri;
+            var sentUri = Telephony.Sms.Sent.ContentUri;
+
+            var contentResolver = XxmsApp.Droid.MainActivity.InstanceResolver ?? primaryContext.ContentResolver;            
+
+            var values = FillValues(smsMessage);
+
+            var qs = contentResolver.Insert(Telephony.Sms.Inbox.ContentUri, values); // Android.Net.Uri.Parse("content://sms/inbox")
+        }
+
+        private ContentValues FillValues(Model.Message smsMessage)
+        {            
+
+            ContentValues values = new ContentValues();            
+
+            var now = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
+            var outNow = (smsMessage.TimeOut - new DateTime(1970, 1, 1)).TotalMilliseconds;
+
+
+            values.Put(Telephony.Sms.InterfaceConsts.ThreadId, GetThreadId(smsMessage.Address));         // chat id
+            values.Put(Telephony.Sms.InterfaceConsts.Address, smsMessage.Address);                        // no read
+            values.Put(Telephony.Sms.InterfaceConsts.Person, "");                                         // Person
+            values.Put(Telephony.Sms.InterfaceConsts.Date, now.ToString());                               // now
+            values.Put(Telephony.Sms.InterfaceConsts.DateSent, outNow.ToString());                        // sent
+            values.Put(Telephony.Sms.InterfaceConsts.Protocol, 0);                                        // in/out
+            values.Put(Telephony.Sms.InterfaceConsts.Status, -1);                                         // always -1 for inbox
+            values.Put(Telephony.Sms.InterfaceConsts.Type, 1);                                            // always 1 for inbox
+
+            values.Put(Telephony.Sms.InterfaceConsts.ReplyPathPresent, 0);                                // I still don't know 
+            values.Put(Telephony.Sms.InterfaceConsts.Subject, "");                                        // I still don't know 
+
+            values.Put(Telephony.Sms.InterfaceConsts.Body, smsMessage.Value);                              // 
+            values.Put(Telephony.Sms.InterfaceConsts.ServiceCenter, smsMessage.Service);                   // 
+
+            values.Put(Telephony.Sms.InterfaceConsts.Locked, 0);                                          // spam/no spam?
+            values.Put(Telephony.Sms.InterfaceConsts.ErrorCode, 0);
+            values.Put(Telephony.Sms.InterfaceConsts.Seen, 1);
+
+            if (DeviceFirmware == Brand.Xiaomi)
+                values.Put("sim_id", smsMessage.SimOsId);                                                  // № sim
+            else            
+                values.Put(Telephony.Sms.InterfaceConsts.SubscriptionId, smsMessage.SimOsId);              // № sim
+            
+
+            return values;
+        }
+
 
 
 
@@ -138,23 +284,6 @@ namespace XxmsApp.Api
             // if (Options.ModelSettings.Sound == true) XMessages.Instance.SoundPlay(Options.ModelSettings.Rington, null, null);
 
         }
-
-        private void Save(SmsMessage smsMessage, int sim)
-        {
-            var uri = Telephony.Sms.ContentUri;
-            var draftUri = Telephony.Sms.Draft.ContentUri;
-            var inboxUri = Telephony.Sms.Inbox.ContentUri;
-            var outboxUri = Telephony.Sms.Outbox.ContentUri;
-            var sentUri = Telephony.Sms.Sent.ContentUri;
-
-            var contentResolver = XxmsApp.Droid.MainActivity.InstanceResolver;            
-
-            var values = FillValues(smsMessage, sim);
-
-            var qs = contentResolver.Insert(Telephony.Sms.Inbox.ContentUri, values); // Android.Net.Uri.Parse("content://sms/inbox")
-        }
-
-
 
 
 
@@ -228,7 +357,8 @@ namespace XxmsApp.Api
         public static int GetThreadId(string number)
         {
             
-            var contentResolver = XxmsApp.Droid.MainActivity.InstanceResolver;
+            var contentResolver = XxmsApp.Droid.MainActivity.InstanceResolver ?? primaryContext.ContentResolver; 
+
 
             int threadId = 0;
 

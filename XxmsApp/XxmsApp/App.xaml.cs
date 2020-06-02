@@ -29,6 +29,7 @@ namespace XxmsApp
             
             DBUpdates();
 
+            var errors = Cache.database.Table<Model.Errors>().ToArray();
 
             MainPage = (new MasterDetailPage()
             {

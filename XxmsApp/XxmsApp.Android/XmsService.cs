@@ -55,8 +55,7 @@ namespace XxmsApp.Droid
         }
 
         public override IBinder OnBind(Intent intent)
-        {
-            
+        {            
             this.Binder = new XmsServiceBinder(this);
             return this.Binder;
         }

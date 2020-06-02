@@ -150,6 +150,13 @@ namespace XxmsApp.Piece
                 Messages = new ObservableCollection<Message>(g.Reverse())
             }).ToList();
 
+            r.ForEach(d => d.PropertyChanged += (s, e) => Source_CollectionChanged(r,
+                new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
+                    System.Collections.Specialized.NotifyCollectionChangedAction.Replace, 
+                    d,
+                    null, 
+                    d.Messages.Last().Id)));
+
             return r;
         }
 
@@ -183,6 +190,9 @@ namespace XxmsApp.Piece
 
                     break;
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
 
                     break;
             }

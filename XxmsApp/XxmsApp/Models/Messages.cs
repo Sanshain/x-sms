@@ -121,11 +121,15 @@ namespace XxmsApp.Model
         const string UnknownSim = "?";
         bool? valid = null;
 
-        public static Sim[] Sims { get; private set; }
+        static Sim[] _sim; public static Sim[] Sims
+        {
+            get => _sim ?? (_sim = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance).GetSimsInfo().ToArray());
+        }
+
         static Message()
         {            
-            var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
-            Sims = info.GetSimsInfo().ToArray();
+            // var info = DependencyService.Get<Api.IMessages>(DependencyFetchTarget.GlobalInstance);
+            // Sims = info.GetSimsInfo().ToArray();
         }
 
 
@@ -158,6 +162,9 @@ namespace XxmsApp.Model
         [PrimaryKey, AutoIncrement, Column("_Number")]
         public int Id { get; set; }
         public DateTime Time { get; set; }
+        public DateTime TimeOut { get; set; }                                                               // time of sending
+        public string Service { get; set; }                                                                 // service_center
+
         public string Address { get; set; }                                                                 // long
         public string Value { get; set; }
         public bool Incoming { get; set; } = true;
@@ -232,7 +239,15 @@ namespace XxmsApp.Model
 
         public bool? Delivered { get; set; } = null;                            // 0 - получено, -1 - нет уведомления о получении, null - входящее
         public int ErrorCode { get; set; } = 0;                                 // 0 - отправлено
-        public bool IsRead { get; set; }                                        // 1 - прочитано, 0 - не прочитано, null - исходящее
+        bool isRead; public bool IsRead                                         // 1 - прочитано, 0 - не прочитано, null - исходящее
+        {
+            get => isRead;
+            set
+            {
+                isRead = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsRead)));
+            }
+        }                                        
 
         public MessageState State
         {
@@ -309,7 +324,7 @@ namespace XxmsApp
 {
     // [Obsolete("пока не уверен, что стоит его использовать")]    
 
-    public class Dialog
+    public class Dialog : INotifyPropertyChanged
     {
 
         // [OneToMany] public Contacts Contact { get; set; }
@@ -319,6 +334,9 @@ namespace XxmsApp
         static Dictionary<Dialog, string> contacts = new Dictionary<Dialog, string>();
 
         ObservableCollection<Message> messages = new ObservableCollection<Message>(); // ObservableCollection<Message>
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public ObservableCollection<Message> Messages
         {
             get
@@ -410,8 +428,19 @@ namespace XxmsApp
 
         public bool SetAsRead()
         {
-            var id_s = this.Messages.Select(m => m.Id).ToArray();
+            var id_s = this.Messages.Select(m => {
+
+                m.IsRead = true;
+                
+                // Cache.Update(m, m.Id);
+                return m.Id;
+
+            }).ToArray();
             var r = DependencyService.Get<Api.IMessages>().SetStateRead(id_s);
+
+            Cache.database.UpdateAll(this.Messages);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastMsgState)));
+
             return Convert.ToBoolean(r);
         }
 

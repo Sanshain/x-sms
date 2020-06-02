@@ -46,11 +46,13 @@ namespace XxmsApp.Droid
         Label = "XxmsApp", Icon = "@drawable/icon", Theme = "@style/MainTheme", // MainLauncher = true,
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Portrait
         ), ]
-    [IntentFilter(new string[] { Intent.ActionSend, Intent.ActionSendto/* , Intent.ActionMain*/ }, Categories = new string[]{
-        // Intent.CategoryLauncher,
-        Intent.CategoryDefault,
-        Intent.CategoryBrowsable
-    }, DataSchemes = new string[] { "sms", "smsto", "mms", "mmsto" })]
+    [IntentFilter(new string[] {
+        Intent.ActionSend, Intent.ActionSendto/* , Intent.ActionMain*/ }, 
+        Categories = new string[]{
+            // Intent.CategoryLauncher,
+            Intent.CategoryDefault,
+            Intent.CategoryBrowsable
+        }, DataSchemes = new string[] { "sms", "smsto", "mms", "mmsto" })]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static Android.Content.ContentResolver InstanceResolver;
