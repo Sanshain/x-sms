@@ -58,7 +58,10 @@ namespace XxmsApp
                         }
                         i++;
                     }
-                    
+
+                    Cache.database.InsertAll(msgs);
+                    Cache.InsertAll(msgs);
+                    StartPage.Dialog.ItemsSource = StartPage.Dialog.ItemsUpdate();          // StartPage.Dialog.DataInitialize();
 
                     i = 0;
                     while(i < msgs.Count)

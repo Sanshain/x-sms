@@ -20,8 +20,13 @@ namespace XxmsApp.Api
 {
     public class LowLevelApi : ILowLevelApi
     {
-        private static Context context = Android.App.Application.Context;     
+        private static Context context = Android.App.Application.Context;
+        static LowLevelApi instance;
+        public static LowLevelApi Instance => instance ?? new LowLevelApi();
+
+        public LowLevelApi() => instance = instance ?? this;
         
+
         /// <summary>
         /// Vibrate 150 ms by default
         /// </summary>

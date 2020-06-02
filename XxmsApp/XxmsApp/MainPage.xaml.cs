@@ -14,6 +14,7 @@ namespace XxmsApp
     {
 
         Dictionary<Type, Action> onPop;
+        public Piece.MainList Dialog { get; private set; }
         Button subBtn = new Button { Text = "Создать", IsEnabled = false };
 
         public MainPage()
@@ -43,7 +44,7 @@ namespace XxmsApp
         private Layout Initialize()
         {
             var rootLayout = new AbsoluteLayout();
-            var dialogs = new Piece.MainList();
+            var dialogs = Dialog = new Piece.MainList();
 
             rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);

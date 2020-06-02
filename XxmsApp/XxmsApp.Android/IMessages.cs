@@ -20,6 +20,7 @@ using Java.IO;
 using Android.Net;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using Android.Provider;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.Rington))
 namespace XxmsApp.Api.Droid
@@ -251,6 +252,12 @@ namespace XxmsApp.Api.Droid
             sw.Stop();
             var lg = sw.ElapsedMilliseconds;
 
+            if (LowLevelApi.Instance.IsDefault)
+            {
+                var values = FillValuesOut(adressee, content, simId != null ? simId.Value : 0);
+                contentResolver.Insert(Telephony.Sms.Outbox.ContentUri, values);
+            }
+
             return sim != null;
         }
 
@@ -260,6 +267,48 @@ namespace XxmsApp.Api.Droid
 
             sim.SendTextMessage(msg.Address, null, msg.Value, PendInSent, PendInDelivered);
 
+        }
+
+
+        private ContentValues FillValuesOut(string number, string body, int simId)
+        {
+
+            ContentValues values = new ContentValues();
+
+
+            // values.Put(Telephony.Sms.InterfaceConsts.Id, "");
+
+            var stamp = new TimeSpan(-1970, 1, 1);
+            var now = DateTime.Now.Add(stamp).Millisecond;
+
+
+            values.Put(Telephony.Sms.InterfaceConsts.ThreadId, MessageReceiver.GetThreadId(number));      // chat id
+            values.Put(Telephony.Sms.InterfaceConsts.Address, number);                                    // no read
+            values.Put(Telephony.Sms.InterfaceConsts.Person, "");                                         // Person
+            values.Put(Telephony.Sms.InterfaceConsts.Date, now.ToString());                               // now
+            values.Put(Telephony.Sms.InterfaceConsts.DateSent, now.ToString());                           // sent
+            values.Put(Telephony.Sms.InterfaceConsts.Protocol, 1);                                        // in/out
+            // values.Put(Telephony.Sms.InterfaceConsts.Status, -1);                                         // always -1 for inbox
+            values.Put(Telephony.Sms.InterfaceConsts.Type, 2);                                            // > 1 dor outgoing
+
+            values.Put(Telephony.Sms.InterfaceConsts.ReplyPathPresent, 0);                                // I still don't know 
+            values.Put(Telephony.Sms.InterfaceConsts.Subject, "");                                        // I still don't know 
+
+            values.Put(Telephony.Sms.InterfaceConsts.Body, body);                                         // 
+            values.Put(Telephony.Sms.InterfaceConsts.ServiceCenter, "");     // 
+
+            values.Put(Telephony.Sms.InterfaceConsts.Locked, 0);                                          // spam/no spam?
+            values.Put(Telephony.Sms.InterfaceConsts.ErrorCode, 0);
+            values.Put(Telephony.Sms.InterfaceConsts.Seen, 1);
+
+            if (MessageReceiver.DeviceFirmware == Brand.Xiaomi)
+                values.Put("sim_id", simId);                                                                  // № sim
+            else
+            {
+                values.Put(Telephony.Sms.InterfaceConsts.SubscriptionId, simId);                              // № sim
+            }
+
+            return values;
         }
 
         public IEnumerable<Sim> GetSimsInfo()

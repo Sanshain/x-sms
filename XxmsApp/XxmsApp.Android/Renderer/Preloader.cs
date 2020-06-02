@@ -30,28 +30,33 @@ namespace XxmsApp.Droid
 
             var bar = FindViewById(Resource.Id.progressBar) as ProgressBar;
             bar.Visibility = ViewStates.Visible;
+            
 
 
+
+
+            /*
             AnimatoOnAppearance(logo, () =>
-            {
-                /*
+            {                
                 var bar = FindViewById(Resource.Id.progressBar) as ProgressBar;
                 bar.Visibility = ViewStates.Visible;
                 
-                new Android.OS.Handler().PostDelayed(() => logo.Visibility = ViewStates.Invisible , 600);//*/
-            });
+                new Android.OS.Handler().PostDelayed(() => logo.Visibility = ViewStates.Invisible , 600);
+            });//*/
 
-
-            /* TextView text = new TextView(this) { Text = "123" };
-            text.LayoutParameters = new ViewGroup.LayoutParams(
-                LinearLayout.LayoutParams.WrapContent,
-                LinearLayout.LayoutParams.WrapContent); //*/
+            /*
+            TextView text = new TextView(this)
+            {
+                Text = "...",
+                LayoutParameters = new ViewGroup.LayoutParams(
+                    LinearLayout.LayoutParams.WrapContent,
+                    LinearLayout.LayoutParams.WrapContent)
+            };//*/
         }
 
 
         private void AnimatoOnAppearance(TextView logo, Action onEnd = null)
-        {
-            return;
+        {            
 
             logo.ScaleX = 0;
             logo.ScaleY = 0;

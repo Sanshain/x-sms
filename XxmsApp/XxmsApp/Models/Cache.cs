@@ -216,7 +216,38 @@ namespace XxmsApp
             }
         }
 
+        public static void Insert<T>(T subject) where T : IModel, new()
+        {
+            var type = typeof(T);
+            if (cache.ContainsKey(typeof(T)))
+            {
+                var cc = cache[typeof(T)];
+                cc.Add(subject);                                                         // 
+            }
+            else
+            {
+                cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
+                // throw new KeyNotFoundException("The type yet was not added to cache");
+            }
+        }
 
+        public static void InsertAll<T>(IEnumerable<T> lstSubj) where T : IModel, new()
+        {
+            var type = typeof(T);
+            if (cache.ContainsKey(typeof(T)))
+            {
+                var cc = cache[typeof(T)];
+                foreach (var subj in lstSubj)
+                {
+                    cc.Add(subj);
+                }                                                                
+            }
+            else
+            {
+                cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
+                // throw new KeyNotFoundException("The type yet was not added to cache");
+            }
+        }
 
         static List<T> iConvert<T>(List<object> raw) where T: IModel, new()
         {

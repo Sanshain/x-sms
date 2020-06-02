@@ -137,14 +137,20 @@ namespace XxmsApp.Piece
         {
             if (this.DialogViewType)                                        // by default
             {
-                ItemsSource = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog
-                {
-                    Address = g.Key,
-                    Messages = new ObservableCollection<Message>(g.Reverse())
-                }).ToList();
-
+                ItemsSource = ItemsUpdate();
             }
             else ItemsSource = this.DataLoad(30);                         // else    
+        }
+
+        public List<Dialog> ItemsUpdate(bool no_cache = false)
+        {
+            var r = this.DataLoad(0, no_cache).GroupBy(m => m.Address).Select(g => new Dialog
+            {
+                Address = g.Key,
+                Messages = new ObservableCollection<Message>(g.Reverse())
+            }).ToList();
+
+            return r;
         }
 
         private async void CustomList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -183,7 +189,7 @@ namespace XxmsApp.Piece
         }
 
 
-        protected ObservableCollection<Message> DataLoad(int limit = 0)
+        protected ObservableCollection<Message> DataLoad(int limit = 0, bool no_cache = false)
         {
             /*
             for (int i = 0; i < 20; i++)
@@ -196,7 +202,13 @@ namespace XxmsApp.Piece
                 });
             }//*/
 
-            var msgs = Cache.Read<Message>().OrderByDescending(m => m.Id).ToList();
+            List<Message> msgs;
+
+            if (no_cache)
+            {
+                msgs = Cache.UpdateAsync(new List<Model.Message>()).GetAwaiter().GetResult();
+            }
+            else msgs = Cache.Read<Message>().OrderByDescending(m => m.Id).ToList();
 
             limit = limit > 0 ? Math.Min(limit, msgs.Count) : msgs.Count;
             source = new ObservableCollection<Message>(msgs.GetRange(0, Math.Min(limit, msgs.Count)));
