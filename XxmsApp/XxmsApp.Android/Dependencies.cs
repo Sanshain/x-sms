@@ -100,16 +100,37 @@ namespace XxmsApp.Api
         private static void StartMainActivity(Context context, List<XxmsApp.Model.Message> messages)
         {
             var appIntent = new Intent(primaryContext, typeof(XxmsApp.Droid.SplashActivity));
+            
+            appIntent.PutExtra("messages", Serialize(messages));
+            context.StartActivity(appIntent);                           // typeof(XxmsApp.Droid.SplashActivity)
+        }
 
+        private static string Serialize(List<Model.Message> messages)
+        {
             System.Xml.Serialization.XmlSerializer xml = new System.Xml.Serialization.XmlSerializer(messages.GetType());
+            
+
             using (StringWriter textWriter = new StringWriter())
             {
                 xml.Serialize(textWriter, messages);
                 var objs = textWriter.ToString();
-                appIntent.PutExtra("messages", objs);
+                return objs;
             }
-            context.StartActivity(appIntent);                           // typeof(XxmsApp.Droid.SplashActivity)
         }
+
+        public static List<Model.Message> Deserialize(string messages)
+        {
+            
+            System.Xml.Serialization.XmlSerializer xml = new System.Xml.Serialization.XmlSerializer(typeof(List<Model.Message>));
+
+            using (StringReader sr = new StringReader(messages))
+            {
+                var r = xml.Deserialize(sr) as List<Model.Message>;
+                return r;
+            }
+        }
+
+
 
         private void OnMessagesReiceved(SmsMessage[] messages, int sim, bool onStart = false)
         {
@@ -152,14 +173,17 @@ namespace XxmsApp.Api
             
             if (isDefault) XMessages.ForEach(m => SaveMsg(m));
 
+            Bundle bundle = new Bundle();
+            bundle.PutString(typeof(Model.Message).Name, Serialize(XMessages));
 
             ShowNotification(
                 "Новое сообщение от " + XMessages.First().Address,
-                XMessages.First().Value);
+                XMessages.First().Value,
+                bundle);
 
             if (onStart)
             {
-                StartMainActivity(primaryContext, XMessages);
+                // StartMainActivity(primaryContext, XMessages);
                 return;
             }
             else Device.BeginInvokeOnMainThread(() =>
@@ -174,6 +198,44 @@ namespace XxmsApp.Api
         }
 
 
+        public void ShowNotification(string title, string content, Bundle bundle)
+        {
+            var context = Android.App.Application.Context;
+            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));
+
+            if (bundle != null)
+            {
+                notificationIntent.PutExtras(bundle);                
+            }
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
+                .SetContentTitle(title)
+                .SetContentText(content)
+
+                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, PendingIntentFlags.UpdateCurrent)) // 0
+                .SetAutoCancel(true)
+
+                .SetDefaults((int)NotificationPriority.High);
+
+
+            Notification notification = builder.Build();            
+            if (Options.ModelSettings.Sound == true)
+            {
+                notification.Sound = Android.Net.Uri.Parse(Options.ModelSettings.Rington.Path);                
+            }
+            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
+
+
+            if (Options.ModelSettings.Vibration == true)
+            {
+                Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
+                vibrator.Vibrate(400);            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0); 
+
+            }
+        }
+
+        [Obsolete]
         private void Save(SmsMessage smsMessage, int sim)
         {
             var uri = Telephony.Sms.ContentUri;
@@ -210,7 +272,7 @@ namespace XxmsApp.Api
         private ContentValues FillValues(Model.Message smsMessage)
         {            
 
-            ContentValues values = new ContentValues();            
+            ContentValues values = new ContentValues();
 
             var now = (DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds;
             var outNow = (smsMessage.TimeOut - new DateTime(1970, 1, 1)).TotalMilliseconds;
@@ -249,44 +311,11 @@ namespace XxmsApp.Api
 
         public void ShowNotification(string title, string content)
         {
-            var context = Android.App.Application.Context;
-
-            Intent notificationIntent = new Intent(Android.App.Application.Context, typeof(XxmsApp.Droid.MainActivity));            
-
-            
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .SetSmallIcon(Android.Resource.Drawable.IcDialogInfo)
-                .SetContentTitle(title)
-                .SetContentText(content)
-
-                .SetContentIntent(PendingIntent.GetActivity(context, 0, notificationIntent, 0))
-                .SetAutoCancel(true)
-                                
-                .SetDefaults((int)NotificationPriority.High);
-                
-
-            Notification notification = builder.Build();
-            // notification.Sound = null;
-            if (Options.ModelSettings.Sound == true)
-            {
-                notification.Sound = Android.Net.Uri.Parse(Options.ModelSettings.Rington.Path);
-            }
-            ((NotificationManager)context.GetSystemService(Context.NotificationService)).Notify(0, notification);
-
-
-            if (Options.ModelSettings.Vibration == true)
-            {
-                Vibrator vibrator = (Vibrator)context.GetSystemService(Context.VibratorService);
-                vibrator.Vibrate(400);            // vibrator.Vibrate(new long[] { 0, 1000, 1000, 1000 }, 0);   
-            }
-
-            // if (Options.ModelSettings.Sound == true) XMessages.Instance.SoundPlay(Options.ModelSettings.Rington, null, null);
-
+            ShowNotification(title, content, null);
         }
 
 
-
+        [Obsolete]
         private ContentValues FillValues(SmsMessage smsMessage, int sim)
         {
             var number = smsMessage.OriginatingAddress;

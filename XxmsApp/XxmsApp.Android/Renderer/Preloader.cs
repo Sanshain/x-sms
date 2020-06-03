@@ -26,6 +26,7 @@ namespace XxmsApp.Droid
     public class SplashActivity : AppCompatActivity                      // AppCompatActivity
     {
 
+        Bundle bundle = null;
 
         protected override void OnCreate(Bundle savedInstanceState) // , PersistableBundle persistentState
         {
@@ -36,10 +37,8 @@ namespace XxmsApp.Droid
 
             var bar = FindViewById(Resource.Id.progressBar) as ProgressBar;
             bar.Visibility = ViewStates.Visible;
-            
 
-
-
+            bundle = savedInstanceState;
 
             /*
             AnimatoOnAppearance(logo, () =>
@@ -109,7 +108,9 @@ namespace XxmsApp.Droid
         {
             await Task.Delay(100);
 
-            StartActivity(new Intent(Application.Context, typeof(MainActivity)));
+            var intent = new Intent(Application.Context, typeof(MainActivity));
+            // intent.PutExtra("message", "123");
+            StartActivity(intent);
         }
     }
 }

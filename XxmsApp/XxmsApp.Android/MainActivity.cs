@@ -14,7 +14,7 @@ using Android.Telephony;
 
 using XxmsApp.Api.Droid;
 using Android.Provider;
-
+using System.Linq;
 
 // [assembly: Permission(Name = "android.permission.BROADCAST_WAP_PUSH")] namespace Receiver {}
 
@@ -64,6 +64,30 @@ namespace XxmsApp.Droid
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
+
+
+            var name = typeof(Model.Message).Name;                                            // "Message"
+            var messages = this.Intent.GetStringExtra(name);                                  // "messages"
+
+            if (messages == null)
+            {
+                Api.LowLevelApi.Instance.ShowNotification("message in null", "ok");
+            }
+            else
+            {
+
+                var msgs = Api.MessageReceiver.Deserialize(messages);
+
+                Api.LowLevelApi.Instance.ShowNotification(msgs.Count.ToString(), msgs.First().Address);
+
+                Cache.database.Insert(new XxmsApp.Model.Errors
+                {
+                    Name = "bundle content",                        
+                    Params = messages
+                });                
+            }
+
+
 
             base.OnCreate(bundle);
 
