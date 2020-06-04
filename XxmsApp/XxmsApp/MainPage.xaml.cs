@@ -14,10 +14,11 @@ namespace XxmsApp
     {
 
         Dictionary<Type, Action> onPop;
-        public Piece.MainList Dialog { get; private set; }
+        public Piece.MainList Dialogs { get; private set; }
         Button subBtn = new Button { Text = "Создать", IsEnabled = false };
+        List<Model.Message> initMessage = null;
 
-        public MainPage()
+        public MainPage(List<Model.Message> messages = null)
         {
 
             var rootLayout = Initialize() as AbsoluteLayout;
@@ -38,13 +39,15 @@ namespace XxmsApp
             }
             else subBtn.IsEnabled = true;
 
+            initMessage = messages;
+
         }
 
 
         private Layout Initialize()
         {
             var rootLayout = new AbsoluteLayout();
-            var dialogs = Dialog = new Piece.MainList();
+            var dialogs = Dialogs = new Piece.MainList();
 
             rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
@@ -88,7 +91,14 @@ namespace XxmsApp
             var parent = (this.Parent as NavigationPage);
             parent.Popped += MainPage_PoppedToRoot;
 
-            
+            if (initMessage != null)
+            {
+                var msg = initMessage.FirstOrDefault();
+
+                var dialog = (Dialogs.ItemsSource as IEnumerable<Dialog>).FirstOrDefault(d => d.Address == msg.Address);
+
+                dialog.L(d => parent?.PushAsync(new Views.MessagesPage(d)));
+            }
         }
 
         public Func<bool> OnBackPressed = null;

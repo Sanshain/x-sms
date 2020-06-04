@@ -68,23 +68,12 @@ namespace XxmsApp.Droid
 
             var name = typeof(Model.Message).Name;                                            // "Message"
             var messages = this.Intent.GetStringExtra(name);                                  // "messages"
+            System.Collections.Generic.List<Model.Message> messageList = null;
 
-            if (messages == null)
+            if (messages != null)
             {
-                Api.LowLevelApi.Instance.ShowNotification("message in null", "ok");
-            }
-            else
-            {
-
-                var msgs = Api.MessageReceiver.Deserialize(messages);
-
-                Api.LowLevelApi.Instance.ShowNotification(msgs.Count.ToString(), msgs.First().Address);
-
-                Cache.database.Insert(new XxmsApp.Model.Errors
-                {
-                    Name = "bundle content",                        
-                    Params = messages
-                });                
+                messageList = Api.MessageReceiver.Deserialize(messages);
+                // Api.LowLevelApi.Instance.ShowNotification(messageList.Count.ToString(), messageList.First().Address);
             }
 
 
@@ -93,7 +82,7 @@ namespace XxmsApp.Droid
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
-            var application = new App();
+            var application = new App(messageList);
 
             try
             {

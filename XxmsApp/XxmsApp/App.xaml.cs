@@ -22,7 +22,7 @@ namespace XxmsApp
         internal Task<List<Model.Contacts>> contactsWaiter;
         internal List<Model.Contacts> _contacts;
 
-        public App()
+        public App(List<Model.Message> _messages = null)
         {
             
             InitializeComponent();
@@ -34,8 +34,9 @@ namespace XxmsApp
             MainPage = (new MasterDetailPage()
             {
                 Master = new MenuPage { Title = "Title" },
-                Detail = new NavPage(new XxmsApp.MainPage()) { BarBackgroundColor = Color.Black } // 
+                Detail = new NavPage(new XxmsApp.MainPage(_messages)) { BarBackgroundColor = Color.Black } // 
             });//*/
+            
 
             MessagingCenter.Subscribe<App, List<XxmsApp.Model.Message>>(
                 this,                                                       // кто подписывается на сообщения
@@ -62,7 +63,7 @@ namespace XxmsApp
 
                     Cache.database.InsertAll(msgs);
                     Cache.InsertAll(msgs);
-                    StartPage.Dialog.ItemsSource = StartPage.Dialog.ItemsUpdate();          // StartPage.Dialog.DataInitialize();
+                    StartPage.Dialogs.ItemsSource = StartPage.Dialogs.ItemsUpdate();          // StartPage.Dialog.DataInitialize();
 
                     i = 0;
                     while(i < msgs.Count)

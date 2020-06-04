@@ -13,6 +13,15 @@ namespace XxmsApp
     public static class Utils
     {
 
+        public static T L<T>(this T obj, Action<T> act) where T: class
+        {
+            if (obj is null) return null;
+
+            act?.Invoke(obj);
+
+            return obj;
+        }
+
         public static void CallAfter(int ms, Action act)
         {
             Device.StartTimer(TimeSpan.FromMilliseconds(ms), () =>
