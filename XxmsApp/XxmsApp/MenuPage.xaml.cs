@@ -33,6 +33,7 @@ namespace XxmsApp
                 {
                     "Настройки",
                     "Read sms",
+                    "Inner read sms",
                     "Сделать дефолтным",
                     "Check default",
                     "О нас",
@@ -105,37 +106,69 @@ namespace XxmsApp
                     break;
                 case "Read sms":
 
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
+                    {
+                        Stopwatch sw = new Stopwatch();
+                        sw.Start();
 
-                    /*
-                    var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
-                    var messages = x_messages.Read();
-                    //*/
-                    // var c = messages.Count;
+                        /*
+                        var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
+                        var messages = x_messages.Read();
+                        //*/
+                        // var c = messages.Count;
 
-                    var messages = await Cache.UpdateAsync(new List<Model.Message>());
+                        var messages = await Cache.UpdateAsync(new List<Model.Message>());
 
-                    /*
-                    var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
-                    var messages = x_messages.Read();
-                    var objects = messages.Select(m => m as object).ToList();//*/
+                        /*
+                        var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
+                        var messages = x_messages.Read();
+                        var objects = messages.Select(m => m as object).ToList();//*/
 
-                    sw.Stop();
+                        sw.Stop();
 
-                    var di = DependencyService.Get <XxmsApp.Api.ILowLevelApi>();
-                    di.ShowNotification("Test", "content");
-                    
+                        var di = DependencyService.Get<XxmsApp.Api.ILowLevelApi>();
+                        di.ShowNotification("Test", "content");
 
-                    var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
-                    var layout = page.Content as AbsoluteLayout;
-                    (layout.Children[0] as MainList).DataInitialize();                              // layout.Children[0] = new MainList();
-                    AbsoluteLayout.SetLayoutBounds(layout.Children[0], new Rectangle(0, 0, 1, 0.9));
-                    AbsoluteLayout.SetLayoutFlags(layout.Children[0], AbsoluteLayoutFlags.SizeProportional);
 
-                    DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
+                        var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
+                        var layout = page.Content as AbsoluteLayout;
+                        (layout.Children[0] as MainList).DataInitialize();                              // layout.Children[0] = new MainList();
+                        AbsoluteLayout.SetLayoutBounds(layout.Children[0], new Rectangle(0, 0, 1, 0.9));
+                        AbsoluteLayout.SetLayoutFlags(layout.Children[0], AbsoluteLayoutFlags.SizeProportional);
 
-                    // sw.Elapsed.ToString()
+                        DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
+
+                        // sw.Elapsed.ToString()
+
+                    }
+                    goto default;
+
+                case "Inner read sms":
+
+                    Task.Run(() =>
+                    {
+                        Stopwatch sw = new Stopwatch();
+                        sw.Start();
+                        
+                        /*
+                        var msg = Cache.database.FindWithQuery<Model.Message>(
+                            "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
+                        );
+                        var id = msg.Id;//*/
+                        
+                        
+                        var id = ((((this.Parent as MasterDetailPage).Detail as NavPage).RootPage as MainPage).Dialogs.ItemsSource
+                            as IEnumerable<Dialog>).SelectMany(d => d.Messages).Max(m => m.Id);//*/
+
+                        var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(id);
+
+                        sw.Stop();
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", msgs.Count.ToString() + " sms", "Ok");
+                        });
+                        
+                    });
 
                     goto default;
 
