@@ -110,9 +110,19 @@ namespace XxmsApp.Views
              {
                  if (await DisplayAlert("Отправить?", "Вы уверены. что хотите отправить отчет разработчикам?", "ok", "Нет"))
                  {
-                     DisplayAlert("Поздравляем!", "Отчет отправлен", "ok");
+                     var notices = Cache.database.Table<Model.Errors>();
+                     string log = Api.Funcs.PhoneModel + ":" + Environment.NewLine + Environment.NewLine +
+                        string.Join(Environment.NewLine, notices.Select(er =>
+                           er.Name + Environment.NewLine +
+                           er.Method + Environment.NewLine +
+                           er.Params + Environment.NewLine));
 
+                     DependencyService.Get<Api.IEssential>().SendEmail("Отчет об ошибках",
+                         "Здесь вы можете добавить описание вашей проблемы (если она есть). Мы постараемся вам помочь",
+                         log);
 
+                     // if (!DependencyService.Get<Api.ILowLevelApi>().IsEsentialInit) return;
+                     // await SendOnEmail(notices);
                  }
              };
 
@@ -140,6 +150,32 @@ namespace XxmsApp.Views
             Title = "Настройки";
             // Properties.Resources.Culture
 
+        }
+
+        private static async Task SendOnEmail(SQLite.TableQuery<Model.Errors> notices)
+        {
+            var message = new Xamarin.Essentials.EmailMessage
+            {
+                Subject = "Отчет об ошибках",
+                Body = "Здесь вы можете добавить описание вашей проблемы (если она есть). Мы постараемся вам помочь",
+                To = new List<string>() { "anticafes@gmail.com" },
+                BodyFormat = Xamarin.Essentials.EmailBodyFormat.PlainText
+            };
+
+            var fn = "logs.txt";
+            var file = System.IO.Path.Combine(Xamarin.Essentials.FileSystem.CacheDirectory, fn);
+            string log = Api.Funcs.PhoneModel + ":" + Environment.NewLine + Environment.NewLine +
+                string.Join(Environment.NewLine, notices.Select(er =>
+                   er.Name + Environment.NewLine +
+                   er.Method + Environment.NewLine +
+                   er.Params + Environment.NewLine));
+            System.IO.File.WriteAllText(file, log);
+            message.Attachments.Add(new Xamarin.Essentials.EmailAttachment(fn));
+
+
+
+            await Xamarin.Essentials.Email.ComposeAsync(message);
+            //*/
         }
 
         /// <summary>

@@ -111,36 +111,27 @@ namespace XxmsApp.Views
             view.SizeChanged += View_SizeChanged;
 
             Label time = new Label { HorizontalOptions = LayoutOptions.Start };
-            Label content = new Label
-            {
-                HorizontalOptions = LayoutOptions.StartAndExpand,
-            };
-            Label status = new Label();
+            Label content = new Label { HorizontalOptions = LayoutOptions.StartAndExpand };
+            Label status = new Label() { HorizontalOptions = LayoutOptions.End };
 
             time.SetBinding(Label.TextProperty, "Time");
             content.SetBinding(Label.TextProperty, "Value");
-            status.SetBinding(Label.TextProperty, "States");            
-
+            status.SetBinding(Label.TextProperty, "SimName");                                       // States    
             view.Children.Extend(time, content, status);
 
             var messageView = new Frame
             {
                 Content = view,                
-                // BackgroundColor = Color.Red,
-                // Padding = new Thickness(0),
                 HasShadow = true,                
                 OutlineColor = Color.Red,             // material design
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
-                
             };
 
             vCellPadding = messageView.Padding.Bottom + messageView.Padding.Top;
 
-
             messageView.SetBinding(Frame.MarginProperty, "Incoming", BindingMode.OneWay, IncomingConverter.Single);
             messageView.SetBinding(Frame.BackgroundColorProperty, "Incoming", BindingMode.OneWay, IncomingConverter.Single);
-
             // messageView.SetBinding(Label.TextProperty, "Selected");
 
             var viewCell = new ViewCell { View = messageView };
@@ -157,9 +148,8 @@ namespace XxmsApp.Views
                     {
                         // Cache.database.Delete<Message>(mess.Id);
                         if (mess is Message)
-                        {
-                            // dialog.Messages.Remove(mess);
-                            dialog.RemoveCommand.Execute(mess);
+                        {                            
+                            dialog.RemoveCommand.Execute(mess);             // dialog.Messages.Remove(mess);
                         }
 
                     }
@@ -184,9 +174,6 @@ namespace XxmsApp.Views
                 
                 if (messagesList.SelectedItem == content.BindingContext)
                 {
-                    /*if (PreviousView != null) PreviousView.BackgroundColor = Color.Default;                    
-                    view.BackgroundColor = Color.Orange; PreviousView = view;//*/
-
                     var message = content.BindingContext as Message;
                     DisplayAlert("Инфо", "", "Ok");
                     messagesList.SelectedItem = null;

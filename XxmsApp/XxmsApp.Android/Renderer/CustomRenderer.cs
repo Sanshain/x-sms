@@ -92,24 +92,71 @@ namespace XxmsApp.Views.Droid
             }
         }
 
+
+
+
         private void ToolBar_ChildViewAdded(object sender, ChildViewAddedEventArgs e)
         {
-            if (e.Child is Android.Support.V7.Widget.ActionMenuView)
+            if (e.Child is Android.Support.V7.Widget.ActionMenuView menuView)
             {
                 var mnuWrapper = (e.Child as Android.Support.V7.Widget.ActionMenuView);
                 mnuWrapper.ChildViewAdded += MnuWrapper_ChildViewAdded;
 
-                // mnuWrapper.SetBackgroundColor(global::Android.Graphics.Color.Orange);
-            }
-        }        
+                menus.Add(menuView);
 
-        private void MnuWrapper_ChildViewAdded(object sender, ChildViewAddedEventArgs e)
-        {
-            var item = e.Child;                                 // ActionMenuPresenter            
-            item.Click += Item_Click;
-            item.FocusChange += Item_FocusChange;
+                // mnuWrapper.SetBackgroundColor(global::Android.Graphics.Color.Orange);
+                // for some reason just on start app (mainpage just first time):
+                /*
+                menuView.ViewAttachedToWindow += (object s, ViewAttachedToWindowEventArgs ev) =>
+                {
+                    menuView.Alpha = 0.1f;
+                    objectAnimator = ObjectAnimator.OfFloat(menuView, "Alpha", 1f);
+                    objectAnimator.SetDuration(1000);
+                    objectAnimator.Start();
+                };//*/  
+            }
         }
 
+        System.Collections.Generic.List<Android.Support.V7.Widget.ActionMenuView> menus =
+            new System.Collections.Generic.List<Android.Support.V7.Widget.ActionMenuView>();
+        int init = 0;
+
+        System.Collections.Generic.List<ActionMenuItemView> subMenuItems = new System.Collections.Generic.List<ActionMenuItemView>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender">ActionMenuView</param>
+        /// <param name="e"></param>
+        private void MnuWrapper_ChildViewAdded(object sender, ChildViewAddedEventArgs e)
+        {            
+
+            var item = e.Child;                                 // ActionMenuPresenter            
+            
+            var navPage = Element as NavigationPage;
+            if (item is ActionMenuItemView && navPage.CurrentPage.GetType() == typeof(MessagesPage))
+            {                
+                if (subMenuItems.Contains(item as ActionMenuItemView) == false)
+                {
+                    if (subMenuItems.Count == 2) subMenuItems.Clear();
+                    subMenuItems.Add(item as ActionMenuItemView);
+                }
+            }//*/
+
+            item.Click += Item_Click;
+            item.FocusChange += Item_FocusChange;
+
+            // var item1 = e.Child as AppCompatImageView;
+            // item.ViewAttachedToWindow += Item_ViewAttachedToWindow;
+        }
+
+        private void Item_ViewAttachedToWindow(object sender, ViewAttachedToWindowEventArgs e)
+        {
+            if (sender is ActionMenuItemView item)
+            {
+                // item.Alpha = 0.3f;      // for some reason just on start app (mainpage just first time)
+            }
+        }
         private void Item_FocusChange(object sender, FocusChangeEventArgs e)
         {
             if (e.HasFocus)
@@ -117,6 +164,8 @@ namespace XxmsApp.Views.Droid
 
             }
         }
+
+
 
         private void Item_Click(object sender, EventArgs e)
         {            
@@ -135,13 +184,23 @@ namespace XxmsApp.Views.Droid
 
 
                 var navPage = Element as NavigationPage;
-                var btn = navPage.CurrentPage.ToolbarItems.First() as SearchToolbarButton;          // RootPage
-                
-                if (btn.State == (SearchPanelState.Hidden | SearchPanelState.InSearch) || navPage.CurrentPage != navPage.RootPage)
+                var btn = navPage.CurrentPage.ToolbarItems.Last() as SearchToolbarButton;          // RootPage
+
+                if (item == subMenuItems.FirstOrDefault())
                 {
-                    btn.ItemClicked();                                                              // occurs click event on X.Forms project
+                    btn = navPage.CurrentPage.ToolbarItems.First() as SearchToolbarButton;
+                    btn.ItemClicked();
                     clicked = true;
+                    // return;
                 }//*/
+                else // if (item == subMenuItems.LastOrDefault())
+                {
+                    if (btn.State == (SearchPanelState.Hidden | SearchPanelState.InSearch) || navPage.CurrentPage != navPage.RootPage)
+                    {
+                        btn.ItemClicked();                                                              // occurs click event on X.Forms project
+                        clicked = true;
+                    }
+                }
 
                 objectAnimator = ObjectAnimator.OfFloat(item, "Alpha", 0.3f);
                 ObjectAnimator scaleDownX = ObjectAnimator.OfFloat(item, "ScaleX", 0.7f);
@@ -159,10 +218,12 @@ namespace XxmsApp.Views.Droid
 
                     if (clicked == false) btn.ItemClicked();
 
-
-                    var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
-                    var d = item.Context.GetDrawable(image);
-                    item.SetIcon(d);
+                    if (navPage.CurrentPage.GetType() != typeof(MessagesPage) || item == subMenuItems.LastOrDefault())
+                    {
+                        var image = SearchToolbarButton.Icons[btn.State].Split('.')[0];
+                        var d = item.Context.GetDrawable(image);
+                        item.SetIcon(d);
+                    }
 
                     var a = ObjectAnimator.OfFloat(item, "Alpha", 1);   // item.Alpha == 0 ? 1 : 0
                     ObjectAnimator scaleDownX1 = ObjectAnimator.OfFloat(item, "ScaleX", 1);

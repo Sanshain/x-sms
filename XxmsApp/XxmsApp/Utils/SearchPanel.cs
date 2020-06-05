@@ -332,6 +332,7 @@ namespace XxmsApp
 
     }
 
+
     public class MsgSearchPanel : SearchPanel<Model.Message>
     {
         private readonly string defaultTitle = string.Empty;
@@ -374,15 +375,61 @@ namespace XxmsApp
             }
 
 
+
+            var number = source.Address.ToNumber().ToString();
+            var callButton = new SearchToolbarButton
+            {
+                Order = ToolbarItemOrder.Primary,
+                Icon = new FileImageSource { File = "phone2.png" },
+                Text = "Phone",
+                Priority = 0,
+                ItemClicked = () =>
+                {
+
+                    if (Options.ModelSettings.FastCall)
+                    {
+                        DependencyService.Get<Api.IEssential>().PhoneDialer(number);
+                    }
+                    else
+                    {
+                        try {
+                            Xamarin.Essentials.PhoneDialer.Open(number);                        // if (!DependencyService.Get<Api.ILowLevelApi>().IsEsentialInit) return;
+                        }
+                        catch (ArgumentNullException) { Api.Funcs.Toast("У вашего оппонента неподдерживаемый номер телефона"); }
+                        catch (Xamarin.Essentials.FeatureNotSupportedException)
+                        {
+                            Api.Funcs.Toast("Чуда не будет. Ваш девайс не умеет говорить");
+                        }
+                        catch (Exception ex)
+                        {
+                            Cache.database.Insert(new Model.Errors
+                            {
+                                Name = ex.Message,
+                                Method = System.Reflection.MethodBase.GetCurrentMethod().Name,
+                                Params = number
+                            });
+                        }
+                    }
+
+                }
+            };                       
+            page.ToolbarItems.Add(callButton);
+
+
+
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
             {
                 ContentLayout = rootLayout,
                 ItemClicked = () => SearchButton_Clicked(rootLayout),
                 // Icon = new FileImageSource() { File = "d_search.png" }
             });
+
             
+
+
             PageWidth = page.Width;
         }
+
 
 
         protected override void ShowHintBtnOnEmpty() { }

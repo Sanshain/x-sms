@@ -262,10 +262,14 @@ namespace XxmsApp.Options
 
         [FullDescription("Выбрать мелодию", "")]
         public static Sound Rington { get => GetFunc<Sound>(); set => SetFunc(value); }
+
         [FullDescription("Звуковое уведомление", "Звуковое уведомление при получении смс")]
         public static bool Sound { get => GetFunc(); set => Set(value); }
         [FullDescription("Включить вибрацию", "Вибрация при получении сообщения")]
         public static bool Vibration { get => GetFunc(); set => Set(value); }
+        [FullDescription("Быстрый звонок", "Сразу начинать непосредственный набор нормера из диалога")]
+        public static bool FastCall { get => GetFunc(); set => Set(value); }
+
         [FullDescription("Выберите язык", "")]
         public static Piece.Languages Language { get => GetFunc<Piece.Languages>(); set => SetFunc(value); }
         [FullDescription("Sim для отправки", "")]

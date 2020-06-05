@@ -14,6 +14,7 @@ using Xamarin.Forms;
 using XxmsApp.Api.Droid;
 using Android.Support.V7.App;
 using Android.Provider;
+using Xamarin.Essentials;
 
 [assembly: Dependency(typeof(XxmsApp.Api.LowLevelApi))]
 namespace XxmsApp.Api
@@ -96,6 +97,30 @@ namespace XxmsApp.Api
 
 
         public bool IsDefault => Telephony.Sms.GetDefaultSmsPackage(context).Equals(context.PackageName);
+
+        static bool isEssentialInit = false;
+        public bool IsEsentialInit
+        {
+            get
+            {
+                if (isEssentialInit) return true;
+                else
+                {
+                    // add this line to your code, it may also be called: bundle
+                    Xamarin.Essentials.Platform.Init(
+                        XxmsApp.Droid.MainActivity.Instance, 
+                        XxmsApp.Droid.MainActivity.Instance.initBundle);
+
+                    isEssentialInit = true;
+
+                    return true;
+                }
+
+            }
+        }
+
+        public string Model => Android.OS.Build.Model + $" ({Android.OS.Build.Manufacturer.ToUpper()})";
+
 
         public void ChangeDefault()
         {

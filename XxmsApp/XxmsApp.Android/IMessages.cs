@@ -33,7 +33,8 @@ namespace XxmsApp.Api.Droid
 
     public enum OnResult 
     {
-        IsAudio = 0
+        IsAudio = 0,
+        EmailSent = 1
     }
 
     class XMessages : IMessages

@@ -87,11 +87,13 @@ namespace XxmsApp.Api
         void Copy(string text);
         
         void AppExit();
+        string Model { get; }
 
         void ChangeDefault();
         bool IsDefault { get; }
 
-        void Play();                // Play(string sound, Action<string> onFinish);        
+        void Play();                // Play(string sound, Action<string> onFinish);       
+        bool IsEsentialInit { get; }
     }
 
 
@@ -110,22 +112,32 @@ namespace XxmsApp.Api
 
 
 
-
-
-
-
-
-
     public static class Funcs
     {
         static ILowLevelApi api = null;
-        static Funcs() =>  api = DependencyService.Get<ILowLevelApi>();
-        
+        static Funcs() => api = DependencyService.Get<ILowLevelApi>();
+
         /// <summary>
         /// App exit
         /// </summary>
         public static void AppExit() => api.AppExit();
+        public static void Toast(string s) => api.ShowToast(s);
+        public static string PhoneModel => api.Model;
 
     }
+
+
+
+
+
+
+    [Obsolete]
+    public interface IEssential
+    {
+        bool PhoneDialer(string number);
+        void SendEmail(string title, string content, string attach);
+    }
+
+
 
 }

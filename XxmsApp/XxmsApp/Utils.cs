@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 using XxmsApp.Piece;
+using System.Linq;
 
 namespace XxmsApp
 {
@@ -20,6 +21,11 @@ namespace XxmsApp
             act?.Invoke(obj);
 
             return obj;
+        }
+
+        public static long ToNumber(this string source)
+        {
+            return long.Parse(new string(source.Where(c => Char.IsDigit(c)).ToArray()));
         }
 
         public static void CallAfter(int ms, Action act)

@@ -57,9 +57,11 @@ namespace XxmsApp.Droid
     {
         public static Android.Content.ContentResolver InstanceResolver;
         internal static MainActivity Instance;
+        internal Bundle initBundle = null;
 
         protected override void OnCreate(Bundle bundle)
         {
+            initBundle = bundle;
             Instance = this;
 
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -79,6 +81,10 @@ namespace XxmsApp.Droid
             InstanceResolver = this.ContentResolver;
 
             base.OnCreate(bundle);
+
+            Xamarin.Essentials.Platform.Init(
+                XxmsApp.Droid.MainActivity.Instance,
+                XxmsApp.Droid.MainActivity.Instance.initBundle);
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
@@ -169,6 +175,12 @@ namespace XxmsApp.Droid
                     }
                     
                     // String name = data.GetStringExtra("name");
+
+                    break;
+
+                case (int)OnResult.EmailSent:
+
+                    Toast.MakeText(this, "Письмо отправлено", ToastLength.Long).Show();
 
                     break;
 
