@@ -98,6 +98,8 @@ namespace XxmsApp
                 var dialog = (Dialogs.ItemsSource as IEnumerable<Dialog>).FirstOrDefault(d => d.Address == msg.Address);
 
                 dialog.L(d => parent?.PushAsync(new Views.MessagesPage(d)));
+
+                initMessage = null;
             }
         }
 

@@ -60,21 +60,18 @@ namespace XxmsApp.Api
                     Params = ex.StackTrace
                 });
 
-                if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction)
-                {
-                    Toast.MakeText(context, "New one message", ToastLength.Long).Show();
-                }                
-                // Api.LowLevelApi.Instance.ShowNotification("123", "111");
+                if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction)                
+                    Toast.MakeText(context, "New one message", ToastLength.Long).Show();                                
 
                 onStart = true;
-
                 primaryContext = context;
             }
 
 
             if (intent.Action != Telephony.Sms.Intents.SmsReceivedAction) return;           // and Telephony.Sms.Intents.SmsDeliverAction ?? for delevered?            
 
-            var bundle = intent.Extras;                     // var slot = bundle.GetInt("slot", -1);
+            var bundle = intent.Extras;
+            // var slot = bundle.GetInt("slot", -1);
             var sub = bundle.GetInt("subscription", -1);
             var columns = bundle.KeySet().ToArray();
 
@@ -134,7 +131,8 @@ namespace XxmsApp.Api
 
         private void OnMessagesReiceved(SmsMessage[] messages, int sim, bool onStart = false)
         {
-            
+            var _sim = Api.Droid.XMessages.Instance.Sims.FirstOrDefault(s => s.SubId == sim);
+
             var smsMesages = new List<(string Address, string Message)>();
             var XMessages = new List<XxmsApp.Model.Message>();
 
@@ -151,6 +149,7 @@ namespace XxmsApp.Api
                     XMessages.Add(new XxmsApp.Model.Message
                     {                        
                         SimOsId = sim.ToString(),
+                        SimIccID = _sim.IccId,
                         Address = messages[i].OriginatingAddress,
                         Value = messages[i].MessageBody,
                         TimeOut = new DateTime(1970, 1, 1).AddMilliseconds(messages[i].TimestampMillis),

@@ -144,6 +144,16 @@ namespace XxmsApp.Piece
 
         public List<Dialog> ItemsUpdate(bool no_cache = false)
         {
+
+            var msg = Cache.database.FindWithQuery<Model.Message>(
+                "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
+            );
+
+            var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);
+
+            Cache.database.InsertAll(msgs);
+            Cache.InsertAll(msgs);
+
             var r = this.DataLoad(0, no_cache).GroupBy(m => m.Address).Select(g => new Dialog
             {
                 Address = g.Key,

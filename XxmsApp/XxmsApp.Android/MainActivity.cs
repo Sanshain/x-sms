@@ -76,7 +76,7 @@ namespace XxmsApp.Droid
                 // Api.LowLevelApi.Instance.ShowNotification(messageList.Count.ToString(), messageList.First().Address);
             }
 
-
+            InstanceResolver = this.ContentResolver;
 
             base.OnCreate(bundle);
 
@@ -99,8 +99,7 @@ namespace XxmsApp.Droid
             // set in App.xaml:
             // Xamarin.Forms.Application.Current.On<Xamarin.Forms.PlatformConfiguration.Android>()
             // .UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
-
-            InstanceResolver = this.ContentResolver;
+            
             
         }
 

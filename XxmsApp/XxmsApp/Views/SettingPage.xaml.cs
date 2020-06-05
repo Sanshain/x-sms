@@ -83,15 +83,21 @@ namespace XxmsApp.Views
             // var itemTemplate = new DataTemplate(() => CellGenerate());
             var itemTemplate = new DataTemplate(MultiPurposeCellGenerate);
 
-            
 
+            Button send;
             Button reset;
             var SettingList = new ListView()
             {
                 ItemTemplate = itemTemplate,                
                 HasUnevenRows = true,
                 // Header = new HeaderFrame { Padding = new Thickness(0), HeightRequest = 80 },
-                Footer = reset = new Button { Text = "Сброс настроек" },
+                Footer = new StackLayout
+                {
+
+                }.AddChilds(
+                    reset = new Button { Text = "Сброс настроек" },
+                    send = new Button { Text = "Отправить отчет с ошибками разработчикам" }
+                ),
                 ItemsSource = settings = settingList ?? Options.ModelSettings.Initialize()
 
                 // BindingContext = settings = new ObservableCollection<Model.Setting>(Settings.Initialize())
@@ -100,6 +106,15 @@ namespace XxmsApp.Views
                 // ItemsSource = new List<Options.Setting> { new Options.Setting { Name = "1", Content = true, Description = "desc" }}
             };
 
+            send.Clicked += async (s, e) =>
+             {
+                 if (await DisplayAlert("Отправить?", "Вы уверены. что хотите отправить отчет разработчикам?", "ok", "Нет"))
+                 {
+                     DisplayAlert("Поздравляем!", "Отчет отправлен", "ok");
+
+
+                 }
+             };
 
             reset.Clicked += async (object sender, EventArgs e) =>
             {

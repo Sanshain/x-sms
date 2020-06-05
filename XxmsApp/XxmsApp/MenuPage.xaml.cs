@@ -148,13 +148,12 @@ namespace XxmsApp
                     {
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
-                        
+
                         /*
                         var msg = Cache.database.FindWithQuery<Model.Message>(
                             "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
                         );
                         var id = msg.Id;//*/
-                        
                         
                         var id = ((((this.Parent as MasterDetailPage).Detail as NavPage).RootPage as MainPage).Dialogs.ItemsSource
                             as IEnumerable<Dialog>).SelectMany(d => d.Messages).Max(m => m.Id);//*/
@@ -189,24 +188,11 @@ namespace XxmsApp
 
                     goto default;
 
-
                 case "Play":
 
                     var r = DependencyService.Get<XxmsApp.Api.IPlayer>();
                     var ringtone = Options.ModelSettings.Rington;
                     r.SoundPlay(ringtone);
-
-                    /*
-                    var ir = DependencyService.Get<XxmsApp.Api.ILowLevelApi>();
-                    ir.Play();
-                    */
-                                        
-                    /*
-                    await (this.Parent as MasterDetailPage).Detail.Navigation.PushAsync(new Views.SoundPage(sound =>
-                    {
-                        // DisplayAlert("Result", sound.Name, "ok");
-                    }));
-                    //*/
 
                     goto default;
 

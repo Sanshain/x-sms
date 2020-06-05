@@ -311,6 +311,9 @@ namespace XxmsApp.Api.Droid
             return values;
         }
 
+        Sim[] sims = null;
+        public Sim[] Sims => sims ?? (sims = GetSimsInfo().ToArray());
+
         public IEnumerable<Sim> GetSimsInfo()
         {
             var ls = new List<Sim>();
