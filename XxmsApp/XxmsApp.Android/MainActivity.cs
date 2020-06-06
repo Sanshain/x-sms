@@ -187,10 +187,12 @@ namespace XxmsApp.Droid
                     break;
 
                 case (int)OnResult.SetDefaultApp:
-                    
-                    // XMessages.UpdateMessageStates();
 
-                    Toast.MakeText(this, "Спасибо", ToastLength.Long).Show();
+                    // XMessages.UpdateMessageStates();
+                    if (Api.LowLevelApi.Instance.IsDefault)
+                    {
+                        Toast.MakeText(this, "Спасибо, что вы с нами", ToastLength.Long).Show();
+                    }                        
 
                     break;
 

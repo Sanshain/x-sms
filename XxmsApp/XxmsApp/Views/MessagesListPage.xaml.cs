@@ -57,27 +57,17 @@ namespace XxmsApp.Views
             {               
 
                 this.Title = "Сообщения c " + dialog.Contact;               // dialog.Address
-
-                /*
-                var bind = new Binding()
+                /* messagesList.SetBinding(ListView.ItemsSourceProperty, new Binding()
                 {
                     Mode = BindingMode.Default,
                     Source = dialog,
                     Path = "Messages"
-                };
-
-                messagesList.SetBinding(ListView.ItemsSourceProperty, bind); // "Messages" */
+                }); // "Messages" */
 
                 messagesList.SetValue(ListView.ItemsSourceProperty, dialog.Messages);
                 dialog.Messages.CollectionChanged += Messages_CollectionChanged;
-
                 // messagesList.ItemsSource = dialog.Messages;
-
-                if (dialog.LastMsgState == MessageState.Unread)
-                {
-                    dialog.SetAsRead();
-                }
-
+                if (dialog.LastMsgState == MessageState.Unread) dialog.SetAsRead();
             }
 
 
@@ -250,7 +240,14 @@ namespace XxmsApp.Views
                 Margin = new Thickness(10, 0, 0, 0),
                 HorizontalOptions = LayoutOptions.FillAndExpand
             };
-
+            mess_editor.Focused += (s, e) =>
+            {
+                var appApi = DependencyService.Get<Api.ILowLevelApi>();
+                if(appApi.IsDefault == false)
+                {
+                    appApi.ChangeDefault();
+                }
+            };
 
             var listView = messagesList;
             //  ((this.Content as RelativeLayout).Children.First() as StackLayout).Children.First() as ListView;

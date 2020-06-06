@@ -117,7 +117,7 @@ namespace XxmsApp.Views
                            er.Method + Environment.NewLine +
                            er.Params + Environment.NewLine));
 
-                     DependencyService.Get<Api.IEssential>().SendEmail("Отчет об ошибках",
+                     DependencyService.Get<Api.IEssential>().SendEmail("XmsApp: " + "отчет об ошибках",
                          "Здесь вы можете добавить описание вашей проблемы (если она есть). Мы постараемся вам помочь",
                          log);
 
