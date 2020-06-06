@@ -354,7 +354,8 @@ namespace XxmsApp
             if (string.IsNullOrEmpty(source.Query)) defaultTitle = page.Title;
             else
             {
-                ((App.Current.MainPage as MasterDetailPage).Detail as NavPage).Title = "13";
+                // ((App.Current.MainPage as MasterDetailPage).Detail as NavPage).Title = "13";
+
                 page.Title = defaultTitle = page.Title.Split(' ').Last() + $"({source.Query})";        
                 
                 ((App.Current.MainPage as MasterDetailPage).Detail as NavPage).BarTextColor = Color.Orange;
@@ -377,6 +378,28 @@ namespace XxmsApp
 
 
             var number = source.Address.ToNumber().ToString();
+            if (number.ToNumber() > 0)
+            {
+                CreateCallButton(page, number);
+            }
+
+
+            page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
+            {
+                ContentLayout = rootLayout,
+                ItemClicked = () => SearchButton_Clicked(rootLayout),
+                // Icon = new FileImageSource() { File = "d_search.png" }
+            });
+
+            
+
+
+            PageWidth = page.Width;
+        }
+
+        
+        private void CreateCallButton(ContentPage page, string number)
+        {
             var callButton = new SearchToolbarButton
             {
                 Order = ToolbarItemOrder.Primary,
@@ -392,7 +415,8 @@ namespace XxmsApp
                     }
                     else
                     {
-                        try {
+                        try
+                        {
                             Xamarin.Essentials.PhoneDialer.Open(number);                        // if (!DependencyService.Get<Api.ILowLevelApi>().IsEsentialInit) return;
                         }
                         catch (ArgumentNullException) { Api.Funcs.Toast("У вашего оппонента неподдерживаемый номер телефона"); }
@@ -412,25 +436,9 @@ namespace XxmsApp
                     }
 
                 }
-            };                       
+            };
             page.ToolbarItems.Add(callButton);
-
-
-
-            page.ToolbarItems.Add(SearchButton = new SearchToolbarButton
-            {
-                ContentLayout = rootLayout,
-                ItemClicked = () => SearchButton_Clicked(rootLayout),
-                // Icon = new FileImageSource() { File = "d_search.png" }
-            });
-
-            
-
-
-            PageWidth = page.Width;
         }
-
-
 
         protected override void ShowHintBtnOnEmpty() { }
 

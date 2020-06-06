@@ -25,7 +25,12 @@ namespace XxmsApp
 
         public static long ToNumber(this string source)
         {
-            return long.Parse(new string(source.Where(c => Char.IsDigit(c)).ToArray()));
+            var r = new string(source.Where(c => Char.IsDigit(c)).ToArray());
+            if (long.TryParse(r, out long lr))
+            {
+                return lr;
+            }
+            return 0;
         }
 
         public static void CallAfter(int ms, Action act)
