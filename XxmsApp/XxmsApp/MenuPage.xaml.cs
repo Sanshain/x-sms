@@ -19,6 +19,7 @@ namespace XxmsApp
         // Dicionary<string, Action>
 
         const string SIM_CARDS = "Сим-карты";
+        const string MessagesUpdate = "Обновить сообщения";
 
 
         public MenuPage ()
@@ -32,13 +33,14 @@ namespace XxmsApp
                 ItemsSource = new string[]
                 {
                     "Настройки",
-                    "Read sms",
-                    "Inner read sms",
-                    "Сделать дефолтным",
-                    "Check default",
-                    "О нас",
+                    MessagesUpdate,
                     SIM_CARDS,
-                    "Play",                        
+                    "О нас",
+                    
+                    // "Inner read sms",                    
+                    // "Сделать дефолтным",                    
+                    // "Check default",
+                    // "Play",                        
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint)),                
             };            
@@ -104,19 +106,37 @@ namespace XxmsApp
                     (this.Parent as MasterDetailPage).IsPresented = false;                    
 
                     break;
-                case "Read sms":
+                case MessagesUpdate:
 
                     {
+
+                        (this.Parent as MasterDetailPage).IsPresented = false;
+
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
 
                         /*
                         var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
                         var messages = x_messages.Read();
-                        //*/
-                        // var c = messages.Count;
+                        //*/                        
 
-                        var messages = await Cache.UpdateAsync(new List<Model.Message>());
+
+                        var _layout = GetDetailLayout();
+                        var indicator = new ActivityIndicator() { HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };                        
+                        
+                        Task<bool> fade = null;     // (_layout.Parent as ContentPage).Content = indicator;
+                        _layout.Children.ToList().ForEach(v => { v.IsEnabled = false; fade = v.FadeTo(0.3, 1000); });                        
+
+                        _layout.Children.Add(indicator, new Rectangle(0.5, 0.5, 0.2, 0.2), AbsoluteLayoutFlags.All);                                                
+
+                        indicator.IsRunning = true;
+
+                            var messages = await Cache.UpdateAsync(new List<Model.Message>());
+                        indicator.IsRunning = false;
+
+                        fade?.Wait();
+                        _layout.Children.ToList().ForEach(v => {v.IsEnabled = true; v.FadeTo(1, 1000); });       // (indicator.Parent as ContentPage).Content = _layout;
+
 
                         /*
                         var x_messages = DependencyService.Get<XxmsApp.Api.IMessages>();
@@ -126,18 +146,14 @@ namespace XxmsApp
                         sw.Stop();
 
                         var di = DependencyService.Get<XxmsApp.Api.ILowLevelApi>();
-                        di.ShowNotification("Test", "content");
+                        // di.ShowNotification("Test", "content");
 
-
-                        var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
-                        var layout = page.Content as AbsoluteLayout;
-                        (layout.Children[0] as MainList).DataInitialize();                              // layout.Children[0] = new MainList();
+                        var layout = GetDetailLayout();
+                        (layout.Children.First() as MainList).DataInitialize();                              // layout.Children[0] = new MainList();
                         AbsoluteLayout.SetLayoutBounds(layout.Children[0], new Rectangle(0, 0, 1, 0.9));
                         AbsoluteLayout.SetLayoutFlags(layout.Children[0], AbsoluteLayoutFlags.SizeProportional);
 
-                        DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");
-
-                        // sw.Elapsed.ToString()
+                        // DisplayAlert($"За {sw.ElapsedMilliseconds.ToString()} мс", messages.Count.ToString() + " sms", "Ok");                        
 
                     }
                     goto default;
@@ -230,6 +246,12 @@ namespace XxmsApp
                 return false;
             });//*/
 
+        }
+
+        private AbsoluteLayout GetDetailLayout()
+        {
+            var page = ((this.Parent as MasterDetailPage).Detail as NavigationPage).RootPage as ContentPage;
+            return page.Content as AbsoluteLayout;
         }
 
         Views.SettingPage settingsPage = null;
