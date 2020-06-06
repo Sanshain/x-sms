@@ -128,7 +128,7 @@ namespace XxmsApp.Api
             Intent intent = new Intent(Telephony.Sms.Intents.ActionChangeDefault);
             intent.PutExtra(Telephony.Sms.Intents.ExtraPackageName, context.PackageName);
 
-            context.StartActivity(intent);
+            XxmsApp.Droid.MainActivity.Instance.StartActivityForResult(intent, (int)OnResult.SetDefaultApp);
 
         }
 

@@ -38,7 +38,21 @@ namespace XxmsApp.Api
     [IntentFilter(new string [] { Telephony.Sms.Intents.SmsReceivedAction, Telephony.Sms.Intents.SmsDeliverAction }, Priority = 1000)] 
     public class MessageReceiver : BroadcastReceiver
     {
-        public static Brand DeviceFirmware = Brand.Unknown;
+
+        public static Brand deviceFirmware = Brand.Unknown;
+        public static Brand DeviceFirmware
+        {
+            get
+            {
+                if (deviceFirmware != Brand.Unknown) return deviceFirmware;
+                else if ( Api.LowLevelApi.Instance.Model.ToLower().Contains("xiaomi"))
+                {
+                    return deviceFirmware = Brand.Xiaomi;
+                }
+                else return deviceFirmware = Brand.Default;
+            }
+        }
+        
         static Context primaryContext = null;
 
         public override void OnReceive(Context context, Intent intent)
@@ -410,15 +424,18 @@ namespace XxmsApp.Api
         }
 
 
-        static void CheckFirm(ICursor cursor)
+        static Brand CheckFirm(ICursor cursor)
         {
             if (DeviceFirmware == Brand.Unknown)
             {
                 if (cursor.GetColumnIndex(Telephony.Sms.InterfaceConsts.SubscriptionId) < 0)
-                    DeviceFirmware = Brand.Xiaomi;
+                    deviceFirmware = Brand.Xiaomi;
                 else
-                    DeviceFirmware = Brand.Default;
+                    deviceFirmware = Brand.Default;
+
+                return deviceFirmware;
             }
+            else return deviceFirmware;
         }
 
     }

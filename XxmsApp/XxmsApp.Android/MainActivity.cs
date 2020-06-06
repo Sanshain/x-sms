@@ -141,6 +141,8 @@ namespace XxmsApp.Droid
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
+            OnResult r = (OnResult)resultCode;
+
             base.OnActivityResult(requestCode, resultCode, data);
             switch (requestCode)
             {
@@ -180,7 +182,15 @@ namespace XxmsApp.Droid
 
                 case (int)OnResult.EmailSent:
 
-                    Toast.MakeText(this, "Письмо отправлено", ToastLength.Long).Show();
+                    Toast.MakeText(this, "Спасибо вам за обратную связь", ToastLength.Long).Show();
+
+                    break;
+
+                case (int)OnResult.SetDefaultApp:
+                    
+                    // XMessages.UpdateMessageStates();
+
+                    Toast.MakeText(this, "Спасибо", ToastLength.Long).Show();
 
                     break;
 
@@ -190,6 +200,10 @@ namespace XxmsApp.Droid
             }
 
         }
+
+
+
+
 
 
 

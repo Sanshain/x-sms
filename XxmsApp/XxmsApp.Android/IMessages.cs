@@ -34,7 +34,8 @@ namespace XxmsApp.Api.Droid
     public enum OnResult 
     {
         IsAudio = 0,
-        EmailSent = 1
+        EmailSent = 1,
+        SetDefaultApp
     }
 
     class XMessages : IMessages
@@ -137,15 +138,34 @@ namespace XxmsApp.Api.Droid
 
             ContentValues values = new ContentValues();
 
-            values.Put("sim_id", simId);            
-            var uri = Android.Net.Uri.Parse(SMS_CONTENT_URI);
-            var idUri = ContentUris.WithAppendedId(uri, messId);
-            // var where = $"_id = {messId}";            
             
-            int r = contentResolver.Update(idUri, values, null, null);
+            if (MessageReceiver.DeviceFirmware == Brand.Xiaomi) values.Put("sim_id", simId);
+            else
+                values.Put("sub_id", simId);
+
+            var uri = Android.Net.Uri.Parse(SMS_CONTENT_URI);
+            // var idUri = ContentUris.WithAppendedId(uri, messId);
+            var where = $"_id = {messId}";            
+            
+            int r = contentResolver.Update(uri, values, where, null);
 
             return r;
         }
+
+        [Obsolete("Почему-то этот код не обновляет состояние даже когда приложение дефолтно. Поэтому отключил пока")]
+        public static void UpdateMessageStates()
+        {
+            if (Api.LowLevelApi.Instance.IsDefault)
+            {
+                var stores = Cache.database.Table<Model.SimStore>().ToList();
+                stores.ForEach(ms =>
+                {
+                    Api.Droid.XMessages.Instance.SetSimSender(ms.Message, ms.Sim);
+                });
+                Cache.database.DeleteAll<Model.SimStore>();
+            }
+        }
+
 
         public List<XxmsApp.Model.Message> ReadAll()
         {
@@ -244,20 +264,28 @@ namespace XxmsApp.Api.Droid
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            var c =Android.App.Application.Context.ContentResolver.Query(Android.Net.Uri.Parse(SMS_CONTENT_URI), null, null, null, null);
-            c.MoveToFirst();
-            var message = ParseMessage(c);
-
-            this.SetSimSender(message.Id, sim.SubscriptionId);
-
-            sw.Stop();
-            var lg = sw.ElapsedMilliseconds;
 
             if (LowLevelApi.Instance.IsDefault)
             {
                 var values = FillValuesOut(adressee, content, simId != null ? simId.Value : 0);
                 contentResolver.Insert(Telephony.Sms.Outbox.ContentUri, values);
             }
+            else
+            {
+                var c = Android.App.Application.Context.ContentResolver.Query(Android.Net.Uri.Parse(SMS_CONTENT_URI), null, null, null, null);
+                c.MoveToFirst();
+                var message = ParseMessage(c);
+
+                // this.SetSimSender(message.Id, sim.SubscriptionId); // - это бесполезно
+
+                Cache.database.Insert(new Model.SimStore { Message = message.Id, Sim = sim.SubscriptionId });
+
+                // вместо этого есть смысл складывать их все в бд. И при установке приложения как дефолтного обновить
+
+            }
+
+            sw.Stop();
+            var lg = sw.ElapsedMilliseconds;
 
             return sim != null;
         }

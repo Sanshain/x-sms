@@ -113,6 +113,17 @@ namespace XxmsApp.Model
         }
     }
 
+
+    [Table("SimStore")]
+    public class SimStore
+    {
+        // [OneToOne]  - записывает null почему-то
+
+        public int Message { get; set; }
+        public int Sim { get; set; }
+    }
+
+
     [Table("Messages")]
     [Serializable]
     public class Message : IModel, INotifyPropertyChanged
