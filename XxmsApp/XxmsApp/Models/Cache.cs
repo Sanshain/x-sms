@@ -115,6 +115,8 @@ namespace XxmsApp
             database.CreateTable<Model.Contacts>();
 
             database.CreateTable<Model.SimStore>();
+
+            // database.CreateTable<Model.SpamDialog>();
             database.CreateTable<Model.Errors>();
 
              // database.DropTable<Options.Setting>();
@@ -124,7 +126,7 @@ namespace XxmsApp
         }
 
 
-        static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
+        internal static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
 
         static Dictionary<Type, Func<Task<List<object>>>> actions = new Dictionary<Type, Func<Task<List<object>>>>()
         {
@@ -217,19 +219,21 @@ namespace XxmsApp
             }
         }
 
-        public static void Insert<T>(T subject) where T : IModel, new()
+        public static bool Contains<T>(T subject) => cache.ContainsKey(typeof(T)) && cache[typeof(T)].Contains(subject);
+        public static bool Insert<T>(T subject) where T : IModel, new()
         {
             var type = typeof(T);
             if (cache.ContainsKey(typeof(T)))
             {
                 var cc = cache[typeof(T)];
-                cc.Add(subject);                                                         // 
+                cc.Add(subject); 
             }
             else
             {
                 cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
                 // throw new KeyNotFoundException("The type yet was not added to cache");
             }
+            return true;
         }
 
         public static void InsertAll<T>(IEnumerable<T> lstSubj) where T : IModel, new()

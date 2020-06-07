@@ -14,6 +14,17 @@ namespace XxmsApp
     public static class Utils
     {
 
+        public static IList<Xamarin.Forms.MenuItem> AddRange(
+            this IList<Xamarin.Forms.MenuItem> menu, 
+            params Xamarin.Forms.MenuItem[] views)
+        {
+            foreach (var view in views)
+            {
+                menu.Add(view);
+            }
+            return views;
+        }
+
         public static T L<T>(this T obj, Action<T> act) where T: class
         {
             if (obj is null) return null;

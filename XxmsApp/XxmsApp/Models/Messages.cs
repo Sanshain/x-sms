@@ -151,7 +151,31 @@ namespace XxmsApp.Model
         }
     }
 
+    [Obsolete("to Props")]
+    public class SpamDialog : IModel
+    {
+        [PrimaryKey]
+        public string Address { get; set; }
 
+        public bool IsActual => true;
+        public IModel CreateAs(object obj) => obj as SpamDialog;
+
+        public static implicit operator SpamDialog(string value) => new SpamDialog { Address = value };
+
+        public override bool Equals(object obj)
+        {
+            if (obj is SpamDialog sd) return sd.Address == this.Address;            
+            else if (obj is string str) return str == this.Address;
+            else return false;
+        }
+
+    }
+
+
+    /// <summary>
+    /// Для сообщений, которые были отправлены когда клиент не был назначен дефолтным 
+    /// (чтобы запомнить номера симок, с кот были отправлены сообщения)
+    /// </summary>
     [Table("SimStore")]
     public class SimStore
     {
@@ -371,8 +395,10 @@ namespace XxmsApp.Model
 
 namespace XxmsApp
 {
-    // [Obsolete("пока не уверен, что стоит его использовать")]    
 
+
+
+    // [Obsolete("пока не уверен, что стоит его использовать")]    
     public class Dialog : INotifyPropertyChanged
     {
 
@@ -421,8 +447,8 @@ namespace XxmsApp
             }
         }
 
-        public bool LastIsOutGoing => !(Messages?.LastOrDefault()?.Incoming ?? true);      
-        public MessageState LastMsgState => Messages?.LastOrDefault()?.State ?? MessageState.IncomeAndRead;      
+        public bool LastIsOutGoing => !(Messages?.LastOrDefault()?.Incoming ?? true);
+        public MessageState LastMsgState => Messages?.LastOrDefault()?.State ?? MessageState.IncomeAndRead;
 
         public string Sim => Messages?.LastOrDefault()?.SlotSimId ?? string.Empty;
         public Color SimBackColor => Messages?.LastOrDefault()?.SimColor ?? Color.Default;
@@ -507,7 +533,7 @@ namespace XxmsApp
             var id_s = this.Messages.Select(m => {
 
                 m.IsRead = true;
-                
+
                 // Cache.Update(m, m.Id);
                 return m.Id;
 
@@ -535,7 +561,7 @@ namespace XxmsApp
             {
                 Address = adressee,
                 Messages = new ObservableCollection<Message>()
-            };            
+            };
 
             if (newMsg != null) dialog.Messages.Add(newMsg);
             return dialog;
@@ -543,6 +569,26 @@ namespace XxmsApp
 
 
         public ICommand RemoveCommand { protected set; get; }
+
+        bool? isSpam = false;
+        public bool IsSpam
+        {
+            get => (bool)(isSpam ?? (isSpam = Cache.Read<SpamDialog>().Any(sd => sd.Address == this.Address)));
+            set
+            {
+                isSpam = value;
+                var contain = Cache.Read<SpamDialog>().Any(sd => sd.Address == this.Address);
+
+                if (value)
+                {
+                    if (contain) Cache.Insert<SpamDialog>(new SpamDialog { Address = this.Address });             
+                }
+                else
+                {
+                    if (!contain) Cache.cache
+                }
+            }
+        }
 
     }
 }

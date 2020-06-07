@@ -87,7 +87,8 @@ namespace XxmsApp.Piece
             // view.Children.AddAsRelative(StateImage, p => 5, p => 30);                   
             view.Children.AddAsRelative(StateFrame, StateFramePosition, p => 39);    
 
-            View = view;
+            View = view;       
+
         }
 
 
@@ -107,6 +108,28 @@ namespace XxmsApp.Piece
             StateFrame.SetBinding(Frame.BackgroundColorProperty, "LastMsgState", BindingMode.OneWay, new MessageStateConverter());
             StateImage.SetBinding(Image.IsVisibleProperty, "LastIsOutGoing");
             // StateImage.SetBinding(Image.SourceProperty, "LastMsgState");
+
+
+
+            var spamBtn = new Xamarin.Forms.MenuItem()
+            {
+                Text = "В спам",
+                CommandParameter = this.BindingContext,
+                Command = new MessageCommander(async (d) => d.is
+                {
+                    if (await DisplayAlert("Подтверждение", "Вы уверены, что хотите удалить сообщение?", "Да", "Нет"))
+                    {
+                        // Cache.database.Delete<Message>(mess.Id);
+                        if (mess is Message)
+                        {
+                            RootDialog.RemoveCommand.Execute(mess);             // dialog.Messages.Remove(mess);
+                        }
+
+                    }
+                })//*/
+            };
+            var rmBtn = new Xamarin.Forms.MenuItem() { Text = "Удалить" };
+            this.ContextActions.AddRange(spamBtn, rmBtn);
 
         }
     }
