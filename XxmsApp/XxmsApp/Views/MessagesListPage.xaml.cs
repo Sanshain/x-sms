@@ -106,12 +106,7 @@ namespace XxmsApp.Views
         private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-            {                
-
-                var msg = e.NewItems[0] as Message;
-
-                var msgApi = DependencyService.Get<Api.IMessages>();
-                msgApi.Send(msg.Address, msg.Value, int.Parse(msg.SimOsId));
+            {
                 
             }
         }
@@ -127,9 +122,9 @@ namespace XxmsApp.Views
             };
             view.SizeChanged += View_SizeChanged;
 
-            Label time = new Label { HorizontalOptions = LayoutOptions.Start };
+            Label time = new Label { HorizontalOptions = LayoutOptions.Start, Opacity = 0.5 };
             Label content = new Label { HorizontalOptions = LayoutOptions.StartAndExpand };
-            Label status = new Label() { HorizontalOptions = LayoutOptions.End };
+            Label status = new Label() { HorizontalOptions = LayoutOptions.End, TextColor = Color.LightSlateGray };
 
             time.SetBinding(Label.TextProperty, "Time", BindingMode.OneWay, TimeConverter.Instance);
             content.SetBinding(Label.TextProperty, "Value");

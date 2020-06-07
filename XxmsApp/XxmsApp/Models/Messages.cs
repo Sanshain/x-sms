@@ -436,6 +436,11 @@ namespace XxmsApp
 
             (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));
 
+            // var msg = e.NewItems[0] as Message;
+            var msgApi = DependencyService.Get<Api.IMessages>();
+            msgApi.Send(message.Address, message.Value, int.Parse(message.SimOsId));
+
+
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Label)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Time)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastMsgState)));
@@ -460,13 +465,20 @@ namespace XxmsApp
         public string Contact {
             get
             {
-                if (contacts.TryGetValue(this, out string contact)) return contact;
+                var limit = 18;
+                string rez = string.Empty;
+                if (contacts.TryGetValue(this, out string contact))
+                {
+                    rez = contact;
+                }
                 else
                 {
                     var name = Cache.Read<Contacts>().FirstOrDefault(c => c.Phone == this.Address)?.Name ?? this.Address;
                     contacts.Add(this, name);
-                    return name;
+                    rez = name;
                 }
+
+                return rez.Length < limit ? rez : rez.Substring(0, limit) + "...";
             }
         }
 
