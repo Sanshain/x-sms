@@ -73,7 +73,10 @@ namespace XxmsApp.Views
 
         }
 
-        private static bool init = false;
+        private bool init = false;
+        static HashSet<System.Collections.ObjectModel.ObservableCollection<Message>> cache = 
+            new HashSet<System.Collections.ObjectModel.ObservableCollection<Message>>();
+
         private void SourceInit(object source)
         {
             if (source.GetType() == typeof(Dialog))
@@ -88,10 +91,12 @@ namespace XxmsApp.Views
                 }); // "Messages" */
 
                 messagesList.SetValue(ListView.ItemsSourceProperty, RootDialog.Messages);
-                if (init == false)
+
+                
+                // if (init == false)
+                if (cache.Add(RootDialog.Messages))
                 {
-                    RootDialog.Messages.CollectionChanged += Messages_CollectionChanged;
-                    init = true;
+                    RootDialog.Messages.CollectionChanged += Messages_CollectionChanged;            // init = true;                    
                 }
                 // messagesList.ItemsSource = dialog.Messages;
                 if (RootDialog.LastMsgState == MessageState.Unread) RootDialog.SetAsRead();
@@ -126,7 +131,7 @@ namespace XxmsApp.Views
             Label content = new Label { HorizontalOptions = LayoutOptions.StartAndExpand };
             Label status = new Label() { HorizontalOptions = LayoutOptions.End };
 
-            time.SetBinding(Label.TextProperty, "Time");
+            time.SetBinding(Label.TextProperty, "Time", BindingMode.OneWay, TimeConverter.Instance);
             content.SetBinding(Label.TextProperty, "Value");
             status.SetBinding(Label.TextProperty, "SimName");                                       // States    
             view.Children.Extend(time, content, status);

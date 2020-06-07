@@ -22,6 +22,11 @@ using System.IO;
 
 namespace XxmsApp.Api
 {
+    // [Obsolete("using nameof(Debud) instead")]
+    public static class CompileConstant
+    {
+        public const string Debug = "DEBUG";
+    }
 
     public enum Brand
     {

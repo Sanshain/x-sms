@@ -204,7 +204,24 @@ namespace XxmsApp.Droid
         }
 
 
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
+            if (grantResults.Length > 0)
+            {
+                
+            }
+
+            switch (requestCode)
+            {
+                case (int)Permissions.WriteSms:
+
+
+
+                    break;
+            }
+        }
 
 
 
