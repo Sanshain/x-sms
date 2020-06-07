@@ -190,6 +190,8 @@ namespace XxmsApp.Api.Droid
                 // empty box (no SMS)
             }//*/
 
+            var maxId = messages.Max(m => m.Id);
+
             return messages;
         }
 
@@ -268,7 +270,9 @@ namespace XxmsApp.Api.Droid
             if (LowLevelApi.Instance.IsDefault)
             {
                 var values = FillValuesOut(adressee, content, simId != null ? simId.Value : 0);
-                contentResolver.Insert(Telephony.Sms.Outbox.ContentUri, values);
+                // var result = contentResolver.Insert(Telephony.Sms.Outbox.ContentUri, values);
+                var result = contentResolver.Insert(Telephony.Sms.ContentUri, values);
+                
             }
             else
             {

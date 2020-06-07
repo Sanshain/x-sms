@@ -358,6 +358,15 @@ namespace XxmsApp
             {
                 messages = value;
                 count = $"({messages?.Count.ToString()})";
+
+                Messages.CollectionChanged += (s, e) =>
+                {
+                    /*
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Label)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Time)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastMsgState)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastIsOutGoing)));//*/
+                };
             }
         }
 
@@ -387,13 +396,20 @@ namespace XxmsApp
         {
             Message message = null;
 
-            (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));                  
+            (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Label)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Time)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastMsgState)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastIsOutGoing)));
 
             return Messages;
         }
 
         public Dialog()
         {
+
+
             RemoveCommand = new Command(m =>
             {
                 if (m is Message message)
@@ -403,7 +419,6 @@ namespace XxmsApp
             });
         }
 
-  
         public string Contact {
             get
             {

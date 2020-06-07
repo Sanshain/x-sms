@@ -160,20 +160,29 @@ namespace XxmsApp.Piece
                 Messages = new ObservableCollection<Message>(g.Reverse())
             }).ToList();
 
-            r.ForEach(d => d.PropertyChanged += (s, e) => Source_CollectionChanged(r,
-                new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
-                    System.Collections.Specialized.NotifyCollectionChangedAction.Replace, 
-                    d,
-                    null, 
-                    d.Messages.Last().Id)));
+
+
+            r.ForEach(d => d.PropertyChanged += (s, e) =>
+            {
+                Source_CollectionChanged(r,
+                    new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
+                        System.Collections.Specialized.NotifyCollectionChangedAction.Replace,
+                        d,
+                        null,
+                        d.Messages.Last().Id));
+            });
+        
 
             return r;
         }
+
+        // static Dictionary<object, Views.MessagesPage> dialogCache = new Dictionary<object, Views.MessagesPage>();
 
         private async void CustomList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
             if (e.SelectedItem == null) return;
 
+            // var msgView = Views.MessagesPage.Create(e.SelectedItem);    // new Views.MessagesPage(e.SelectedItem);
             var msgView = new Views.MessagesPage(e.SelectedItem);
 
             await Navigation.PushAsync(msgView, false);

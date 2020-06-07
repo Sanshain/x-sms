@@ -25,19 +25,33 @@ namespace XxmsApp.Views
         int scrollHeight;
         ListView messagesList;
         Button sender_button;
-        internal readonly Dialog dialog;
+        internal Dialog RootDialog { private set; get; }
 
+        static MessagesPage instance = null;
+        [Obsolete]
+        public static MessagesPage Create(object source)
+        {
+            if (instance == null) instance = new MessagesPage(source);
+            else
+            {
+                instance.RootDialog = source as Dialog;
 
-        
+                instance.SourceInit(source);
+
+                MsgSearchPanel.Initialize(instance);       
+            }
+            return instance;
+        }
+
 
         public MessagesPage(object source)
         {
-            var root = new RelativeLayout(){ };
+            var root = new RelativeLayout() { };
             Content = root;
-            dialog = source as Dialog;
+            RootDialog = source as Dialog;
 
             root.Children.AddAsRelative(messagesList = new ListView
-            {                
+            {
                 ItemTemplate = new DataTemplate(this.CellInitialize),
                 HasUnevenRows = true,
                 Margin = new Thickness(0, 0, 0, bottomHeight),
@@ -52,11 +66,20 @@ namespace XxmsApp.Views
                 p => p.Width,
                 p => bottomHeight);
 
+            SourceInit(source);
 
+            MsgSearchPanel.Initialize(this);
+
+
+        }
+
+        private static bool init = false;
+        private void SourceInit(object source)
+        {
             if (source.GetType() == typeof(Dialog))
-            {               
+            {
 
-                this.Title = "Сообщения c " + dialog.Contact;               // dialog.Address
+                this.Title = "Сообщения c " + RootDialog.Contact;               // dialog.Address
                 /* messagesList.SetBinding(ListView.ItemsSourceProperty, new Binding()
                 {
                     Mode = BindingMode.Default,
@@ -64,16 +87,15 @@ namespace XxmsApp.Views
                     Path = "Messages"
                 }); // "Messages" */
 
-                messagesList.SetValue(ListView.ItemsSourceProperty, dialog.Messages);
-                dialog.Messages.CollectionChanged += Messages_CollectionChanged;
+                messagesList.SetValue(ListView.ItemsSourceProperty, RootDialog.Messages);
+                if (init == false)
+                {
+                    RootDialog.Messages.CollectionChanged += Messages_CollectionChanged;
+                    init = true;
+                }
                 // messagesList.ItemsSource = dialog.Messages;
-                if (dialog.LastMsgState == MessageState.Unread) dialog.SetAsRead();
+                if (RootDialog.LastMsgState == MessageState.Unread) RootDialog.SetAsRead();
             }
-
-
-            MsgSearchPanel.Initialize(this);
-
-
         }
 
         private void Messages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -85,7 +107,7 @@ namespace XxmsApp.Views
 
                 var msgApi = DependencyService.Get<Api.IMessages>();
                 msgApi.Send(msg.Address, msg.Value, int.Parse(msg.SimOsId));
-
+                
             }
         }
 
@@ -139,7 +161,7 @@ namespace XxmsApp.Views
                         // Cache.database.Delete<Message>(mess.Id);
                         if (mess is Message)
                         {                            
-                            dialog.RemoveCommand.Execute(mess);             // dialog.Messages.Remove(mess);
+                            RootDialog.RemoveCommand.Execute(mess);             // dialog.Messages.Remove(mess);
                         }
 
                     }
@@ -304,16 +326,17 @@ namespace XxmsApp.Views
                 if (messagesList.HeightRequest > 0)
                 {
                     inited = false;
-                    count = dialog.Messages.Count;
+                    count = RootDialog.Messages.Count;
                     totalHeihght = messagesList.HeightRequest - messagesList.Margin.Bottom;
                 }
 
-                string message = editor.Text;
+                string message = editor.Text;                
 
+                
                 Cards.SimChoice(bottom, (index) =>
                 {                    
-                    dialog.CreateMessage(dialog.Address, message, Message.Sims[index].SubId);
-                });
+                    RootDialog.CreateMessage(RootDialog.Address, message, Message.Sims[index].SubId);
+                });//*/
                 
 
                 // messagesList.ItemsSource = null;
