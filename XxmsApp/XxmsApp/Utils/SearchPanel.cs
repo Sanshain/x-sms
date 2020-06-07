@@ -339,18 +339,33 @@ namespace XxmsApp
         protected override string DefaultTitle => defaultTitle;
 
         private Dialog source;
+        static MsgSearchPanel instance;
 
-        public static MsgSearchPanel Initialize(ContentPage page, View subBtn = null) => new MsgSearchPanel(page, subBtn);
+        // [Obsolete("CreateCallButton or Removre it on dependent to source")]
+        public static MsgSearchPanel Initialize(ContentPage page, View subBtn = null)
+        {
+            if (instance == null) return instance = new MsgSearchPanel(page, subBtn);
+            else
+            {
+                // instance = 
+                if (page.ToolbarItems.Any(i => i.Text == "Phone"))
+                {
+
+                }
+                // return instance;
+            }
+
+            return new MsgSearchPanel(page, subBtn);
+        }
 
         public MsgSearchPanel(ContentPage page, View subView = null, ListView lsView = null) 
         {
-            RelativeLayout rootLayout = page.Content as RelativeLayout;
-            var st = rootLayout.Children.ToArray();
+            RelativeLayout rootLayout = page.Content as RelativeLayout;            
             bottomView = subView ?? rootLayout.Children.Last();
             listView = lsView ?? (ListView)rootLayout.Children.First() as ListView;
             
 
-            source = (page as Views.MessagesPage).dialog;
+            source = (page as Views.MessagesPage).RootDialog;
             if (string.IsNullOrEmpty(source.Query)) defaultTitle = page.Title;
             else
             {

@@ -27,6 +27,44 @@ namespace XxmsApp.Model
         Delivered
     }
 
+    public class TimeConverter : IValueConverter
+    {
+        string _format = null;
+        static Dictionary<string, TimeConverter> cache = new Dictionary<string, TimeConverter>();
+
+        static TimeConverter instance;
+        public static TimeConverter Instance => instance ?? (instance = new TimeConverter());
+        public static string DefaultFormat { get; set; } = "dd/MM/yyyy HH:mm:ss"; 
+        
+        public static TimeConverter GetInstance(string format = null)
+        {
+            if (format == null) return Instance;
+            else if (cache.TryGetValue(format, out TimeConverter converter))
+            {
+                return converter;
+            }
+            else
+            {
+                var _converter = new TimeConverter { _format = format };
+                cache.Add(format, _converter);
+                return converter;
+            }                       
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value.GetType() == typeof(DateTime))
+            {
+                return ((DateTime)value).ToString(_format ?? DefaultFormat);
+            }
+            throw new NotImplementedException(this.GetType().Name + " get no datetime value");
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException(this.GetType().Name + " has no back converter");
+        }
+    }
 
     public class IncomingConverter : IValueConverter
     {
@@ -358,10 +396,19 @@ namespace XxmsApp
             {
                 messages = value;
                 count = $"({messages?.Count.ToString()})";
+
+                Messages.CollectionChanged += (s, e) =>
+                {
+                    /*
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Label)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Time)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastMsgState)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastIsOutGoing)));//*/
+                };
             }
         }
 
-        public DateTime Time => Messages?.LastOrDefault()?.Time ?? DateTime.Now;
+        public string Time => (Messages?.LastOrDefault()?.Time ?? DateTime.Now).ToString(TimeConverter.DefaultFormat);
         public string Label
         {
             get
@@ -387,13 +434,20 @@ namespace XxmsApp
         {
             Message message = null;
 
-            (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));                  
+            (Messages as IList<Message>).Add(message = new Message(receiver, value, simId));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Label)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Time)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastMsgState)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.LastIsOutGoing)));
 
             return Messages;
         }
 
         public Dialog()
         {
+
+
             RemoveCommand = new Command(m =>
             {
                 if (m is Message message)
@@ -403,7 +457,6 @@ namespace XxmsApp
             });
         }
 
-  
         public string Contact {
             get
             {

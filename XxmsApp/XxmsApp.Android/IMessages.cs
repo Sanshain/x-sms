@@ -21,10 +21,11 @@ using Android.Net;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Android.Provider;
+using XxmsApp;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.Rington))
 namespace XxmsApp.Api.Droid
-{
+{    
 
     public static class Utils
     {
@@ -36,6 +37,11 @@ namespace XxmsApp.Api.Droid
         IsAudio = 0,
         EmailSent = 1,
         SetDefaultApp
+    }
+
+    public enum Permissions
+    {
+        WriteSms,
     }
 
     class XMessages : IMessages
@@ -190,6 +196,11 @@ namespace XxmsApp.Api.Droid
                 // empty box (no SMS)
             }//*/
 
+            if (messages.Count > 0)
+            {
+                var maxId = messages.Max(m => m.Id);
+            }
+            
             return messages;
         }
 
@@ -217,6 +228,8 @@ namespace XxmsApp.Api.Droid
         {            
 
             var income = qs.GetShort(qs.GetColumnIndex("type"));
+
+            // var tId = qs.GetInt(qs.GetColumnIndex("thread_id"));            
 
             XxmsApp.Model.Message msg = new Model.Message
             {
@@ -267,8 +280,12 @@ namespace XxmsApp.Api.Droid
 
             if (LowLevelApi.Instance.IsDefault)
             {
-                var values = FillValuesOut(adressee, content, simId != null ? simId.Value : 0);
-                contentResolver.Insert(Telephony.Sms.Outbox.ContentUri, values);
+
+                var values = FillValuesOut(adressee, content, simId != null ? simId.Value : 0);                                 // var url = string.Join(":", uri.Scheme, uri.SchemeSpecificPart);
+                var result = contentResolver.Insert(Telephony.Sms.Outbox.ContentUri, values);
+
+                SucessCheck();
+
             }
             else
             {
@@ -290,6 +307,43 @@ namespace XxmsApp.Api.Droid
             return sim != null;
         }
 
+        
+        [Conditional(CompileConstant.Debug)]
+        private void SucessCheck()
+        {       
+
+            /*
+            var readPermission = Android.Support.V4.App.ActivityCompat.CheckSelfPermission(
+                XxmsApp.Droid.MainActivity.Instance, 
+                Android.Manifest.Permission.WriteSms);
+            if (readPermission != Android.Content.PM.Permission.Granted)
+            {
+                if (Android.Support.V4.App.ActivityCompat.ShouldShowRequestPermissionRationale(
+                    XxmsApp.Droid.MainActivity.Instance,
+                    Android.Manifest.Permission.WriteSms)) { }
+                else Android.Support.V4.App.ActivityCompat.RequestPermissions(
+                       XxmsApp.Droid.MainActivity.Instance,
+                       new String[] { Android.Manifest.Permission.WriteSms },
+                       (int)Permissions.WriteSms);                    
+            }//*/
+
+
+
+            var msg = Cache.database.FindWithQuery<Model.Message>(
+                "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
+            );
+            var last = msg.Id; // msgs.Max(m => m.Id);
+            var msgs = ReadFrom(last);
+            if (msgs.Count > 0)
+            {
+                // success                    
+            }
+            else
+            {
+                // fail
+            }
+        }
+
         public void Send(XxmsApp.Model.Message msg)
         {
             var sim = int.TryParse(msg.SimOsId, out int subId) ? SmsManager.GetSmsManagerForSubscriptionId(subId) : SmsManager.Default;
@@ -307,34 +361,40 @@ namespace XxmsApp.Api.Droid
 
             // values.Put(Telephony.Sms.InterfaceConsts.Id, "");
 
-            var stamp = new TimeSpan(-1970, 1, 1);
-            var now = DateTime.Now.Add(stamp).Millisecond;
+            var stamp = TimeSpan.FromTicks(new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
+            var now = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalMilliseconds - stamp;            
 
 
-            values.Put(Telephony.Sms.InterfaceConsts.ThreadId, MessageReceiver.GetThreadId(number));      // chat id
+            // values.Put(Telephony.Sms.InterfaceConsts.ThreadId, (long)MessageReceiver.GetThreadId(number));     // chat id
+
             values.Put(Telephony.Sms.InterfaceConsts.Address, number);                                    // no read
-            values.Put(Telephony.Sms.InterfaceConsts.Person, "");                                         // Person
-            values.Put(Telephony.Sms.InterfaceConsts.Date, now.ToString());                               // now
-            values.Put(Telephony.Sms.InterfaceConsts.DateSent, now.ToString());                           // sent
+
+            //  values.Put(Telephony.Sms.InterfaceConsts.Person, "");                                         // Person
+            values.Put(Telephony.Sms.InterfaceConsts.Date, (long)now);                                        // now
+            //  values.Put(Telephony.Sms.InterfaceConsts.DateSent, now.ToString());                           // sent
             values.Put(Telephony.Sms.InterfaceConsts.Protocol, 1);                                        // in/out
-            // values.Put(Telephony.Sms.InterfaceConsts.Status, -1);                                         // always -1 for inbox
+
+            values.Put(Telephony.Sms.InterfaceConsts.Status, -1);                                         // always -1 for inbox
             values.Put(Telephony.Sms.InterfaceConsts.Type, 2);                                            // > 1 dor outgoing
 
-            values.Put(Telephony.Sms.InterfaceConsts.ReplyPathPresent, 0);                                // I still don't know 
-            values.Put(Telephony.Sms.InterfaceConsts.Subject, "");                                        // I still don't know 
+            //  values.Put(Telephony.Sms.InterfaceConsts.ReplyPathPresent, 0);                                // I still don't know 
+            //  values.Put(Telephony.Sms.InterfaceConsts.Subject, "");                                        // I still don't know 
 
             values.Put(Telephony.Sms.InterfaceConsts.Body, body);                                         // 
-            values.Put(Telephony.Sms.InterfaceConsts.ServiceCenter, "");     // 
+            //  values.Put(Telephony.Sms.InterfaceConsts.ServiceCenter, "");     // 
 
             values.Put(Telephony.Sms.InterfaceConsts.Locked, 0);                                          // spam/no spam?
             values.Put(Telephony.Sms.InterfaceConsts.ErrorCode, 0);
             values.Put(Telephony.Sms.InterfaceConsts.Seen, 1);
 
+
             if (MessageReceiver.DeviceFirmware == Brand.Xiaomi)
-                values.Put("sim_id", simId);                                                                  // № sim
+            {
+                values.Put("sim_id", (short)simId);                                                          // № sim
+            }
             else
             {
-                values.Put(Telephony.Sms.InterfaceConsts.SubscriptionId, simId);                              // № sim
+                values.Put(Telephony.Sms.InterfaceConsts.SubscriptionId, (float)simId);                      // № sub
             }
 
             return values;

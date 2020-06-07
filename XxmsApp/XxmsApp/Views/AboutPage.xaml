@@ -4,10 +4,15 @@
              x:Class="XxmsApp.Views.About">
     <ContentPage.Content>
         <StackLayout>
-            <Frame x:Name="frame" HasShadow="True" OutlineColor="Red" 
+            <Frame x:Name="about" HasShadow="True"  Margin="15"
                    VerticalOptions="CenterAndExpand" 
                    HorizontalOptions="CenterAndExpand">
-                <Label Text="About X-sms!" />
+                <Label Text="XmsApp" />
+            </Frame>
+            <Frame x:Name="frame" HasShadow="True" OutlineColor="Red"  Margin="15"
+                   VerticalOptions="CenterAndExpand" 
+                   HorizontalOptions="CenterAndExpand">
+                <Label Text="Powered by Sanshain" />
             </Frame>
         </StackLayout>
     </ContentPage.Content>
