@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using XxmsApp.Model;
-
+using System.Linq;
 
 using SQLiteNetExtensions.Attributes;
 using System.Linq;
@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using XxmsApp.Api;
 using System.Windows.Input;
+using Actions = System.Collections.Specialized.NotifyCollectionChangedAction;
 
 namespace XxmsApp.Model
 {
@@ -151,7 +152,7 @@ namespace XxmsApp.Model
         }
     }
 
-    [Obsolete("to Props")]
+    // [Obsolete("to Props")]
     public class SpamDialog : IModel
     {
         [PrimaryKey]
@@ -162,13 +163,16 @@ namespace XxmsApp.Model
 
         public static implicit operator SpamDialog(string value) => new SpamDialog { Address = value };
 
+        public override int GetHashCode() => Address.GetHashCode();
+        /*
         public override bool Equals(object obj)
         {
             if (obj is SpamDialog sd) return sd.Address == this.Address;            
             else if (obj is string str) return str == this.Address;
             else return false;
-        }
+        }//*/
 
+        public override string ToString() => this.Address ?? string.Empty;
     }
 
 
@@ -389,6 +393,21 @@ namespace XxmsApp.Model
         }
     }
 
+
+    public class DialogCommander : ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+        public Action<Dialog> Command = null;
+
+        public DialogCommander(Action<Dialog> action = null) => Command = action;
+        public bool CanExecute(object parameter) => parameter is Dialog;
+
+        public void Execute(object parameter)
+        {
+            if (CanExecute(parameter)) Command?.Invoke(parameter as Dialog);
+        }
+    }
+
 }
 
 
@@ -456,6 +475,13 @@ namespace XxmsApp
         // public string Count => $"({Messages?.Count.ToString()})";
         public string Count => count;
 
+
+        public Dialog CreateMessage(string value, int? simId = null)
+        {
+            CreateMessage(this.Address, value, simId);
+            return this;
+        }
+
         public IEnumerable<Message> CreateMessage(string receiver, string value, int? simId = null)
         {
             Message message = null;
@@ -475,9 +501,10 @@ namespace XxmsApp
             return Messages;
         }
 
-        public Dialog()
+        public Dialog(string address)
         {
-
+            Address = address;
+            isSpam = Spams.Contains(address);
 
             RemoveCommand = new Command(m =>
             {
@@ -495,13 +522,13 @@ namespace XxmsApp
                 string rez = string.Empty;
                 if (contacts.TryGetValue(this, out string contact))
                 {
-                    rez = contact;
+                    rez = contact ?? string.Empty;
                 }
                 else
                 {
                     var name = Cache.Read<Contacts>().FirstOrDefault(c => c.Phone == this.Address)?.Name ?? this.Address;
-                    contacts.Add(this, name);
-                    rez = name;
+                    contacts.Add(this, name ?? string.Empty);
+                    rez = name ?? string.Empty;
                 }
 
                 return rez.Length < limit ? rez : rez.Substring(0, limit) + "...";
@@ -551,15 +578,13 @@ namespace XxmsApp
 
             var msgs = Cache.Read<Message>().OrderBy(m => m.Id).ToList();
 
-            var source = new ObservableCollection<Message>(msgs).GroupBy(m => m.Address).Select(g => new Dialog
-            {
-                Address = g.Key,
+            var source = new ObservableCollection<Message>(msgs).GroupBy(m => m.Address).Select(g => new Dialog(g.Key)
+            {                
                 Messages = new ObservableCollection<Message>(g)
             });
 
-            var dialog = source.SingleOrDefault(d => d.Address == adressee) ?? new Dialog
-            {
-                Address = adressee,
+            var dialog = source.SingleOrDefault(d => d.Address == adressee) ?? new Dialog(adressee)
+            {                
                 Messages = new ObservableCollection<Message>()
             };
 
@@ -567,28 +592,89 @@ namespace XxmsApp
             return dialog;
         }
 
-
         public ICommand RemoveCommand { protected set; get; }
 
-        bool? isSpam = false;
-        public bool IsSpam
+        public static ObservableHashSet<string> Spams;            
+
+        static Dialog()
         {
-            get => (bool)(isSpam ?? (isSpam = Cache.Read<SpamDialog>().Any(sd => sd.Address == this.Address)));
+            Spams = new ObservableHashSet<string>(Cache.database.Table<SpamDialog>().Select(s => s.ToString()));
+            Spams.CollectionChanged += (s, e) =>
+            {
+                switch (e.Action)
+                {
+                    case Actions.Add: Cache.database.Insert(new SpamDialog { Address = e.NewItems[0] as string }); break;
+                    case Actions.Remove: Cache.database.Delete(new SpamDialog { Address = e.OldItems[0] as string }); break;
+                    case Actions.Reset: Cache.database.DeleteAll<SpamDialog>(); break;
+                }
+            };
+        }
+
+        bool isSpam;
+        public bool IsSpam {
+            get => isSpam;
             set
             {
-                isSpam = value;
-                var contain = Cache.Read<SpamDialog>().Any(sd => sd.Address == this.Address);
+                if (isSpam != value)
+                {
+                    isSpam = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSpam)));
 
-                if (value)
-                {
-                    if (contain) Cache.Insert<SpamDialog>(new SpamDialog { Address = this.Address });             
+                    if (IsSpam) Spams.Add(this.Address);
+                    else
+                    {
+                        Spams.Remove(this.Address);
+                    }                        
                 }
-                else
-                {
-                    if (!contain) Cache.cache
-                }
+
             }
         }
+
+        
+        // static List<SpamDialog> spamCache = Cache.database.Table<SpamDialog>().ToList();
+
+        /*
+        bool? _isSpam = null;
+        public bool IsSpam1
+        {
+            get
+            {
+                if (_isSpam.HasValue) return _isSpam.Value;
+                
+                if (spamCache == null)
+                {
+                    // App.Current.Properties.TryGetValue(nameof(IsSpam), out object spam)
+                    if (App.Current.Properties.TryGetValue(nameof(IsSpam), out object spam))
+                    {
+                        if (spam is string _spam)
+                        {
+                            spamCache = _spam.Split('|').ToList();
+                            _isSpam = spamCache.Contains(this.Address);
+                        }
+
+                        App.Current.Properties.Remove(nameof(IsSpam));
+                        spamCache = new List<string>();
+                    }
+                    spamCache = new List<string>();
+                }
+                else _isSpam = spamCache.Contains(this.Address);
+
+                
+                return false;
+            }
+            set
+            {
+                var isSpam = IsSpam;
+                if (value && !isSpam) spamCache.Add(this.Address);
+                else if (!value && isSpam)
+                {
+                    spamCache.Remove(this.Address);
+                }
+                
+                var str = string.Join("|", spamCache);
+                App.Current.Properties[nameof(IsSpam)] = str;
+            }
+        }//*/
 
     }
 }

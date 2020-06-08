@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace XxmsApp
@@ -13,6 +14,20 @@ namespace XxmsApp
                 return result;
             }
             else return false;
+        }
+    }
+
+
+    public class UniversalConverter : Xamarin.Forms.IValueConverter
+    {
+        Func<object, object> func = null;
+
+        public UniversalConverter(Func<object, object> act) => func = act;
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => func?.Invoke(value);        
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException(this.GetType().Name + " is for just OneWay");
         }
     }
 }

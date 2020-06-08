@@ -19,6 +19,7 @@ namespace XxmsApp.Piece
     {
         public int TimeSize { get; set; } = 14;
 
+        static NavPage navPage = ((App.Current.MainPage as MasterDetailPage).Detail as NavPage);
         Label PhoneLabel = null;
         Label TimeLabel = null;
         Label ValueLabel = null;
@@ -27,11 +28,11 @@ namespace XxmsApp.Piece
         BoxView SimView = null;
         Image StateImage = null;
         Frame StateFrame = null;
+        static bool spamView = true; // Options.ModelSettings.ViewSpam;
 
         public DialogCell()
         {
             
-
             double timeWidth = Utils.CalcString(DateTime.Now.ToString());
 
             var view = new RelativeLayout();
@@ -87,21 +88,62 @@ namespace XxmsApp.Piece
             // view.Children.AddAsRelative(StateImage, p => 5, p => 30);                   
             view.Children.AddAsRelative(StateFrame, StateFramePosition, p => 39);    
 
-            View = view;       
+            View = view;
 
+            SetBindings();
         }
 
 
+        Xamarin.Forms.MenuItem spamBtn, rmBtn;
         protected override void OnBindingContextChanged()
         {
-            base.OnBindingContextChanged();
-            
+            var bc = this.BindingContext;
+            try
+            {
+                base.OnBindingContextChanged();
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            if ((this.BindingContext as Dialog).IsSpam)
+            {
+                spamBtn.Text = "Восстановить";
+            }
+            spamBtn.CommandParameter = this.BindingContext;
+            rmBtn.CommandParameter = this.BindingContext;
+
+        }
+
+        
+        private void SetBindings()
+        {
             PhoneLabel.SetBinding(Label.TextProperty, "Contact");       // Address
             TimeLabel.SetBinding(Label.TextProperty, "Time");
             ValueLabel.SetBinding(Label.TextProperty, "Label");
             CapacityLabel.SetBinding(Label.TextProperty, "Count");//*/
             SimLabel.SetBinding(Label.TextProperty, "Sim");//*/
 
+
+            if (spamView)
+            {
+                var opacityConverter = new UniversalConverter(b =>
+                {
+                    if (b is bool isSpam && isSpam)
+                    {
+                        return 0.1f;
+                    }
+                    return 1;
+                });
+
+                
+                PhoneLabel.SetBinding(Label.OpacityProperty, "IsSpam", BindingMode.OneWay, opacityConverter);
+                ValueLabel.SetBinding(Label.OpacityProperty, "IsSpam", BindingMode.OneWay, opacityConverter);
+                CapacityLabel.SetBinding(Label.OpacityProperty, "IsSpam", BindingMode.OneWay, opacityConverter);
+                TimeLabel.SetBinding(Label.OpacityProperty, nameof(Dialog.IsSpam), BindingMode.OneWay, opacityConverter);
+            }
+            //*/
 
             // SimLabel.SetBinding(Label.TextColorProperty, "SimBackColor");//*/
 
@@ -111,26 +153,19 @@ namespace XxmsApp.Piece
 
 
 
-            var spamBtn = new Xamarin.Forms.MenuItem()
+            spamBtn = new Xamarin.Forms.MenuItem { Text = "В спам", Command = new DialogCommander(d => d.IsSpam = !d.IsSpam) };
+            rmBtn = new Xamarin.Forms.MenuItem()
             {
-                Text = "В спам",
-                CommandParameter = this.BindingContext,
-                Command = new MessageCommander(async (d) => d.is
+                Text = "Удалить",
+                Command = new DialogCommander(async d =>
                 {
-                    if (await DisplayAlert("Подтверждение", "Вы уверены, что хотите удалить сообщение?", "Да", "Нет"))
+                    if (await navPage.DisplayAlert( "Подтверждение", "Вы уверены, что хотите удалить весь диалог?","Да", "Нет"))
                     {
-                        // Cache.database.Delete<Message>(mess.Id);
-                        if (mess is Message)
-                        {
-                            RootDialog.RemoveCommand.Execute(mess);             // dialog.Messages.Remove(mess);
-                        }
-
+                        
                     }
-                })//*/
+                })
             };
-            var rmBtn = new Xamarin.Forms.MenuItem() { Text = "Удалить" };
             this.ContextActions.AddRange(spamBtn, rmBtn);
-
         }
     }
 
@@ -143,9 +178,9 @@ namespace XxmsApp.Piece
         /// <summary>
         /// Для списка сообщений
         /// </summary>
-        public MainList () : base(ListViewCachingStrategy.RecycleElementAndDataTemplate)
+        public MainList () : base(ListViewCachingStrategy.RecycleElement)        // RecycleElementAndDataTemplate
         {        
-
+            
             DataInitialize();
 
             HasUnevenRows = true;
@@ -162,30 +197,55 @@ namespace XxmsApp.Piece
             {
                 ItemsSource = ItemsUpdate();
             }
-            else ItemsSource = this.DataLoad(30);                         // else    
+            else ItemsSource = this.DataLoad(30);                         // else   
+
+            
+            Options.ModelSettings.Instance.CollectionChanged += (s, e) =>
+            {
+                var setting = (s as Options.ModelSettings)[e.Id];
+                if (setting.Name == nameof(Options.ModelSettings.ViewSpam))
+                {
+                    
+                    var r = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog(g.Key)
+                    {                        
+                        Messages = new ObservableCollection<Message>(g.Reverse())
+                    }).ToList();
+
+                    if (Options.ModelSettings.ViewSpam == false) r = r.Where(d => d.IsSpam == false).ToList();
+
+                    ItemsSource = r;//*/
+                }               
+            };//*/
         }
 
-        public List<Dialog> ItemsUpdate(bool no_cache = false)
+        public ObservableCollection<Dialog> ItemsUpdate(bool no_cache = false)
         {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
 
             var msg = Cache.database.FindWithQuery<Model.Message>(
                 "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
-            );
+            );// var l1 = sw.ElapsedMilliseconds;
 
-            var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);
-
-            Cache.database.InsertAll(msgs);
-            Cache.InsertAll(msgs);
-
-            var r = this.DataLoad(0, no_cache).GroupBy(m => m.Address).Select(g => new Dialog
+            var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);  // var l2 = sw.ElapsedMilliseconds;
+            if (msgs.Count > 0)
             {
-                Address = g.Key,
+                Cache.database.InsertAll(msgs);                   // var l3 = sw.ElapsedMilliseconds;
+                Cache.InsertAll(msgs);
+            }
+            
+            var l = sw.ElapsedMilliseconds;
+
+            var r = this.DataLoad(0, no_cache).GroupBy(m => m.Address).Select(g => new Dialog(g.Key)
+            {                
                 Messages = new ObservableCollection<Message>(g.Reverse())
-            }).ToList();
+            });
 
+            if (Options.ModelSettings.ViewSpam == false) r = r.Where(d => d.IsSpam == false);
 
-
-            r.ForEach(d => d.PropertyChanged += (s, e) =>
+            // foreach (var d in r) d.PropertyChanged += (s, e) =>
+            /*
+            r.ForEach(d =>
             {
                 Source_CollectionChanged(r,
                     new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
@@ -193,10 +253,13 @@ namespace XxmsApp.Piece
                         d,
                         null,
                         d.Messages.Last().Id));
-            });
-        
+            });//*/
 
-            return r;
+            var f = sw.ElapsedMilliseconds;
+            sw.Stop();
+
+            
+            return new ObservableCollection<Dialog>(r);
         }
 
         // static Dictionary<object, Views.MessagesPage> dialogCache = new Dictionary<object, Views.MessagesPage>();
@@ -206,6 +269,19 @@ namespace XxmsApp.Piece
             if (e.SelectedItem == null) return;
 
             // var msgView = Views.MessagesPage.Create(e.SelectedItem);    // new Views.MessagesPage(e.SelectedItem);
+
+            if (e.SelectedItem is Dialog dialog && dialog.Messages.Count == 0)
+            {
+                var navPage = ((App.Current.MainPage as MasterDetailPage).Detail as NavPage);
+                navPage.DisplayAlert(
+                    "Уведомление",
+                    "В выбранном диалоге нет сообщений, удовлетворяющих вашему фильтру",
+                    "Ok");
+
+                    (sender as ListView).SelectedItem = null;
+                return;
+            }
+
             var msgView = new Views.MessagesPage(e.SelectedItem);
 
             await Navigation.PushAsync(msgView, false);
@@ -223,7 +299,7 @@ namespace XxmsApp.Piece
             (sender as ListView).SelectedItem = null;
         }
 
-
+        // [Obsolete("Срабатывает на изменение сообщений, а не диалогов. В принципе, работает. Но не востребовано")]
         private void Source_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)

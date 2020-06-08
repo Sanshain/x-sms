@@ -269,6 +269,9 @@ namespace XxmsApp.Options
         public static bool Vibration { get => GetFunc(); set => Set(value); }
         [FullDescription("Быстрый звонок", "Сразу начинать непосредственный набор нормера из диалога")]
         public static bool FastCall { get => GetFunc(); set => Set(value); }
+        
+        [FullDescription("Скрывать спам", "Скрывать диалоги, отмеченные как спам, в общем списке")]
+        public static bool ViewSpam { get => GetFunc(); set => Set(value); }//*/
 
         [FullDescription("Выберите язык", "")]
         public static Piece.Languages Language { get => GetFunc<Piece.Languages>(); set => SetFunc(value); }

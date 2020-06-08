@@ -116,7 +116,8 @@ namespace XxmsApp
 
             database.CreateTable<Model.SimStore>();
 
-            // database.CreateTable<Model.SpamDialog>();
+            // database.DropTable<Model.SpamDialog>();
+            database.CreateTable<Model.SpamDialog>();
             database.CreateTable<Model.Errors>();
 
              // database.DropTable<Options.Setting>();
@@ -249,8 +250,15 @@ namespace XxmsApp
             }
             else
             {
+
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+
                 cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
                 // throw new KeyNotFoundException("The type yet was not added to cache");
+
+                sw.Stop();
+                var l = sw.ElapsedMilliseconds;
             }
         }
 

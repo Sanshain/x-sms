@@ -345,7 +345,7 @@ namespace XxmsApp.Views
                 }
                 else
                 {
-                    dialog = new Dialog() { Address = receiver };
+                    dialog = new Dialog(receiver);
                     dialog.CreateMessage(receiver, text, sim);
                     dialogs.Add(dialog);
                 }
