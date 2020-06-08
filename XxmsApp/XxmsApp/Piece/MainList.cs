@@ -28,7 +28,7 @@ namespace XxmsApp.Piece
         BoxView SimView = null;
         Image StateImage = null;
         Frame StateFrame = null;
-        static bool spamView = true; // Options.ModelSettings.ViewSpam;
+        public static bool hideSpam = Options.ModelSettings.HideSpam;
 
         public DialogCell()
         {
@@ -126,7 +126,7 @@ namespace XxmsApp.Piece
             SimLabel.SetBinding(Label.TextProperty, "Sim");//*/
 
 
-            if (spamView)
+            if (hideSpam == false)
             {
                 var opacityConverter = new UniversalConverter(b =>
                 {
@@ -156,7 +156,12 @@ namespace XxmsApp.Piece
             spamBtn = new Xamarin.Forms.MenuItem { Text = "В спам", Command = new DialogCommander(d =>
             {
                 d.IsSpam = !d.IsSpam;
-                if (d.IsSpam) Api.Funcs.Toast("Вы можете скрыть сообщения, помеченные как спам, в настройках приложения");
+                if (d.IsSpam)
+                {
+                    Api.Funcs.Toast("Вы можете скрыть сообщения, помеченные как спам, в настройках приложения, передернув рычаг");
+                    // if (Options.ModelSettings.HideSpam) Options.ModelSettings.HideSpam = false;
+                }
+
             })};
 
             rmBtn = new Xamarin.Forms.MenuItem()
@@ -225,8 +230,10 @@ namespace XxmsApp.Piece
                     {
                         r = r.Where(d => d.IsSpam == false).ToList();
                     }
+                    
+                    DialogCell.hideSpam = Options.ModelSettings.HideSpam;
 
-                    ItemsSource = r;//*/
+                    ItemsSource = r;//*/                    
                 }               
             };//*/
         }

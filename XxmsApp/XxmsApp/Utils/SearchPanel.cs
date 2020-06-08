@@ -395,6 +395,10 @@ namespace XxmsApp
             var number = source.Address.ToNumber().ToString();
             if (number.ToNumber() > 0)
             {
+                if (number.Length > 10)
+                {
+                    number = "+" + number;
+                }
                 CreateCallButton(page, number);
             }
 
