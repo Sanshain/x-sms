@@ -243,18 +243,6 @@ namespace XxmsApp.Piece
 
             if (Options.ModelSettings.ViewSpam == false) r = r.Where(d => d.IsSpam == false);
 
-            // foreach (var d in r) d.PropertyChanged += (s, e) =>
-            /*
-            r.ForEach(d =>
-            {
-                Source_CollectionChanged(r,
-                    new System.Collections.Specialized.NotifyCollectionChangedEventArgs(
-                        System.Collections.Specialized.NotifyCollectionChangedAction.Replace,
-                        d,
-                        null,
-                        d.Messages.Last().Id));
-            });//*/
-
             var f = sw.ElapsedMilliseconds;
             sw.Stop();
 
