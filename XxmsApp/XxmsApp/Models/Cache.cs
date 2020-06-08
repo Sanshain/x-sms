@@ -120,7 +120,7 @@ namespace XxmsApp
             database.CreateTable<Model.SpamDialog>();
             database.CreateTable<Model.Errors>();
 
-             // database.DropTable<Options.Setting>();
+            // database.DropTable<Options.Setting>();
             database.CreateTable<Options.Setting>();
 
             

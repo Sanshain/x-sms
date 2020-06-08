@@ -153,7 +153,12 @@ namespace XxmsApp.Piece
 
 
 
-            spamBtn = new Xamarin.Forms.MenuItem { Text = "В спам", Command = new DialogCommander(d => d.IsSpam = !d.IsSpam) };
+            spamBtn = new Xamarin.Forms.MenuItem { Text = "В спам", Command = new DialogCommander(d =>
+            {
+                d.IsSpam = !d.IsSpam;
+                if (d.IsSpam) Api.Funcs.Toast("Вы можете скрыть сообщения, помеченные как спам, в настройках приложения");
+            })};
+
             rmBtn = new Xamarin.Forms.MenuItem()
             {
                 Text = "Удалить",
@@ -161,7 +166,9 @@ namespace XxmsApp.Piece
                 {
                     if (await navPage.DisplayAlert( "Подтверждение", "Вы уверены, что хотите удалить весь диалог?","Да", "Нет"))
                     {
-                        
+                        ((navPage.RootPage as MainPage).Dialogs.ItemsSource as IList<Dialog>).Remove(d);
+
+                        // Cache.database.Execute("DELETE FROM Messages WHERE Address = ?", new string[] { d.Address });
                     }
                 })
             };
@@ -203,15 +210,21 @@ namespace XxmsApp.Piece
             Options.ModelSettings.Instance.CollectionChanged += (s, e) =>
             {
                 var setting = (s as Options.ModelSettings)[e.Id];
-                if (setting.Name == nameof(Options.ModelSettings.ViewSpam))
+                if (setting.Name == nameof(Options.ModelSettings.HideSpam))
                 {
-                    
-                    var r = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog(g.Key)
-                    {                        
-                        Messages = new ObservableCollection<Message>(g.Reverse())
-                    }).ToList();
 
-                    if (Options.ModelSettings.ViewSpam == false) r = r.Where(d => d.IsSpam == false).ToList();
+                    // var source =  ItemsSource as ObservableCollection<Dialog>;
+
+
+                    var r = this.DataLoad().GroupBy(m => m.Address).Select(g => new Dialog(g.Key)
+                    {
+                        Messages = new ObservableCollection<Message>(g.Reverse())
+                    });
+
+                    if (Options.ModelSettings.HideSpam)
+                    {
+                        r = r.Where(d => d.IsSpam == false).ToList();
+                    }
 
                     ItemsSource = r;//*/
                 }               
@@ -241,7 +254,7 @@ namespace XxmsApp.Piece
                 Messages = new ObservableCollection<Message>(g.Reverse())
             });
 
-            if (Options.ModelSettings.ViewSpam == false) r = r.Where(d => d.IsSpam == false);
+            if (Options.ModelSettings.HideSpam) r = r.Where(d => d.IsSpam == false);
 
             var f = sw.ElapsedMilliseconds;
             sw.Stop();

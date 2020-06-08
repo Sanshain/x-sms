@@ -271,7 +271,7 @@ namespace XxmsApp.Options
         public static bool FastCall { get => GetFunc(); set => Set(value); }
         
         [FullDescription("Скрывать спам", "Скрывать диалоги, отмеченные как спам, в общем списке")]
-        public static bool ViewSpam { get => GetFunc(); set => Set(value); }//*/
+        public static bool HideSpam { get => GetFunc(); set => Set(value); }//*/
 
         [FullDescription("Выберите язык", "")]
         public static Piece.Languages Language { get => GetFunc<Piece.Languages>(); set => SetFunc(value); }
