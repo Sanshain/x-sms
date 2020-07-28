@@ -149,6 +149,8 @@ namespace XxmsApp.Piece
                 "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
             );
 
+            if (msg is null) return new List<Dialog>();
+
             var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);
 
             Cache.database.InsertAll(msgs);
