@@ -454,25 +454,16 @@ namespace XxmsApp.Api.Droid
                 MainActivity.Instance, Manifest.Permission.ReadPhoneNumbers
             );
 
-            if (readPhoneNumsPermission != Android.Content.PM.Permission.Granted)
-            {
-                Android.Support.V4.App.ActivityCompat.RequestPermissions(
-                    MainActivity.Instance,
-                    new String[] { Android.Manifest.Permission.ReadPhoneNumbers },
-                    Permissions.ReadPhoneNumbers.ToInt());
 
-                return ls;
-            }
-
-            int c = (int)Android.OS.BuildVersionCodes.O;            
-
+            /*
+            int c = (int)Android.OS.BuildVersionCodes.O;           
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
             {
                 Android.Support.V4.App.ActivityCompat.RequestPermissions(
                     MainActivity.Instance, 
                     new String[]{ Android.Manifest.Permission.ReadPhoneNumbers }, 
                     Permissions.ReadPhoneNumbers.ToInt());
-            }
+            }//*/
         
 
 
