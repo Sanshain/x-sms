@@ -247,6 +247,8 @@ namespace XxmsApp.Piece
                 "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
             );// var l1 = sw.ElapsedMilliseconds;
 
+            if (msg is null) return new ObservableCollection<Dialog>();
+
             var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);  // var l2 = sw.ElapsedMilliseconds;
             if (msgs.Count > 0)
             {

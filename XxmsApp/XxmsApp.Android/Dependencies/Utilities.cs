@@ -15,6 +15,7 @@ using XxmsApp.Api.Droid;
 using Android.Support.V7.App;
 using Android.Provider;
 using Xamarin.Essentials;
+using Android.Support.V4.App;
 
 [assembly: Dependency(typeof(XxmsApp.Api.LowLevelApi))]
 namespace XxmsApp.Api

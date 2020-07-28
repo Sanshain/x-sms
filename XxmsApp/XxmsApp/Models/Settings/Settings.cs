@@ -92,7 +92,6 @@ namespace XxmsApp.Options
             List<Setting> stgs = props.Select(prop =>
             {
                 
-
                 var attr = prop.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
                 string value = prop.GetValue(null).ToString();

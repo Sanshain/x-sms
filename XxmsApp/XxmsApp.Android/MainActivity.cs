@@ -217,9 +217,11 @@ namespace XxmsApp.Droid
             {
                 case (int)Permissions.WriteSms:
 
-
-
                     break;
+
+                case (int)Permissions.ReadPhoneNumbers:
+
+                    if (requestCode == 0) Api.LowLevelApi.Instance.AppExit(); break;
             }
         }
 
