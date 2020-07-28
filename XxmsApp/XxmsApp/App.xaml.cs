@@ -31,10 +31,8 @@ namespace XxmsApp
             InitializeComponent();            
 
             DependencyService.Get<Api.IMessages>().CheckRequiredPermissions();           
-
-            Cache.Test();
-
-            DBUpdates();            
+           
+            DBUpdates();                    // Cache.Test();
 
             var errors = Cache.database.Table<Model.Errors>().ToArray();
 

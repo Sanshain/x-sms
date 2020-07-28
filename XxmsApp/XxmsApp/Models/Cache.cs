@@ -41,14 +41,14 @@ namespace XxmsApp.Model
         /// <param name="obj"></param>
         /// <returns></returns>
         public IModel CreateAs(object obj)
-        {            
-            
-            var contact = obj as Contact;
+        {
+
+            var contact = obj as Contacts; // as Contact;
 
             this.Name = contact.Name;
-            this.Phone = contact.Number;
-            this.OptionalPhones = contact.Numbers != null ? string.Join(";", contact.Numbers) : string.Empty;
-            this.Photo = contact.PhotoUriThumbnail ?? string.Empty;
+            this.Phone = contact.Phone;
+            this.OptionalPhones = contact.OptionalPhones;
+            this.Photo = contact.Photo ?? string.Empty;
 
             return this;
         }

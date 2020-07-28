@@ -61,7 +61,7 @@ namespace XxmsApp.Droid.Dependencies
                     {
                         Name = name,
                         Phone = phones.FirstOrDefault()?.Replace(" ","").Replace("-","") ?? string.Empty,
-                        OptionalPhones = string.Join(',', phones),
+                        OptionalPhones = string.Join(';', phones),
                         Photo = photo
                     };
 
