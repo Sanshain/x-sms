@@ -62,7 +62,9 @@ namespace XxmsApp.Api
     /// Deal with sms
     /// </summary>
     public interface IMessages
-    {                
+    {
+        void CheckRequiredPermissions();
+
         List<XxmsApp.Model.Message> ReadAll();
         List<XxmsApp.Model.Message> ReadFrom(int start);
 
@@ -136,6 +138,8 @@ namespace XxmsApp.Api
     {
         bool PhoneDialer(string number);
         void SendEmail(string title, string content, string attach);
+
+        IList<Model.Contacts> GetContacts();
     }
 
 

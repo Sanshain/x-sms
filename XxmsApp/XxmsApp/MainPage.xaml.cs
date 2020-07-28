@@ -29,7 +29,7 @@ namespace XxmsApp
 
             if ((Application.Current as App)._contacts.Count == 0)       // если контактов нет, то запрашиваем их сразу же при загрузке
             {
-                (Application.Current as App).contactsWaiter.ContinueWith((cn) =>
+                (Application.Current as App).contactsWaiter?.ContinueWith((cn) =>
                 {
                     (Application.Current as App)._contacts = cn.GetAwaiter().GetResult();
 
@@ -127,7 +127,6 @@ namespace XxmsApp
             {
                 onPop[e.Page.GetType()]();
             }
-
         }
     }
 }

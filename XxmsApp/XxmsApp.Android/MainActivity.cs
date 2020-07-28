@@ -90,9 +90,11 @@ namespace XxmsApp.Droid
 
             var application = new App(messageList);
 
+            LoadApplication(application);
+
             try
             {
-                LoadApplication(application);
+                // LoadApplication(application);
             }
             catch(Exception ex)
             {
@@ -100,7 +102,7 @@ namespace XxmsApp.Droid
             }
             
 
-            CreateMessageStateListener();
+            // CreateMessageStateListener();
 
             // set in App.xaml:
             // Xamarin.Forms.Application.Current.On<Xamarin.Forms.PlatformConfiguration.Android>()
@@ -221,7 +223,11 @@ namespace XxmsApp.Droid
 
                 case (int)Permissions.ReadPhoneNumbers:
 
-                    if (requestCode == 0) Api.LowLevelApi.Instance.AppExit(); break;
+                    if (requestCode == 0)
+                    {
+                        // Api.LowLevelApi.Instance.AppExit(); 
+                    }
+                    break;
             }
         }
 

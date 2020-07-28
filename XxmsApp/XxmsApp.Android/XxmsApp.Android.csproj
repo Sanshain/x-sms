@@ -43,7 +43,7 @@
     <WarningLevel>4</WarningLevel>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
-	<AotAssemblies>True</AotAssemblies>
+    <AotAssemblies>True</AotAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dependencies.cs" />
+    <Compile Include="Dependencies\Contacts.cs" />
     <Compile Include="Dependencies\Player.cs" />
     <Compile Include="Dependencies\Specific.cs" />
     <Compile Include="Dependencies\Utilities.cs" />

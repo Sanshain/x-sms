@@ -26,6 +26,10 @@ using Android;
 using XxmsApp.Droid;
 using Android.Support.Compat;
 using Android.Support.V7.CardView;
+using Android.Support.V4.App;
+
+using AndroidPermission = Android.Content.PM.Permission;
+using Xamarin.Forms.Internals;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.Rington))
 namespace XxmsApp.Api.Droid
@@ -43,11 +47,13 @@ namespace XxmsApp.Api.Droid
         EmailSent = 1,
         SetDefaultApp
     }
-
+    
     public enum Permissions
-    {
+    {        
+        ReadPhoneNumbers,
         WriteSms,
-        ReadPhoneNumbers
+        ReadSms,
+        All
     }
 
     class XMessages : IMessages
@@ -176,6 +182,38 @@ namespace XxmsApp.Api.Droid
                 });
                 Cache.database.DeleteAll<Model.SimStore>();
             }
+        }
+
+
+        public void CheckRequiredPermissions()
+        {
+
+            var _context = Android.App.Application.Context;
+            var pacname = _context.PackageName;
+            var packinfo = _context.PackageManager.GetPackageInfo(
+                pacname, 
+                Android.Content.PM.PackageInfoFlags.Permissions);
+            
+            var _permissions = packinfo.RequestedPermissions;
+
+            int i = 0;
+            var permissions = _permissions.Select(pername => (i++, pername))
+            .Where(p =>
+                ActivityCompat.CheckSelfPermission(_context, p.pername) != AndroidPermission.Granted)
+            .ToArray();
+
+            if (permissions.Length > 0)
+            {
+                ActivityCompat.RequestPermissions(
+                    MainActivity.Instance,
+                    permissions.Select(p => p.pername).ToArray(),
+                    permissions.Select(p => p.Item1).Aggregate((sum, p) =>
+                    {
+                        int shft = 1 << p;
+                        return sum & shft;
+                    }));
+            }
+
         }
 
 

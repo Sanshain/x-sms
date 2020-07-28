@@ -5,6 +5,7 @@ using SQLiteNetExtensions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -122,10 +123,17 @@ namespace XxmsApp
 
             // database.DropTable<Options.Setting>();
             database.CreateTable<Options.Setting>();
-
             
         }
 
+        [Conditional("DEBUG")]
+        public static void Test()
+        {
+            var sw = Stopwatch.StartNew();
+            var r1 = actions[typeof(Model.Contacts)]().GetAwaiter().GetResult();
+            sw.Stop();
+            var log = sw.ElapsedMilliseconds;            
+        }
 
         internal static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
 
@@ -134,8 +142,12 @@ namespace XxmsApp
 
             { typeof(Model.Contacts),  async () =>
                 {
-                    return (await Plugin.ContactService.CrossContactService.Current.GetContactListAsync())
-                        .Select(r => r as object).ToList();
+                    /*
+                    return (await 
+                        Plugin.ContactService.CrossContactService.Current.GetContactListAsync())
+                        .Select(r => r as object).ToList();//*/
+                    return DependencyService.Get<Api.IEssential>()
+                            .GetContacts().Select(r => r as object).ToList();
                 }
             },
             { typeof(Model.Message), async () =>

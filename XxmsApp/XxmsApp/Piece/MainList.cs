@@ -240,16 +240,20 @@ namespace XxmsApp.Piece
 
         public ObservableCollection<Dialog> ItemsUpdate(bool no_cache = false)
         {
+
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-
+            
             var msg = Cache.database.FindWithQuery<Model.Message>(
                 "SELECT * FROM Messages WHERE _Number=(SELECT MAX(_Number) FROM Messages)"
             );// var l1 = sw.ElapsedMilliseconds;
 
-            if (msg is null) return new ObservableCollection<Dialog>();
+            List<Message> msgs;
 
-            var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);  // var l2 = sw.ElapsedMilliseconds;
+            if (msg is null) msgs = DependencyService.Get<Api.IMessages>().ReadAll();
+            else
+                msgs = DependencyService.Get<Api.IMessages>().ReadFrom(msg.Id);  // var l2 = sw.ElapsedMilliseconds;
+
             if (msgs.Count > 0)
             {
                 Cache.database.InsertAll(msgs);                   // var l3 = sw.ElapsedMilliseconds;
