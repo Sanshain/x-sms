@@ -57,7 +57,7 @@ namespace XxmsApp.Piece
     public class Languages : List<string>, Options.IAbstractOption
     {
         public const string Russian = "Русский";
-        public const string English = "English";
+        public const string English = "English (Demo)";
 
 
         static string[] values = new string[]
