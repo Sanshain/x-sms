@@ -103,13 +103,6 @@ namespace XxmsApp.Droid.Dependencies
             
             CustomTabsIntent builder = new CustomTabsIntent.Builder()
                 //.AddDefaultShareMenuItem()        // dont work
-                /*
-                .SetStartAnimations(context, 
-                    Android.Resource.Animation.SlideInLeft, 
-                    Android.Resource.Animation.SlideOutRight)
-                .SetExitAnimations(context,
-                    Android.Resource.Animation.SlideInLeft,
-                    Android.Resource.Animation.SlideOutRight)
                 //.SetCloseButtonIcon()
                 // .SetToolbarColor(Android.Graphics.Color.ParseColor("#43A047"))                
                 .EnableUrlBarHiding()//*/
