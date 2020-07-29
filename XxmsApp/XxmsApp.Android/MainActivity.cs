@@ -232,7 +232,7 @@ namespace XxmsApp.Droid
 
         public void UpdateUiForBoundService()
         {
-            Toast.MakeText(Android.App.Application.Context, "UpdateUiForBoundService", ToastLength.Long).Show();
+            Toast.MakeText(Android.App.Application.Context, "Welcome", ToastLength.Short).Show(); // "UpdateUiForBoundService"
 
             // new AlertDialog.Builder()
 
