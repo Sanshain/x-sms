@@ -51,8 +51,9 @@ namespace XxmsApp.Piece
                 HeightRequest = 20,
                 WidthRequest = 10,
                 Padding = new Thickness(0),
-                OutlineColor = Color.Red
-                
+                // BackgroundColor = Color.Gray,
+                // BorderColor = Color.Green
+                // OutlineColor = Color.Red
             };
             StateImage = new Image
             {

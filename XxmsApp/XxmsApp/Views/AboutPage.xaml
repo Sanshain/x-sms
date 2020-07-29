@@ -9,11 +9,13 @@
                    HorizontalOptions="CenterAndExpand">
                 <Label Text="XmsApp" />
             </Frame>
-            <Frame x:Name="frame" HasShadow="True" OutlineColor="Red"  Margin="15"
+            <!--
+            <Frame x:Name="frame" HasShadow="True" OutlineColor="LightGray"  Margin="15" 
                    VerticalOptions="CenterAndExpand" 
                    HorizontalOptions="CenterAndExpand">
                 <Label Text="Powered by Sanshain" />
-            </Frame>
+            </Frame>            
+            -->
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

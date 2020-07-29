@@ -139,8 +139,8 @@ namespace XxmsApp.Views
             var messageView = new Frame
             {
                 Content = view,                
-                HasShadow = true,                
-                OutlineColor = Color.Red,             // material design
+                HasShadow = true,                    // material design
+                // OutlineColor = Color.Red,             
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
             };
