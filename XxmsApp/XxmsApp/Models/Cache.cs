@@ -217,6 +217,12 @@ namespace XxmsApp
             return true;
         }
 
+        /// <summary>
+        /// Обновляет запись в кэше с определенным индексом. Если ее нет, то добавляет
+        /// </summary>
+        /// <typeparam name="T">тип модели</typeparam>
+        /// <param name="subject">объект модели для добавления</param>
+        /// <param name="id">ид</param>
         public static void Update<T>(T subject, int id) where T : new() 
         {
             var type = typeof(T);
@@ -233,6 +239,12 @@ namespace XxmsApp
         }
 
         public static bool Contains<T>(T subject) => cache.ContainsKey(typeof(T)) && cache[typeof(T)].Contains(subject);
+        /// <summary>
+        /// Добавляет запись в кэш
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="subject"></param>
+        /// <returns></returns>
         public static bool Insert<T>(T subject) where T : IModel, new()
         {
             var type = typeof(T);

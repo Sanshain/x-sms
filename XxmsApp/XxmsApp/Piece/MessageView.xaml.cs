@@ -38,7 +38,7 @@ namespace XxmsApp.Piece
 
             Content = new Frame {
                 Content = rltv, Margin = new Thickness(10),
-                HasShadow = true, OutlineColor = Color.Red,             // material design
+                HasShadow = true, // OutlineColor = Color.Red,          // material design
                 CornerRadius = 10, IsClippedToBounds = true             // border-radius
             };
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-
+using System.Threading;
 using Xamarin.Forms;
 using XxmsApp.Model;
 
@@ -52,7 +52,7 @@ namespace XxmsApp.Piece
                 HeightRequest = 20,
                 WidthRequest = 10,
                 Padding = new Thickness(0),
-                OutlineColor = Color.Red
+                // OutlineColor = Color.Red
                 
             };
             StateImage = new Image
@@ -191,17 +191,26 @@ namespace XxmsApp.Piece
         /// Для списка сообщений
         /// </summary>
         public MainList () : base(ListViewCachingStrategy.RecycleElement)        // RecycleElementAndDataTemplate
-        {        
-            
+        {
             DataInitialize();
 
             HasUnevenRows = true;
             ItemTemplate = new DataTemplate(typeof(DialogCell));            // this.DataView();
 
-            this.ItemSelected += CustomList_ItemSelected;
             source.CollectionChanged += Source_CollectionChanged;
+            this.ItemSelected += CustomList_ItemSelected;
+            this.Scrolled += MainList_Scrolled;
 
+        }        
+        
+        private void MainList_Scrolled(object sender, ScrolledEventArgs e)
+        {                        
+            if (e.ScrollY < 0)
+            {
+
+            }
         }
+
 
         internal void DataInitialize()
         {

@@ -49,7 +49,44 @@ namespace XxmsApp
             var rootLayout = new AbsoluteLayout();
             var dialogs = Dialogs = new Piece.MainList();
 
-            rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
+            var refreshSwiper = new RefreshView
+            {
+                Content = dialogs
+            };
+            var command = new Command(() =>
+            {
+                // var messages = Cache.UpdateAsync(new List<Model.Message>()).GetAwaiter().GetResult();
+                // dialogs.DataInitialize();
+
+                var npage = this.Parent as NavPage;
+                var id = ((npage.RootPage as MainPage)
+                    .Dialogs.ItemsSource as IEnumerable<Dialog>)
+                    .SelectMany(d => d.Messages).Max(m => m.Id);//*/
+
+                var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(id);
+
+                if (msgs.Count > 0)
+                {
+                    this.Dialogs.ItemsUpdate();
+
+                    XxmsApp.Api.Funcs.Toast($"Обновлено {msgs.Count} сообщений");
+
+                    foreach (var msg in msgs)
+                    {
+                        // Cache.InsertAll(msgs);
+                        // Cache.database.InsertAll(msgs);
+
+                        // msg.Address
+
+                        // (dialogs.BindingContext as ObservableCollection<Dialog>).Add
+                    }
+                }
+
+                refreshSwiper.IsRefreshing = false;
+            });
+            refreshSwiper.Command = command;
+
+            rootLayout.Children.Add(refreshSwiper, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
 
             Content = rootLayout;            

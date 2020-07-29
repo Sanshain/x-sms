@@ -218,7 +218,7 @@ namespace XxmsApp
                 Margin = new Thickness(2),
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 /*HasShadow = true,
-                OutlineColor = Color.Red,             // material design //*/
+                // OutlineColor = Color.Red,         // material design //*/
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius //*/
             };
@@ -581,7 +581,7 @@ namespace XxmsApp
             AbsoluteLayout rootLayout = page.Content as AbsoluteLayout;
             
             bottomView = subView ?? rootLayout.Children.Last();
-            listView = lstView ?? (ListView)rootLayout.Children.First() as ListView;
+            listView = lstView ?? (rootLayout.Children.First() as RefreshView).Content as ListView;
 
             
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton

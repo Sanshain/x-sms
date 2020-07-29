@@ -135,7 +135,7 @@ namespace XxmsApp.Views
             {
                 Content = view,                
                 HasShadow = true,                
-                OutlineColor = Color.Red,             // material design
+                // OutlineColor = Color.Red,         // material design
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius
             };
@@ -186,8 +186,8 @@ namespace XxmsApp.Views
                 
                 if (messagesList.SelectedItem == content.BindingContext)
                 {
-                    var message = content.BindingContext as Message;
-                    DisplayAlert("Инфо", "", "Ok");
+                    var message = content.BindingContext as Message;                    
+                    DisplayAlert("Инфо", "Сервис: " + message.Service, "Ok");
                     messagesList.SelectedItem = null;
                 }
                 
