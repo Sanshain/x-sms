@@ -22,6 +22,14 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Android.Provider;
 using XxmsApp;
+using Android;
+using XxmsApp.Droid;
+using Android.Support.Compat;
+using Android.Support.V7.CardView;
+using Android.Support.V4.App;
+
+using AndroidPermission = Android.Content.PM.Permission;
+using Xamarin.Forms.Internals;
 
 [assembly: Dependency(typeof(XxmsApp.Api.Droid.XMessages))]                       // , Dependency(typeof(XxmsApp.Api.Rington))
 namespace XxmsApp.Api.Droid
@@ -30,6 +38,7 @@ namespace XxmsApp.Api.Droid
     public static class Utils
     {
         public static int ToInt(this OnResult arg) => (int) arg;
+        public static int ToInt(this Permissions arg) => (int) arg;
     }
 
     public enum OnResult 
@@ -38,10 +47,13 @@ namespace XxmsApp.Api.Droid
         EmailSent = 1,
         SetDefaultApp
     }
-
+    
     public enum Permissions
-    {
+    {        
+        ReadPhoneNumbers,
         WriteSms,
+        ReadSms,
+        All
     }
 
     class XMessages : IMessages
@@ -170,6 +182,38 @@ namespace XxmsApp.Api.Droid
                 });
                 Cache.database.DeleteAll<Model.SimStore>();
             }
+        }
+
+
+        public void CheckRequiredPermissions()
+        {
+
+            var _context = Android.App.Application.Context;
+            var pacname = _context.PackageName;
+            var packinfo = _context.PackageManager.GetPackageInfo(
+                pacname, 
+                Android.Content.PM.PackageInfoFlags.Permissions);
+            
+            var _permissions = packinfo.RequestedPermissions;
+
+            int i = 0;
+            var permissions = _permissions.Select(pername => (i++, pername))
+            .Where(p =>
+                ActivityCompat.CheckSelfPermission(_context, p.pername) != AndroidPermission.Granted)
+            .ToArray();
+
+            if (permissions.Length > 0)
+            {
+                ActivityCompat.RequestPermissions(
+                    MainActivity.Instance,
+                    permissions.Select(p => p.pername).ToArray(),
+                    permissions.Select(p => p.Item1).Aggregate((sum, p) =>
+                    {
+                        int shft = 1 << p;
+                        return sum & shft;
+                    }));
+            }
+
         }
 
 
@@ -405,26 +449,47 @@ namespace XxmsApp.Api.Droid
 
         public IEnumerable<Sim> GetSimsInfo()
         {
-            var ls = new List<Sim>();
+            var ls = new List<Sim>();            
+            var readPhoneNumsPermission = Android.Support.V4.App.ActivityCompat.CheckSelfPermission(
+                MainActivity.Instance, Manifest.Permission.ReadPhoneNumbers
+            );
 
-            var context = Android.App.Application.Context;
 
-            SubscriptionManager localSubscriptionManager = SubscriptionManager.From(context);
-
-            foreach (var simInfo in localSubscriptionManager.ActiveSubscriptionInfoList)
+            /*
+            int c = (int)Android.OS.BuildVersionCodes.O;           
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
             {
-                int slot = simInfo.SimSlotIndex;             // 1
-                int id = simInfo.SubscriptionId;             // 6                
-                string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
-                string IccId = simInfo.IccId;                // 897010287534043278ff
-                Color backColor = Color.FromRgba(            // 
-                    simInfo.IconTint.R, 
-                    simInfo.IconTint.G, 
-                    simInfo.IconTint.B, 
-                    simInfo.IconTint.A);
+                Android.Support.V4.App.ActivityCompat.RequestPermissions(
+                    MainActivity.Instance, 
+                    new String[]{ Android.Manifest.Permission.ReadPhoneNumbers }, 
+                    Permissions.ReadPhoneNumbers.ToInt());
+            }//*/
+        
 
-                yield return new Sim(slot, id, sim1, IccId, backColor);
+
+            static IEnumerable<Sim> getSims(){
+
+                var context = Android.App.Application.Context;
+
+                SubscriptionManager localSubscriptionManager = SubscriptionManager.From(context);
+
+                foreach (var simInfo in localSubscriptionManager.ActiveSubscriptionInfoList)
+                {
+                    int slot = simInfo.SimSlotIndex;             // 1
+                    int id = simInfo.SubscriptionId;             // 6                
+                    string sim1 = simInfo.DisplayName;           // ~ MegaFon #1
+                    string IccId = simInfo.IccId;                // 897010287534043278ff
+                    Color backColor = Color.FromRgba(            // 
+                        simInfo.IconTint.R,
+                        simInfo.IconTint.G,
+                        simInfo.IconTint.B,
+                        simInfo.IconTint.A);
+
+                    yield return new Sim(slot, id, sim1, IccId, backColor);
+                }
             }
+
+            return getSims();
 
         }
 

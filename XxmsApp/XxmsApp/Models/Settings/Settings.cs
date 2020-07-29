@@ -92,7 +92,6 @@ namespace XxmsApp.Options
             List<Setting> stgs = props.Select(prop =>
             {
                 
-
                 var attr = prop.GetCustomAttributes(false).Single(a => a.GetType() == typeof(FullDescriptionAttribute)) as FullDescriptionAttribute;
 
                 string value = prop.GetValue(null).ToString();
@@ -269,6 +268,9 @@ namespace XxmsApp.Options
         public static bool Vibration { get => GetFunc(); set => Set(value); }
         [FullDescription("Быстрый звонок", "Сразу начинать непосредственный набор нормера из диалога")]
         public static bool FastCall { get => GetFunc(); set => Set(value); }
+        
+        [FullDescription("Скрывать спам", "Скрывать диалоги, отмеченные как спам, в общем списке")]
+        public static bool HideSpam { get => GetFunc(); set => Set(value); }//*/
 
         [FullDescription("Выберите язык", "")]
         public static Piece.Languages Language { get => GetFunc<Piece.Languages>(); set => SetFunc(value); }

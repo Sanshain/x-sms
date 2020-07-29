@@ -18,7 +18,7 @@ using Java.IO;
 [assembly: Dependency(typeof(XxmsApp.Droid.Dependencies.Specific))]
 namespace XxmsApp.Droid.Dependencies
 {
-    class Specific : IEssential
+    partial class Specific : IEssential
     {
 
         static Context context;

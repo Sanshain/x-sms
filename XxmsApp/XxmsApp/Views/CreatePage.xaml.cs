@@ -330,8 +330,29 @@ namespace XxmsApp.Views
 
             else
             {
-                var msgApi = DependencyService.Get<Api.IMessages>();
-                msgApi.Send(receiver, text, sim);
+
+                // var msgApi = DependencyService.Get<Api.IMessages>();
+                // msgApi.Send(receiver, text, sim);
+
+                // необходимо обновить данные в основном списке
+
+                var dialogs = (((this.Parent as NavPage).RootPage as MainPage).Dialogs.ItemsSource as IList<Dialog>);
+                var dialog = dialogs.FirstOrDefault(d => d.Address == receiver);
+                if (dialog != null)
+                {                    
+                    // dialog.Messages.Add(new Model.Message(receiver, text, sim));
+                    dialog.CreateMessage(receiver, text, sim);
+                }
+                else
+                {
+                    dialog = new Dialog(receiver);
+                    dialog.CreateMessage(receiver, text, sim);
+                    dialogs.Add(dialog);
+                }
+
+                /*.source.Add(
+                    new Model.Message(receiver, text, sim)
+                );//*/
 
                 await DisplayAlert("Info", "Сообщение отправлено", "Ok");
 

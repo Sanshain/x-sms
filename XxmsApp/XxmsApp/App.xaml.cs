@@ -24,10 +24,15 @@ namespace XxmsApp
 
         public App(List<Model.Message> _messages = null)
         {
-            
-            InitializeComponent();
-            
-            DBUpdates();
+
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException; ;
+
+            InitializeComponent();            
+
+            DependencyService.Get<Api.IMessages>().CheckRequiredPermissions();           
+           
+            DBUpdates();                    // Cache.Test();
 
             var errors = Cache.database.Table<Model.Errors>().ToArray();
 
@@ -37,7 +42,7 @@ namespace XxmsApp
                 Detail = new NavPage(new XxmsApp.MainPage(_messages)) { BarBackgroundColor = Color.Black } // 
             });//*/
             
-
+            
             MessagingCenter.Subscribe<App, List<XxmsApp.Model.Message>>(
                 this,                                                       // кто подписывается на сообщения
                 "MessageReceived",                                              // название сообщения
@@ -78,9 +83,19 @@ namespace XxmsApp
                         if (b) break;
                     }
 
-                });    
+                });    //*/
 
 
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void XMessages_Received(IEnumerable<Model.Message> message)

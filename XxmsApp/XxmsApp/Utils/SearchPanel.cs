@@ -218,7 +218,7 @@ namespace XxmsApp
                 Margin = new Thickness(2),
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 /*HasShadow = true,
-                OutlineColor = Color.Red,             // material design //*/
+                // OutlineColor = Color.Red,         // material design //*/
                 CornerRadius = 10,
                 IsClippedToBounds = true             // border-radius //*/
             };
@@ -395,6 +395,10 @@ namespace XxmsApp
             var number = source.Address.ToNumber().ToString();
             if (number.ToNumber() > 0)
             {
+                if (number.Length > 10)
+                {
+                    number = "+" + number;
+                }
                 CreateCallButton(page, number);
             }
 
@@ -577,7 +581,7 @@ namespace XxmsApp
             AbsoluteLayout rootLayout = page.Content as AbsoluteLayout;
             
             bottomView = subView ?? rootLayout.Children.Last();
-            listView = lstView ?? (ListView)rootLayout.Children.First() as ListView;
+            listView = lstView ?? (rootLayout.Children.First() as RefreshView).Content as ListView;
 
             
             page.ToolbarItems.Add(SearchButton = new SearchToolbarButton

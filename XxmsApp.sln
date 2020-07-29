@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XxmsApp.Android", "XxmsApp\XxmsApp.Android\XxmsApp.Android.csproj", "{D7F8A0EE-C1DB-4C40-B143-B40088325189}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XxmsApp.iOS", "XxmsApp\XxmsApp.iOS\XxmsApp.iOS.csproj", "{8B7FEA29-0F45-4C13-B217-1C8C77725C45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XxmsApp", "XxmsApp\XxmsApp\XxmsApp.csproj", "{A6439266-C6B1-4B0B-B8EB-C91A5DAC8949}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XxmsApp", "XxmsApp\XxmsApp\XxmsApp.csproj", "{A6439266-C6B1-4B0B-B8EB-C91A5DAC8949}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

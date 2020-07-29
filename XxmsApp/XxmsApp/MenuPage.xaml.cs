@@ -41,6 +41,7 @@ namespace XxmsApp
                     // "Сделать дефолтным",                    
                     // "Check default",
                     // "Play",                        
+
                 },
                 ItemTemplate = new DataTemplate(typeof(MenuPoint)),                
             };            
@@ -222,6 +223,7 @@ namespace XxmsApp
 
                     goto default;
 
+                case "Spam": DisplayAlert("spam", string.Join("|", Dialog.Spams), "ok");break;
                 case "Сделать дефолтным": DependencyService.Get<Api.ILowLevelApi>().ChangeDefault(); goto default;
                 case "Check default": DisplayAlert(DependencyService.Get<Api.ILowLevelApi>().IsDefault.ToString(), "", "ok");
                     goto default;

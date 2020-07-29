@@ -5,6 +5,7 @@ using SQLiteNetExtensions.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -40,14 +41,14 @@ namespace XxmsApp.Model
         /// <param name="obj"></param>
         /// <returns></returns>
         public IModel CreateAs(object obj)
-        {            
-            
-            var contact = obj as Contact;
+        {
+
+            var contact = obj as Contacts; // as Contact;
 
             this.Name = contact.Name;
-            this.Phone = contact.Number;
-            this.OptionalPhones = contact.Numbers != null ? string.Join(";", contact.Numbers) : string.Empty;
-            this.Photo = contact.PhotoUriThumbnail ?? string.Empty;
+            this.Phone = contact.Phone;
+            this.OptionalPhones = contact.OptionalPhones;
+            this.Photo = contact.Photo ?? string.Empty;
 
             return this;
         }
@@ -115,24 +116,38 @@ namespace XxmsApp
             database.CreateTable<Model.Contacts>();
 
             database.CreateTable<Model.SimStore>();
+
+            // database.DropTable<Model.SpamDialog>();
+            database.CreateTable<Model.SpamDialog>();
             database.CreateTable<Model.Errors>();
 
-             // database.DropTable<Options.Setting>();
+            // database.DropTable<Options.Setting>();
             database.CreateTable<Options.Setting>();
-
             
         }
 
+        [Conditional("DEBUG")]
+        public static void Test()
+        {
+            var sw = Stopwatch.StartNew();
+            var r1 = actions[typeof(Model.Contacts)]().GetAwaiter().GetResult();
+            sw.Stop();
+            var log = sw.ElapsedMilliseconds;            
+        }
 
-        static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
+        internal static Dictionary<Type, IList<object>> cache = new Dictionary<Type, IList<object>>();
 
         static Dictionary<Type, Func<Task<List<object>>>> actions = new Dictionary<Type, Func<Task<List<object>>>>()
         {
 
             { typeof(Model.Contacts),  async () =>
                 {
-                    return (await Plugin.ContactService.CrossContactService.Current.GetContactListAsync())
-                        .Select(r => r as object).ToList();
+                    /*
+                    return (await 
+                        Plugin.ContactService.CrossContactService.Current.GetContactListAsync())
+                        .Select(r => r as object).ToList();//*/
+                    return DependencyService.Get<Api.IEssential>()
+                            .GetContacts().Select(r => r as object).ToList();
                 }
             },
             { typeof(Model.Message), async () =>
@@ -202,6 +217,12 @@ namespace XxmsApp
             return true;
         }
 
+        /// <summary>
+        /// Обновляет запись в кэше с определенным индексом. Если ее нет, то добавляет
+        /// </summary>
+        /// <typeparam name="T">тип модели</typeparam>
+        /// <param name="subject">объект модели для добавления</param>
+        /// <param name="id">ид</param>
         public static void Update<T>(T subject, int id) where T : new() 
         {
             var type = typeof(T);
@@ -217,19 +238,27 @@ namespace XxmsApp
             }
         }
 
-        public static void Insert<T>(T subject) where T : IModel, new()
+        public static bool Contains<T>(T subject) => cache.ContainsKey(typeof(T)) && cache[typeof(T)].Contains(subject);
+        /// <summary>
+        /// Добавляет запись в кэш
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="subject"></param>
+        /// <returns></returns>
+        public static bool Insert<T>(T subject) where T : IModel, new()
         {
             var type = typeof(T);
             if (cache.ContainsKey(typeof(T)))
             {
                 var cc = cache[typeof(T)];
-                cc.Add(subject);                                                         // 
+                cc.Add(subject); 
             }
             else
             {
                 cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
                 // throw new KeyNotFoundException("The type yet was not added to cache");
             }
+            return true;
         }
 
         public static void InsertAll<T>(IEnumerable<T> lstSubj) where T : IModel, new()
@@ -245,8 +274,15 @@ namespace XxmsApp
             }
             else
             {
+
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+
                 cache.Add(typeof(T), database.Table<T>().Select(t => (Object)t).ToList());
                 // throw new KeyNotFoundException("The type yet was not added to cache");
+
+                sw.Stop();
+                var l = sw.ElapsedMilliseconds;
             }
         }
 

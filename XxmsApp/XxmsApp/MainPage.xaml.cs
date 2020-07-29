@@ -29,7 +29,7 @@ namespace XxmsApp
 
             if ((Application.Current as App)._contacts.Count == 0)       // если контактов нет, то запрашиваем их сразу же при загрузке
             {
-                (Application.Current as App).contactsWaiter.ContinueWith((cn) =>
+                (Application.Current as App).contactsWaiter?.ContinueWith((cn) =>
                 {
                     (Application.Current as App)._contacts = cn.GetAwaiter().GetResult();
 
@@ -48,8 +48,20 @@ namespace XxmsApp
         {
             var rootLayout = new AbsoluteLayout();
             var dialogs = Dialogs = new Piece.MainList();
+            var refreshSwiper = new RefreshView { Content = dialogs };
 
-            rootLayout.Children.Add(dialogs, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
+            var command = new Command(async () =>
+            {
+                // var messages = await Cache.UpdateAsync(new List<Model.Message>());
+
+                this.Dialogs.ItemsSource = await Task.Run(() => this.Dialogs.ItemsUpdate());                
+                // this.Dialogs.ItemsSource = this.Dialogs.ItemsUpdate();
+                                  
+                refreshSwiper.IsRefreshing = false;
+            });
+            refreshSwiper.Command = command;
+
+            rootLayout.Children.Add(refreshSwiper, new Rectangle(0, 0, 1, 0.9), AbsoluteLayoutFlags.SizeProportional);
             rootLayout.Children.Add(subBtn, new Rectangle(0, 1, 1, 0.1), AbsoluteLayoutFlags.All);
 
             Content = rootLayout;            
@@ -68,7 +80,7 @@ namespace XxmsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    var lst = (dialogs.ItemsSource as List<Dialog>).SelectMany(m => m.Messages).ToList(); // bug (under observation)
+                    var lst = (dialogs.ItemsSource as IList<Dialog>).SelectMany(m => m.Messages).ToList(); // bug (under observation)
 
                     /*
                     foreach (var item in lst.Where(m => m.Status == Api.MessageState.Unsent))
@@ -127,7 +139,6 @@ namespace XxmsApp
             {
                 onPop[e.Page.GetType()]();
             }
-
         }
     }
 }
