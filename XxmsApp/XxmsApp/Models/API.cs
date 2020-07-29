@@ -140,6 +140,7 @@ namespace XxmsApp.Api
         void SendEmail(string title, string content, string attach);
 
         IList<Model.Contacts> GetContacts();
+        void MoveTo(string host);
     }
 
 

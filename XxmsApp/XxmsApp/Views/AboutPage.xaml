@@ -7,7 +7,15 @@
             <Frame x:Name="about" HasShadow="True"  Margin="15"
                    VerticalOptions="CenterAndExpand" 
                    HorizontalOptions="CenterAndExpand">
-                <Label Text="XmsApp" />
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="About" />
+                            <Span Text=" " />
+                            <Span FontAttributes="Bold">XxmsApp</Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
             </Frame>
             <!--
             <Frame x:Name="frame" HasShadow="True" OutlineColor="LightGray"  Margin="15" 

@@ -14,6 +14,8 @@ using XxmsApp.Api;
 
 using Xamarin.Forms;
 using Java.IO;
+using Android.Support.CustomTabs;
+using Android.Graphics;
 
 [assembly: Dependency(typeof(XxmsApp.Droid.Dependencies.Specific))]
 namespace XxmsApp.Droid.Dependencies
@@ -91,6 +93,28 @@ namespace XxmsApp.Droid.Dependencies
                 throw new Exception("Ошибка создания файла такая - " + e.Message);                
             }         
             
+        }
+
+        [Obsolete]
+        public void MoveTo(string host)
+        {
+
+            var context = Android.App.Application.Context;
+            
+            CustomTabsIntent builder = new CustomTabsIntent.Builder()
+                //.AddDefaultShareMenuItem()        // dont work
+                //.SetCloseButtonIcon()
+                // .SetToolbarColor(Android.Graphics.Color.ParseColor("#43A047"))                
+                .EnableUrlBarHiding()//*/
+                .Build();
+
+            // builder.Intent.AddFlags(ActivityFlags.NewTask);
+            builder.LaunchUrl(MainActivity.Instance, Android.Net.Uri.Parse(host));
+
+            /*
+            Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(host));
+            Android.App.Application.Context.StartActivity(intent);
+            // throw new Exception("Obsolete");//*/
         }
     }
 }
