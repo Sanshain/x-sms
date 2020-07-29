@@ -33,7 +33,7 @@ namespace XxmsApp
                 ItemsSource = new string[]
                 {
                     "Настройки",
-                    MessagesUpdate,
+                    // MessagesUpdate,
                     SIM_CARDS,
                     "О нас",
                     
