@@ -48,40 +48,15 @@ namespace XxmsApp
         {
             var rootLayout = new AbsoluteLayout();
             var dialogs = Dialogs = new Piece.MainList();
+            var refreshSwiper = new RefreshView { Content = dialogs };
 
-            var refreshSwiper = new RefreshView
+            var command = new Command(async () =>
             {
-                Content = dialogs
-            };
-            var command = new Command(() =>
-            {
-                // var messages = Cache.UpdateAsync(new List<Model.Message>()).GetAwaiter().GetResult();
-                // dialogs.DataInitialize();
+                // var messages = await Cache.UpdateAsync(new List<Model.Message>());
 
-                var npage = this.Parent as NavPage;
-                var id = ((npage.RootPage as MainPage)
-                    .Dialogs.ItemsSource as IEnumerable<Dialog>)
-                    .SelectMany(d => d.Messages).Max(m => m.Id);//*/
-
-                var msgs = DependencyService.Get<Api.IMessages>().ReadFrom(id);
-
-                if (msgs.Count > 0)
-                {
-                    this.Dialogs.ItemsUpdate();
-
-                    XxmsApp.Api.Funcs.Toast($"Обновлено {msgs.Count} сообщений");
-
-                    foreach (var msg in msgs)
-                    {
-                        // Cache.InsertAll(msgs);
-                        // Cache.database.InsertAll(msgs);
-
-                        // msg.Address
-
-                        // (dialogs.BindingContext as ObservableCollection<Dialog>).Add
-                    }
-                }
-
+                this.Dialogs.ItemsSource = await Task.Run(() => this.Dialogs.ItemsUpdate());                
+                // this.Dialogs.ItemsSource = this.Dialogs.ItemsUpdate();
+                                  
                 refreshSwiper.IsRefreshing = false;
             });
             refreshSwiper.Command = command;

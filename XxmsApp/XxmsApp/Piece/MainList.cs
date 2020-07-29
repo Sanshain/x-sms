@@ -249,7 +249,7 @@ namespace XxmsApp.Piece
 
         public ObservableCollection<Dialog> ItemsUpdate(bool no_cache = false)
         {
-
+            
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
             
